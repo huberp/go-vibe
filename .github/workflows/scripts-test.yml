@@ -11,6 +11,7 @@ on:
     paths:
       - 'scripts/**'
       - '.github/workflows/scripts-test.yml'
+  workflow_dispatch:
 
 jobs:
   test-bash-scripts:
