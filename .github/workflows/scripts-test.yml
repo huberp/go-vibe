@@ -120,7 +120,30 @@ jobs:
           postgres:13-alpine
         
         # Wait for PostgreSQL to be ready
-        Start-Sleep -Seconds 5
+        Write-Host "Waiting for PostgreSQL to be ready..."
+        $maxAttempts = 30
+        $attempt = 0
+        $ready = $false
+        
+        while (-not $ready -and $attempt -lt $maxAttempts) {
+          $attempt++
+          try {
+            $result = docker exec postgres pg_isready -U testuser -d testdb
+            if ($result -match "accepting connections") {
+              $ready = $true
+              Write-Host "PostgreSQL is ready!"
+            }
+          } catch {
+            Write-Host "Attempt $attempt/$maxAttempts - PostgreSQL not ready yet..."
+            Start-Sleep -Seconds 2
+          }
+        }
+        
+        if (-not $ready) {
+          Write-Host "PostgreSQL failed to start in time"
+          docker logs postgres
+          exit 1
+        }
         
         # Verify PostgreSQL is running
         docker ps
