@@ -1,0 +1,61 @@
+# Default values for myapp
+replicaCount: 2
+
+image:
+  repository: myapp
+  pullPolicy: IfNotPresent
+  tag: "latest"
+
+service:
+  type: ClusterIP
+  port: 8080
+
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+  hosts:
+    - host: myapp.local
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []
+
+resources:
+  limits:
+    cpu: 500m
+    memory: 512Mi
+  requests:
+    cpu: 250m
+    memory: 256Mi
+
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 80
+
+database:
+  url: "postgres://user:password@postgres:5432/myapp?sslmode=disable"
+
+jwt:
+  secret: "your-secret-key-change-in-production"
+
+env:
+  - name: DATABASE_URL
+    valueFrom:
+      secretKeyRef:
+        name: myapp-secrets
+        key: database-url
+  - name: JWT_SECRET
+    valueFrom:
+      secretKeyRef:
+        name: myapp-secrets
+        key: jwt-secret
+  - name: SERVER_PORT
+    value: "8080"
+
+serviceMonitor:
+  enabled: true
+  interval: 30s
+  path: /metrics
