@@ -104,6 +104,15 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
+    - name: Set up PostgreSQL
+      uses: ikalnytskyi/action-setup-postgres@v7
+      with:
+        username: testuser
+        password: testpassword
+        database: testdb
+        port: 5432
+      id: postgres
+
     - name: Set up Go
       uses: actions/setup-go@v5
       with:
@@ -111,22 +120,6 @@ jobs:
 
     - name: Download dependencies
       run: go mod download
-
-    - name: Install PostgreSQL
-      shell: pwsh
-      run: |
-        choco install postgresql -y --params "/Password:postgres"
-        # Start PostgreSQL service
-        net start postgresql-x64-15
-        # Wait for PostgreSQL to be ready
-        Start-Sleep -Seconds 10
-
-    - name: Create test database
-      shell: pwsh
-      run: |
-        & "C:\Program Files\PostgreSQL\15\bin\psql.exe" -U postgres -c "CREATE DATABASE testdb;"
-      env:
-        PGPASSWORD: postgres
 
     - name: Test build script
       shell: pwsh
@@ -145,7 +138,7 @@ jobs:
       shell: pwsh
       run: |
         # Set environment variables for the server
-        $env:DATABASE_URL = "host=localhost user=postgres password=postgres dbname=testdb port=5432 sslmode=disable"
+        $env:DATABASE_URL = "host=localhost user=testuser password=testpassword dbname=testdb port=5432 sslmode=disable"
         $env:JWT_SECRET = "test-secret-key"
         $env:SERVER_PORT = "8081"
         
