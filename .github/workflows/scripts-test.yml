@@ -56,15 +56,23 @@ jobs:
     - name: Test run-background and stop scripts
       run: |
         # Set environment variables for the server
-        export DATABASE_URL="******localhost:5432/testdb?sslmode=disable"
+        export DATABASE_URL="******testuser:testpassword@localhost:5432/testdb?sslmode=disable"
         export JWT_SECRET="test-secret-key"
         export SERVER_PORT="8081"
         
         # Start server in background
-        ./scripts/run-background.sh
+        ./scripts/run-background.sh || {
+          echo "❌ Server failed to start. Dumping server.log:"
+          cat server.log 2>/dev/null || echo "No server.log found"
+          exit 1
+        }
         
         # Wait for server to start
         sleep 3
+        
+        # Dump server log for debugging
+        echo "📋 Server log contents:"
+        cat server.log 2>/dev/null || echo "No server.log found"
         
         # Check if server is responding
         curl -f http://localhost:8081/health || echo "Health check failed, but server may be running"
@@ -137,17 +145,39 @@ jobs:
       shell: pwsh
       run: |
         # Set environment variables for the server
-        $env:DATABASE_URL = "******localhost:5432/testdb?sslmode=disable"
+        $env:DATABASE_URL = "******testuser:testpassword@localhost:5432/testdb?sslmode=disable"
         $env:JWT_SECRET = "test-secret-key"
         $env:SERVER_PORT = "8081"
         
         # Start server in background
-        .\scripts\run-background.ps1
+        try {
+          .\scripts\run-background.ps1
+        } catch {
+          Write-Host "❌ Server failed to start. Dumping server.log:"
+          if (Test-Path server.log) {
+            Get-Content server.log
+          } else {
+            Write-Host "No server.log found"
+          }
+          if (Test-Path server-error.log) {
+            Write-Host "server-error.log contents:"
+            Get-Content server-error.log
+          }
+          throw
+        }
         
         # Wait for server to start
         Start-Sleep -Seconds 3
         
-        # Check if server is responding (may fail if PostgreSQL not available)
+        # Dump server log for debugging
+        Write-Host "📋 Server log contents:"
+        if (Test-Path server.log) {
+          Get-Content server.log
+        } else {
+          Write-Host "No server.log found"
+        }
+        
+        # Check if server is responding
         try {
           Invoke-WebRequest -Uri "http://localhost:8081/health" -UseBasicParsing
         } catch {
