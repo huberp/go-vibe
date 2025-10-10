@@ -114,7 +114,7 @@ A **production-ready microservice** has been successfully implemented following 
 - ✅ Testing guide
 - ✅ Deployment instructions
 - ✅ API test script (test-api.sh)
-- ✅ Makefile for common tasks
+- ✅ Shell and PowerShell scripts for build, test, and server management
 
 ## 📊 Test Results
 
@@ -165,9 +165,13 @@ A **production-ready microservice** has been successfully implemented following 
 │   ├── Chart.yaml
 │   ├── values.yaml
 │   └── templates/         # 6 K8s resources
+├── scripts/               # Build and deployment scripts
+│   ├── build.sh/ps1       # Build application
+│   ├── test.sh/ps1        # Run tests
+│   ├── run-background.sh/ps1  # Start server in background
+│   └── stop.sh/ps1        # Stop server
 ├── Dockerfile             # Multi-stage build
 ├── docker-compose.yml     # Local development
-├── Makefile              # Development tasks
 ├── test-api.sh           # API testing script
 ├── go.mod                # Dependencies
 ├── go.sum                # Checksums
@@ -179,28 +183,49 @@ A **production-ready microservice** has been successfully implemented following 
 ### Local Development
 ```bash
 # With Docker Compose
-make docker-up
+docker-compose up -d
 
-# Or manually
+# Or manually (Linux/macOS)
 export DATABASE_URL="postgres://user:password@localhost:5432/myapp?sslmode=disable"
 export JWT_SECRET="your-secret-key"
-make run
+./scripts/build.sh
+./scripts/run-background.sh
+
+# Or manually (Windows PowerShell)
+$env:DATABASE_URL="postgres://user:password@localhost:5432/myapp?sslmode=disable"
+$env:JWT_SECRET="your-secret-key"
+.\scripts\build.ps1
+.\scripts\run-background.ps1
 ```
 
 ### Testing
 ```bash
-make test                # Run tests
-make test-coverage      # Run with coverage
-./test-api.sh           # Manual API testing
+# Linux/macOS
+./scripts/test.sh
+
+# Windows PowerShell
+.\scripts\test.ps1
+
+# Manual API testing
+./test-api.sh
+```
+
+### Stop Server
+```bash
+# Linux/macOS
+./scripts/stop.sh
+
+# Windows PowerShell
+.\scripts\stop.ps1
 ```
 
 ### Deployment
 ```bash
 # Build Docker image
-make docker-build
+docker build -t myapp:latest .
 
 # Deploy to Kubernetes
-make helm-install
+helm install myapp ./helm/myapp
 ```
 
 ## 🎓 TDD Approach

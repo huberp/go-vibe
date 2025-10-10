@@ -28,9 +28,16 @@ Thumbs.db
 
 # Build artifacts
 server
+server.exe
 myapp
 dist/
 build/
+
+# Server process files
+server.pid
+server.log
+server-error.log
+nohup.out
 
 # Temporary files
 tmp/

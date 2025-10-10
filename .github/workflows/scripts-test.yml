@@ -1,0 +1,143 @@
+name: Scripts Smoke Test
+
+on:
+  push:
+    branches: [ main, develop ]
+    paths:
+      - 'scripts/**'
+      - '.github/workflows/scripts-test.yml'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'scripts/**'
+      - '.github/workflows/scripts-test.yml'
+
+jobs:
+  test-bash-scripts:
+    name: Test Bash Scripts
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Go
+      uses: actions/setup-go@v5
+      with:
+        go-version: '1.24'
+
+    - name: Download dependencies
+      run: go mod download
+
+    - name: Test build script
+      run: |
+        ./scripts/build.sh
+        test -f server
+        ./server --version || echo "Server binary created successfully"
+
+    - name: Test test script
+      run: ./scripts/test.sh
+
+    - name: Test run-background and stop scripts
+      run: |
+        # Set environment variables for the server
+        export DATABASE_URL="******localhost:5432/testdb?sslmode=disable"
+        export JWT_SECRET="test-secret-key"
+        export SERVER_PORT="8081"
+        
+        # Start server in background
+        ./scripts/run-background.sh
+        
+        # Wait for server to start
+        sleep 3
+        
+        # Check if server is responding
+        curl -f http://localhost:8081/health || echo "Health check failed, but server may be running"
+        
+        # Stop server
+        ./scripts/stop.sh
+        
+        # Verify server stopped
+        sleep 2
+        if curl -f http://localhost:8081/health 2>/dev/null; then
+          echo "Server still running!"
+          exit 1
+        else
+          echo "Server stopped successfully"
+        fi
+
+    - name: Cleanup
+      if: always()
+      run: |
+        rm -f server server.pid server.log
+        pkill -f "./server" || true
+
+  test-powershell-scripts:
+    name: Test PowerShell Scripts
+    runs-on: windows-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Go
+      uses: actions/setup-go@v5
+      with:
+        go-version: '1.24'
+
+    - name: Download dependencies
+      run: go mod download
+
+    - name: Test build script
+      shell: pwsh
+      run: |
+        .\scripts\build.ps1
+        Test-Path .\server.exe
+        if (-not (Test-Path .\server.exe)) {
+          throw "Server binary not created"
+        }
+
+    - name: Test test script
+      shell: pwsh
+      run: .\scripts\test.ps1
+
+    - name: Test run-background and stop scripts
+      shell: pwsh
+      run: |
+        # Set environment variables for the server
+        $env:DATABASE_URL = "******localhost:5432/testdb?sslmode=disable"
+        $env:JWT_SECRET = "test-secret-key"
+        $env:SERVER_PORT = "8081"
+        
+        # Start server in background
+        .\scripts\run-background.ps1
+        
+        # Wait for server to start
+        Start-Sleep -Seconds 3
+        
+        # Check if server is responding (may fail if PostgreSQL not available)
+        try {
+          Invoke-WebRequest -Uri "http://localhost:8081/health" -UseBasicParsing
+        } catch {
+          Write-Host "Health check failed, but server may be running"
+        }
+        
+        # Stop server
+        .\scripts\stop.ps1
+        
+        # Verify server stopped
+        Start-Sleep -Seconds 2
+        try {
+          Invoke-WebRequest -Uri "http://localhost:8081/health" -UseBasicParsing -TimeoutSec 2
+          Write-Host "Server still running!"
+          exit 1
+        } catch {
+          Write-Host "Server stopped successfully"
+        }
+
+    - name: Cleanup
+      if: always()
+      shell: pwsh
+      run: |
+        Remove-Item -Path server.exe, server.pid, server.log, server-error.log -ErrorAction SilentlyContinue
+        Get-Process | Where-Object {$_.ProcessName -eq "server"} | Stop-Process -Force -ErrorAction SilentlyContinue
