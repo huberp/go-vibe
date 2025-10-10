@@ -56,7 +56,7 @@ jobs:
     - name: Test run-background and stop scripts
       run: |
         # Set environment variables for the server
-        export DATABASE_URL="******testuser:testpassword@localhost:5432/testdb?sslmode=disable"
+        export DATABASE_URL="host=localhost user=testuser password=testpassword dbname=testdb port=5432 sslmode=disable"
         export JWT_SECRET="test-secret-key"
         export SERVER_PORT="8081"
         
@@ -145,7 +145,7 @@ jobs:
       shell: pwsh
       run: |
         # Set environment variables for the server
-        $env:DATABASE_URL = "******testuser:testpassword@localhost:5432/testdb?sslmode=disable"
+        $env:DATABASE_URL = "host=localhost user=testuser password=testpassword dbname=testdb port=5432 sslmode=disable"
         $env:JWT_SECRET = "test-secret-key"
         $env:SERVER_PORT = "8081"
         
