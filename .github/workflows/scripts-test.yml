@@ -117,7 +117,7 @@ jobs:
           -e POSTGRES_PASSWORD=testpassword `
           -e POSTGRES_DB=testdb `
           -p 5432:5432 `
-          postgres:13-alpine
+          postgres:13
         
         # Wait for PostgreSQL to be ready
         Write-Host "Waiting for PostgreSQL to be ready..."
