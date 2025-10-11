@@ -9,6 +9,7 @@ if (-not (Test-Path $PID_FILE)) {
 }
 
 $PID = Get-Content $PID_FILE
+Write-Host "📋 PID file content: $PID" -ForegroundColor Cyan
 $process = Get-Process -Id $PID -ErrorAction SilentlyContinue
 
 if ($process) {

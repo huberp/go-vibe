@@ -28,6 +28,8 @@ $job = Start-Process -FilePath ".\server.exe" -RedirectStandardOutput "server.lo
 
 # Save PID to file
 $job.Id | Out-File -FilePath $PID_FILE -NoNewline
+Write-Host "📋 Captured PID: $($job.Id)" -ForegroundColor Cyan
+Write-Host "📋 PID file content: $(Get-Content $PID_FILE)" -ForegroundColor Cyan
 
 # Wait a moment and check if server is running
 Start-Sleep -Seconds 2

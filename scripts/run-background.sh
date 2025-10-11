@@ -23,6 +23,8 @@ SERVER_PID=$!
 
 # Save PID to file
 echo $SERVER_PID > "$PID_FILE"
+echo "📋 Captured PID: $SERVER_PID"
+echo "📋 PID file content: $(cat "$PID_FILE")"
 
 # Wait a moment and check if server is running
 sleep 2
