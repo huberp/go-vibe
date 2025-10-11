@@ -1,7 +1,7 @@
 package config
 
 import (
-	"os"
+	"github.com/spf13/viper"
 )
 
 // Config holds application configuration
@@ -11,18 +11,19 @@ type Config struct {
 	ServerPort  string
 }
 
-// Load reads configuration from environment variables
+// Load reads configuration from environment variables using Viper
 func Load() *Config {
-	return &Config{
-		DatabaseURL: getEnv("DATABASE_URL", "postgres://user:password@localhost:5432/myapp?sslmode=disable"),
-		JWTSecret:   getEnv("JWT_SECRET", "your-secret-key"),
-		ServerPort:  getEnv("SERVER_PORT", "8080"),
-	}
-}
+	// Set default values
+	viper.SetDefault("DATABASE_URL", "postgres://user:password@localhost:5432/myapp?sslmode=disable")
+	viper.SetDefault("JWT_SECRET", "your-secret-key")
+	viper.SetDefault("SERVER_PORT", "8080")
 
-func getEnv(key, defaultValue string) string {
-	if value := os.Getenv(key); value != "" {
-		return value
+	// Automatically read from environment variables
+	viper.AutomaticEnv()
+
+	return &Config{
+		DatabaseURL: viper.GetString("DATABASE_URL"),
+		JWTSecret:   viper.GetString("JWT_SECRET"),
+		ServerPort:  viper.GetString("SERVER_PORT"),
 	}
-	return defaultValue
 }
