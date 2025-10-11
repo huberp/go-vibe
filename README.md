@@ -567,6 +567,8 @@ curl http://localhost:8080/metrics
 .\scripts\local-k8s-cleanup.ps1
 ```
 
+**Troubleshooting**: See [Local Kubernetes Troubleshooting Guide](docs/LOCAL_K8S_TROUBLESHOOTING.md) for common issues and solutions.
+
 ### Custom values
 
 Create `my-values.yaml`:
