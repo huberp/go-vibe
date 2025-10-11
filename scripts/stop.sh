@@ -8,7 +8,6 @@ if [ ! -f "$PID_FILE" ]; then
 fi
 
 PID=$(cat "$PID_FILE")
-echo "📋 PID file content: $PID"
 
 if ps -p $PID > /dev/null 2>&1; then
     echo "Stopping server (PID $PID)..."
