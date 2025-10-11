@@ -16,8 +16,9 @@ A **production-ready microservice** has been successfully implemented following 
 - ✅ gorm.io/gorm **v1.25.10**
 - ✅ gorm.io/driver/postgres **v1.5.9**
 - ✅ github.com/golang-jwt/jwt/v5 **v5.2.1**
+- ✅ github.com/spf13/viper **v1.21.0**
 - ✅ go.uber.org/zap **v1.27.0**
-- ✅ github.com/stretchr/testify **v1.9.0**
+- ✅ github.com/stretchr/testify **v1.11.1**
 - ✅ github.com/prometheus/client_golang **v1.19.1**
 
 ### API Endpoints (All Implemented)
@@ -158,7 +159,7 @@ A **production-ready microservice** has been successfully implemented following 
 │   ├── repository/        # Data layer (3 files)
 │   └── routes/            # Route setup (1 file)
 ├── pkg/
-│   ├── config/            # Configuration (1 file)
+│   ├── config/            # Configuration with Viper (2 files)
 │   ├── logger/            # Logging setup (1 file)
 │   └── utils/             # JWT, hashing (2 files)
 ├── helm/myapp/            # Kubernetes (8 files)

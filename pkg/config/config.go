@@ -1,28 +1,33 @@
 package config
 
 import (
-	"os"
+	"log"
+
+	"github.com/spf13/viper"
 )
 
 // Config holds application configuration
 type Config struct {
-	DatabaseURL string
-	JWTSecret   string
-	ServerPort  string
+	DatabaseURL string `mapstructure:"DATABASE_URL"`
+	JWTSecret   string `mapstructure:"JWT_SECRET"`
+	ServerPort  string `mapstructure:"SERVER_PORT"`
 }
 
-// Load reads configuration from environment variables
+// Load reads configuration from environment variables using Viper
 func Load() *Config {
-	return &Config{
-		DatabaseURL: getEnv("DATABASE_URL", "postgres://user:password@localhost:5432/myapp?sslmode=disable"),
-		JWTSecret:   getEnv("JWT_SECRET", "your-secret-key"),
-		ServerPort:  getEnv("SERVER_PORT", "8080"),
-	}
-}
+	// Set default values
+	viper.SetDefault("DATABASE_URL", "postgres://user:password@localhost:5432/myapp?sslmode=disable")
+	viper.SetDefault("JWT_SECRET", "your-secret-key")
+	viper.SetDefault("SERVER_PORT", "8080")
 
-func getEnv(key, defaultValue string) string {
-	if value := os.Getenv(key); value != "" {
-		return value
+	// Automatically read from environment variables
+	viper.AutomaticEnv()
+
+	// Unmarshal configuration into struct
+	var config Config
+	if err := viper.Unmarshal(&config); err != nil {
+		log.Fatalf("Failed to unmarshal configuration: %v", err)
 	}
-	return defaultValue
+
+	return &config
 }

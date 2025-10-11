@@ -46,8 +46,9 @@ myapp/
 | GORM | v1.25.10 | ORM |
 | PostgreSQL Driver | v1.5.9 | Database driver |
 | JWT | v5.2.1 | Authentication |
+| Viper | v1.21.0 | Configuration management |
 | Zap | v1.27.0 | Structured logging |
-| Testify | v1.9.0 | Testing framework |
+| Testify | v1.11.1 | Testing framework |
 | Prometheus | v1.19.1 | Metrics |
 
 ## Prerequisites
