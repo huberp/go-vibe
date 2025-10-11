@@ -6,6 +6,15 @@ This document provides overarching guidelines and best practices for contributin
 
 go-vibe is a production-ready user management microservice built with Go 1.24, following Test-Driven Development (TDD) principles and designed for cloud-native Kubernetes deployment.
 
+**Target Audience**: Backend developers working on Go microservices with PostgreSQL databases, deployed on Kubernetes.
+
+**Key Design Decisions**:
+- TDD-first approach for all new features
+- Repository pattern for data abstraction
+- JWT-based stateless authentication
+- Horizontal scalability via Kubernetes HPA
+- Observability-first design with structured logging and metrics
+
 ## Tech Stack
 
 - **Language**: Go 1.24+
@@ -46,6 +55,61 @@ go-vibe is a production-ready user management microservice built with Go 1.24, f
 - Keep functions focused and small
 - Prefer explicit error handling over panic
 - Use meaningful variable and function names
+
+### Naming Conventions
+
+**Variables**:
+- Use camelCase for local variables: `userID`, `requestCount`
+- Use descriptive names, avoid single letters except for: `i`, `j` (loops), `c` (Gin context), `t` (tests)
+- Boolean variables start with `is`, `has`, `should`: `isValid`, `hasPermission`
+
+**Functions**:
+- Use PascalCase for exported functions: `CreateUser`, `ValidateToken`
+- Use camelCase for private functions: `hashPassword`, `parseRequest`
+- Function names should be verbs or verb phrases: `GetUser`, `UpdateRecord`, `CalculateTotal`
+
+**Files**:
+- Use snake_case for Go files: `user_handler.go`, `auth_middleware.go`
+- Test files: `*_test.go` (e.g., `user_handler_test.go`)
+- Mock files: `*_mock.go` (e.g., `user_repository_mock.go`)
+
+**Packages**:
+- Use short, lowercase, single-word names: `handlers`, `models`, `utils`
+- Avoid underscores or mixed caps
+- Package name should match directory name
+
+**Constants**:
+- Use PascalCase for exported: `DefaultTimeout`, `MaxRetries`
+- Use camelCase or UPPER_CASE for private based on context
+
+### Code Comments
+
+**When to Comment**:
+- ✅ Package documentation (package-level comment)
+- ✅ Exported functions, types, and constants (godoc format)
+- ✅ Complex business logic or algorithms
+- ✅ TODOs with ticket references: `// TODO(#123): Implement retry logic`
+- ❌ Don't comment obvious code
+- ❌ Don't leave commented-out code
+
+**Godoc Format**:
+```go
+// Package handlers provides HTTP request handlers for the user management API.
+package handlers
+
+// CreateUser handles user creation requests.
+// It validates input, hashes the password, and stores the user in the database.
+// Returns 201 on success, 400 for invalid input, or 500 for server errors.
+func (h *UserHandler) CreateUser(c *gin.Context) {
+    // implementation
+}
+```
+
+**Documentation Style**:
+- Write in complete sentences
+- Start with the name of the thing being described
+- Be concise but complete
+- Include error conditions and return values for functions
 
 ### Error Handling
 - Return errors explicitly, don't use panic
@@ -304,6 +368,226 @@ go run ./cmd/server
 - Configure resource limits in Kubernetes
 - Enable HPA for automatic scaling
 
+## Communication and Contribution
+
+### Commit Messages
+
+Follow conventional commits format:
+
+```
+<type>(<scope>): <subject>
+
+<body>
+
+<footer>
+```
+
+**Types**:
+- `feat`: New feature
+- `fix`: Bug fix
+- `docs`: Documentation changes
+- `test`: Test additions or modifications
+- `refactor`: Code refactoring
+- `perf`: Performance improvements
+- `chore`: Maintenance tasks
+
+**Examples**:
+```
+feat(auth): add JWT token refresh endpoint
+
+Implements token refresh mechanism for expired tokens.
+Closes #42
+
+fix(handlers): validate user ID before database query
+
+Prevents panic when invalid ID format is provided.
+```
+
+**Rules**:
+- Keep subject line under 72 characters
+- Use imperative mood: "add" not "added" or "adds"
+- No period at the end of subject line
+- Reference issue numbers in footer
+
+### Pull Request Guidelines
+
+**Branch Naming**:
+- Feature: `feature/<issue-number>-short-description` (e.g., `feature/42-add-user-export`)
+- Bug fix: `fix/<issue-number>-short-description` (e.g., `fix/43-auth-token-validation`)
+- Hotfix: `hotfix/<issue-number>-short-description`
+
+**PR Title Format**:
+```
+<type>: <description>
+```
+
+Examples:
+- `feat: Add user export functionality`
+- `fix: Resolve JWT token validation issue`
+
+**PR Description Template**:
+```markdown
+## Overview
+Brief description of changes
+
+## Changes Made
+- List of changes
+- Another change
+
+## Testing
+How changes were tested
+
+## Related Issues
+Closes #<issue-number>
+```
+
+**Review Requirements**:
+- ✅ All tests passing
+- ✅ Code coverage maintained or improved
+- ✅ No security vulnerabilities introduced
+- ✅ Documentation updated if needed
+- ✅ At least one approval from maintainer
+
+### Code Review Checklist
+
+When reviewing PRs, verify:
+
+- [ ] Tests written and passing (TDD approach)
+- [ ] Error handling implemented correctly
+- [ ] Logging added with appropriate context
+- [ ] Security best practices followed
+- [ ] Input validation included
+- [ ] Documentation updated (if needed)
+- [ ] No sensitive data in logs or responses
+- [ ] Code follows Go conventions
+- [ ] Dependencies are justified and minimal
+- [ ] Commit messages follow conventions
+- [ ] No commented-out code
+
+## Do's and Don'ts
+
+### ✅ DO:
+
+- **DO** write tests before implementation (TDD)
+- **DO** use dependency injection for testability
+- **DO** validate all user inputs
+- **DO** hash passwords with bcrypt
+- **DO** use structured logging with context
+- **DO** handle errors explicitly at every level
+- **DO** use GORM parameterized queries
+- **DO** return appropriate HTTP status codes
+- **DO** document exported functions with godoc
+- **DO** use context.Context for cancellation and timeouts
+- **DO** run `go mod tidy` after dependency changes
+- **DO** use interfaces for repository layer
+- **DO** store secrets in environment variables
+- **DO** close database connections and resources properly
+
+### ❌ DON'T:
+
+- **DON'T** use panic for error handling
+- **DON'T** commit secrets or credentials
+- **DON'T** log sensitive data (passwords, tokens, PII)
+- **DON'T** return password hashes in API responses
+- **DON'T** use global variables for state
+- **DON'T** mock what you own (internal structs)
+- **DON'T** skip input validation
+- **DON'T** use string concatenation for SQL queries
+- **DON'T** hardcode configuration values
+- **DON'T** ignore errors (use `if err != nil`)
+- **DON'T** use `panic()` or `os.Exit()` in library code
+- **DON'T** modify request/response after calling `c.Next()`
+- **DON'T** use time.Sleep in production code (use proper timeouts)
+
+### Common Pitfalls to Avoid
+
+1. **N+1 Query Problem**: Use eager loading with GORM's `Preload()`
+2. **Goroutine Leaks**: Always ensure goroutines can exit
+3. **Missing Context**: Always propagate context through call chain
+4. **Race Conditions**: Run tests with `-race` flag
+5. **Improper Error Wrapping**: Use `fmt.Errorf("context: %w", err)`
+6. **Missing Middleware Order**: Auth before business logic
+7. **Unbounded Slices**: Set capacity when size is known
+8. **Pointer to Loop Variable**: Use local variable in loop closures
+
+## Dependency Management
+
+### Adding New Dependencies
+
+1. **Before Adding**:
+   - Check if functionality exists in standard library
+   - Verify the package is actively maintained
+   - Review security advisories
+   - Consider the dependency tree size
+
+2. **How to Add**:
+```bash
+# Add dependency
+go get github.com/package/name@version
+
+# Update go.mod and go.sum
+go mod tidy
+
+# Verify
+go mod verify
+```
+
+3. **Approval Process**:
+   - Discuss in issue or PR why dependency is needed
+   - Get maintainer approval for new dependencies
+   - Document the purpose in PR description
+
+### Preferred Libraries
+
+**For Common Tasks**:
+- **HTTP Router**: Gin (already in use)
+- **ORM**: GORM (already in use)
+- **Testing**: testify + gomock (already in use)
+- **Logging**: zap (already in use)
+- **UUID**: github.com/google/uuid (already in use)
+- **JWT**: github.com/golang-jwt/jwt/v5 (already in use)
+- **Validation**: Use Gin's built-in validator
+- **Environment**: Standard `os.Getenv()` or viper if needed
+
+**Avoid**:
+- Unnecessary web frameworks (stick with Gin)
+- Multiple logging libraries (use zap)
+- Alternative ORMs (use GORM)
+
+## External Resources
+
+### Official Documentation
+
+- **Go Language**: https://go.dev/doc/
+- **Gin Framework**: https://gin-gonic.com/docs/
+- **GORM**: https://gorm.io/docs/
+- **PostgreSQL**: https://www.postgresql.org/docs/
+- **JWT**: https://jwt.io/introduction
+- **Zap Logging**: https://pkg.go.dev/go.uber.org/zap
+- **Testify**: https://pkg.go.dev/github.com/stretchr/testify
+- **Prometheus**: https://prometheus.io/docs/
+
+### API References
+
+- **Gin Context**: https://pkg.go.dev/github.com/gin-gonic/gin#Context
+- **GORM Models**: https://gorm.io/docs/models.html
+- **GORM Associations**: https://gorm.io/docs/associations.html
+- **bcrypt**: https://pkg.go.dev/golang.org/x/crypto/bcrypt
+
+### Internal Documentation
+
+- **README.md**: Project setup and API documentation
+- **IMPLEMENTATION_SUMMARY.md**: Architecture and implementation details
+- **OpenAPI Spec**: In README.md, defines all API endpoints
+- **Helm Chart**: `helm/myapp/` for Kubernetes deployment
+
+### Related Standards
+
+- **Effective Go**: https://go.dev/doc/effective_go
+- **Go Code Review Comments**: https://github.com/golang/go/wiki/CodeReviewComments
+- **Uber Go Style Guide**: https://github.com/uber-go/guide/blob/master/style.md
+- **12-Factor App**: https://12factor.net/ (for cloud-native principles)
+
 ## Maintenance
 
 ### Dependency Updates
@@ -319,5 +603,7 @@ go run ./cmd/server
 - Monitor resource usage (CPU, memory)
 
 ---
+
+**Note**: This file should be located at `.github/copilot-instructions.md` for optimal GitHub Copilot workspace agent integration.
 
 Remember: Write tests first, handle errors explicitly, log with context, and never commit secrets!
