@@ -520,6 +520,55 @@ helm upgrade myapp ./helm/myapp \
 helm uninstall myapp -n production
 ```
 
+### Local Testing with Kind
+
+For local development and testing, you can deploy to a Kind cluster:
+
+1. **Setup local Kubernetes cluster:**
+
+```bash
+# Linux/macOS
+./scripts/local-k8s-setup.sh
+
+# Windows PowerShell
+.\scripts\local-k8s-setup.ps1
+```
+
+2. **Deploy to local cluster:**
+
+```bash
+# Linux/macOS
+./scripts/local-k8s-deploy.sh
+
+# Windows PowerShell
+.\scripts\local-k8s-deploy.ps1
+```
+
+3. **Access the application:**
+
+```bash
+kubectl port-forward -n production svc/myapp 8080:8080
+```
+
+4. **Test the API:**
+
+```bash
+curl http://localhost:8080/health
+curl http://localhost:8080/metrics
+```
+
+5. **Cleanup:**
+
+```bash
+# Linux/macOS
+./scripts/local-k8s-cleanup.sh
+
+# Windows PowerShell
+.\scripts\local-k8s-cleanup.ps1
+```
+
+**Troubleshooting**: See [Local Kubernetes Troubleshooting Guide](docs/LOCAL_K8S_TROUBLESHOOTING.md) for common issues and solutions.
+
 ### Custom values
 
 Create `my-values.yaml`:
