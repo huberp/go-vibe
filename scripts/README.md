@@ -79,9 +79,85 @@ These scripts are automatically tested in the `scripts-test.yml` GitHub Actions 
 - Running tests
 - Starting/stopping the server in background mode
 
+## Local Kubernetes Testing
+
+### Validate Deployment Configuration
+
+Validates Helm charts and Kubernetes manifests without requiring a running cluster:
+
+**Linux/macOS:**
+```bash
+./scripts/validate-k8s.sh
+```
+
+This script performs:
+- Helm chart linting
+- Kubernetes manifest generation
+- Manifest syntax validation
+- Dockerfile verification
+
+### Setup Local Cluster
+Creates a local Kind (Kubernetes in Docker) cluster for testing deployments.
+
+**Linux/macOS:**
+```bash
+./scripts/local-k8s-setup.sh
+```
+
+**Windows PowerShell:**
+```powershell
+.\scripts\local-k8s-setup.ps1
+```
+
+### Deploy to Local Cluster
+Builds the Docker image, loads it into Kind, and deploys with Helm (includes PostgreSQL).
+
+**Linux/macOS:**
+```bash
+./scripts/local-k8s-deploy.sh
+```
+
+**Windows PowerShell:**
+```powershell
+.\scripts\local-k8s-deploy.ps1
+```
+
+### Access the Application
+After deployment, port-forward to access the application:
+
+```bash
+kubectl port-forward -n production svc/myapp 8080:8080
+```
+
+Then test the API:
+```bash
+curl http://localhost:8080/health
+curl http://localhost:8080/metrics
+```
+
+### View Logs
+```bash
+kubectl logs -n production -l app=myapp -f
+```
+
+### Cleanup Local Cluster
+Provides options to clean up the deployment, namespace, or entire cluster.
+
+**Linux/macOS:**
+```bash
+./scripts/local-k8s-cleanup.sh
+```
+
+**Windows PowerShell:**
+```powershell
+.\scripts\local-k8s-cleanup.ps1
+```
+
 ## Notes
 
 - All scripts check for errors and exit with appropriate status codes
 - The run-background script saves the server PID to `server.pid`
 - Server logs are written to `server.log` (and `server-error.log` on Windows)
 - The stop script cleans up PID files automatically
+- Local Kubernetes scripts use Kind cluster named `go-vibe-local`
+- Local deployments use the `production` namespace for testing
