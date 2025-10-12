@@ -34,11 +34,22 @@ The application automatically runs migrations on startup using the `pkg/migratio
 
 ## Creating New Migrations
 
-### Using the Makefile (Recommended)
+### Using the migration script (Recommended)
 
+**Linux/macOS:**
 ```bash
 # Create a new migration
-make migrate-create NAME=add_user_profile
+./scripts/migrate.sh create add_user_profile
+
+# This creates:
+# migrations/000002_add_user_profile.up.sql
+# migrations/000002_add_user_profile.down.sql
+```
+
+**Windows PowerShell:**
+```powershell
+# Create a new migration
+.\scripts\migrate.ps1 create add_user_profile
 
 # This creates:
 # migrations/000002_add_user_profile.up.sql
@@ -75,17 +86,30 @@ Migrations run automatically when the application starts. Check logs:
 2024-01-01T00:00:00Z INFO Migrations applied successfully
 ```
 
-### Manual Using Makefile
+### Manual Using Migration Scripts
 
+**Linux/macOS:**
 ```bash
 # Apply all pending migrations
-make migrate-up
+./scripts/migrate.sh up
 
 # Rollback last migration
-make migrate-down
+./scripts/migrate.sh down
 
 # Force to specific version (if stuck)
-make migrate-force VERSION=1
+./scripts/migrate.sh force 1
+```
+
+**Windows PowerShell:**
+```powershell
+# Apply all pending migrations
+.\scripts\migrate.ps1 up
+
+# Rollback last migration
+.\scripts\migrate.ps1 down
+
+# Force to specific version (if stuck)
+.\scripts\migrate.ps1 force 1
 ```
 
 ### Manual Using migrate CLI
@@ -139,18 +163,35 @@ COMMIT;
 ```
 
 ### 4. Test Both Directions
+
+**Linux/macOS:**
 ```bash
 # Test up
-make migrate-up
+./scripts/migrate.sh up
 
 # Verify changes
 psql $DATABASE_URL -c "\d users"
 
 # Test down
-make migrate-down
+./scripts/migrate.sh down
 
 # Verify rollback worked
 psql $DATABASE_URL -c "\d users"
+```
+
+**Windows PowerShell:**
+```powershell
+# Test up
+.\scripts\migrate.ps1 up
+
+# Verify changes
+psql $env:DATABASE_URL -c "\d users"
+
+# Test down
+.\scripts\migrate.ps1 down
+
+# Verify rollback worked
+psql $env:DATABASE_URL -c "\d users"
 ```
 
 ### 5. Never Modify Existing Migrations
@@ -174,15 +215,29 @@ psql $DATABASE_URL -c "\d users"
 
 ### "Dirty database version"
 This happens when a migration partially fails:
+
+**Linux/macOS:**
 ```bash
 # Check current version
 migrate -path migrations -database "${DATABASE_URL}" version
 
 # Force to a known good version
-make migrate-force VERSION=1
+./scripts/migrate.sh force 1
 
 # Then re-run migrations
-make migrate-up
+./scripts/migrate.sh up
+```
+
+**Windows PowerShell:**
+```powershell
+# Check current version
+migrate -path migrations -database "$env:DATABASE_URL" version
+
+# Force to a known good version
+.\scripts\migrate.ps1 force 1
+
+# Then re-run migrations
+.\scripts\migrate.ps1 up
 ```
 
 ### "File does not exist"
@@ -215,11 +270,11 @@ Migrations run automatically on application startup, so no separate CI/CD step i
     
     # Run migrations
     export DATABASE_URL="postgres://postgres:test@localhost:5432/postgres?sslmode=disable"
-    make migrate-up
+    ./scripts/migrate.sh up
     
     # Verify migrations can rollback
-    make migrate-down
-    make migrate-up
+    ./scripts/migrate.sh down
+    ./scripts/migrate.sh up
 ```
 
 ## Docker Considerations

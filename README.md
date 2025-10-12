@@ -25,7 +25,7 @@ A production-ready microservice built with Go 1.25.2, Gin v1.11.0, following TDD
 - ✅ Multi-stage Docker build (Alpine-based)
 - ✅ Helm chart for Kubernetes deployment
 - ✅ GitHub Actions CI/CD pipelines
-- ✅ **Makefile for common development tasks**
+- ✅ **Shell scripts for common development tasks** (Linux/macOS and Windows PowerShell)
 
 ## Architecture
 
@@ -47,8 +47,8 @@ myapp/
 ├── docs/                       # Generated Swagger docs
 ├── helm/                       # Helm chart
 ├── .github/workflows/          # CI/CD pipelines
+├── scripts/                    # Development scripts (.sh/.ps1)
 ├── Dockerfile                  # Multi-stage build
-├── Makefile                    # Development tasks
 ├── go.mod
 └── README.md
 ```
