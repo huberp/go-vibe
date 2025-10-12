@@ -13,3 +13,7 @@ database:
 
 jwt:
   secret: "your-secret-key"
+
+rate_limit:
+  requests_per_second: 100
+  burst: 200

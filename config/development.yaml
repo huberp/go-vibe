@@ -6,3 +6,7 @@ database:
 
 jwt:
   secret: "dev-secret-key"
+
+rate_limit:
+  requests_per_second: 100
+  burst: 200

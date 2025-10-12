@@ -56,8 +56,8 @@ func SetupRoutes(router *gin.Engine, db *gorm.DB, logger *zap.Logger, jwtSecret 
 	// Logging middleware (with W3C trace context support)
 	router.Use(middleware.LoggingMiddleware(logger))
 
-	// Rate limiting middleware - 100 requests per second with burst of 200
-	router.Use(middleware.RateLimitMiddleware(100, 200))
+	// Rate limiting middleware - configurable via YAML/environment variables
+	router.Use(middleware.RateLimitMiddleware(cfg.RateLimit.RequestsPerSecond, cfg.RateLimit.Burst))
 
 	// Prometheus metrics middleware
 	router.Use(middleware.PrometheusMiddleware())

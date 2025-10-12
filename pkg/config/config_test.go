@@ -58,6 +58,48 @@ func TestLoad(t *testing.T) {
 	})
 }
 
+func TestRateLimitConfiguration(t *testing.T) {
+	t.Run("should load default rate limit values", func(t *testing.T) {
+		os.Unsetenv("RATE_LIMIT_REQUESTS_PER_SECOND")
+		os.Unsetenv("RATE_LIMIT_BURST")
+		os.Unsetenv("APP_STAGE")
+
+		cfg := Load()
+
+		assert.Equal(t, 100.0, cfg.RateLimit.RequestsPerSecond)
+		assert.Equal(t, 200, cfg.RateLimit.Burst)
+	})
+
+	t.Run("should allow rate limit override via environment variables", func(t *testing.T) {
+		os.Setenv("RATE_LIMIT_REQUESTS_PER_SECOND", "50")
+		os.Setenv("RATE_LIMIT_BURST", "100")
+		defer func() {
+			os.Unsetenv("RATE_LIMIT_REQUESTS_PER_SECOND")
+			os.Unsetenv("RATE_LIMIT_BURST")
+		}()
+
+		cfg := Load()
+
+		assert.Equal(t, 50.0, cfg.RateLimit.RequestsPerSecond)
+		assert.Equal(t, 100, cfg.RateLimit.Burst)
+	})
+
+	t.Run("should load production rate limit values", func(t *testing.T) {
+		os.Setenv("DATABASE_URL", "postgres://prod:pass@prod-host:5432/prod")
+		os.Setenv("JWT_SECRET", "prod-secret")
+		defer func() {
+			os.Unsetenv("DATABASE_URL")
+			os.Unsetenv("JWT_SECRET")
+		}()
+
+		cfg := LoadWithStage("production")
+
+		// Production has more conservative rate limit (50 req/s)
+		assert.Equal(t, 50.0, cfg.RateLimit.RequestsPerSecond)
+		assert.Equal(t, 100, cfg.RateLimit.Burst)
+	})
+}
+
 func TestLoadWithStage(t *testing.T) {
 	t.Run("should load development stage", func(t *testing.T) {
 		cfg := LoadWithStage("development")
