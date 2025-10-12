@@ -4,7 +4,7 @@ This document provides overarching guidelines and best practices for contributin
 
 ## Project Overview
 
-go-vibe is a production-ready user management microservice built with Go 1.25, following Test-Driven Development (TDD) principles and designed for cloud-native Kubernetes deployment.
+go-vibe is a production-ready user management microservice built with Go 1.25.2, following Test-Driven Development (TDD) principles and designed for cloud-native Kubernetes deployment.
 
 **Target Audience**: Backend developers working on Go microservices with PostgreSQL databases, deployed on Kubernetes.
 
@@ -17,14 +17,14 @@ go-vibe is a production-ready user management microservice built with Go 1.25, f
 
 ## Tech Stack
 
-- **Language**: Go 1.25+
-- **Web Framework**: Gin v1.10.0
-- **ORM**: GORM v1.25.10
+- **Language**: Go 1.25.2+
+- **Web Framework**: Gin v1.11.0
+- **ORM**: GORM v1.31.0
 - **Database**: PostgreSQL 13+
-- **Authentication**: JWT (github.com/golang-jwt/jwt/v5 v5.2.1)
+- **Authentication**: JWT (github.com/golang-jwt/jwt/v5 v5.3.0)
 - **Logging**: Zap v1.27.0
-- **Testing**: Testify v1.9.0 + gomock
-- **Metrics**: Prometheus v1.19.1
+- **Testing**: Testify v1.11.1 + gomock
+- **Metrics**: Prometheus v1.23.2
 - **Deployment**: Docker, Kubernetes, Helm
 
 ## Architecture Patterns
@@ -277,7 +277,7 @@ func (h *UserHandler) CreateUser(c *gin.Context) {
 - Expose metrics at `/metrics` endpoint
 - Track HTTP requests: `http_requests_total{method,path,status}`
 - Track duration: `http_request_duration_seconds{method,path}`
-- Use Prometheus client library v1.19.1
+- Use Prometheus client library v1.23.2
 
 ### Health Checks
 - Implement `/health` endpoint
