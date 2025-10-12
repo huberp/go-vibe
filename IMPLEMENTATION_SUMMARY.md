@@ -4,14 +4,19 @@
 
 A **production-ready microservice** has been successfully implemented following **TDD principles** and adhering to all specified requirements. 
 
-**Latest Enhancement:** YAML-based configuration system with multi-stage support (development, staging, production) providing flexible, maintainable configuration management while maintaining full backward compatibility.
+**Latest Enhancements:**
+- ✅ **Database Migrations**: Version-controlled schema management with golang-migrate
+- ✅ **OpenAPI/Swagger**: Auto-generated API documentation from code annotations
+- ✅ **Configurable Rate Limiting**: Environment/YAML-based rate limit configuration
+- ✅ **CI/CD Improvements**: Automated dependency management with `go mod tidy`
 
 ## ✅ Requirements Checklist
 
 ### Project Structure (100% Complete)
 - ✅ Exact project structure as specified
-- ✅ All directories created: cmd, internal, pkg, helm, .github/workflows
+- ✅ All directories created: cmd, internal, pkg, helm, .github/workflows, migrations, docs
 - ✅ Proper separation of concerns (handlers, models, repository, middleware, routes)
+- ✅ Database migration infrastructure
 
 ### Dependencies (All Exact Versions)
 - ✅ github.com/gin-gonic/gin **v1.11.0**
@@ -22,9 +27,11 @@ A **production-ready microservice** has been successfully implemented following 
 - ✅ go.uber.org/zap **v1.27.0**
 - ✅ github.com/stretchr/testify **v1.11.1**
 - ✅ github.com/prometheus/client_golang **v1.23.2**
-- ✅ go.opentelemetry.io/otel **v1.33.0** (OpenTelemetry tracing)
+- ✅ go.opentelemetry.io/otel **v1.37.0** (OpenTelemetry tracing)
 - ✅ github.com/gin-contrib/cors **v1.7.0** (CORS middleware)
 - ✅ golang.org/x/time/rate (Rate limiting)
+- ✅ **github.com/golang-migrate/migrate/v4 v4.19.0** (Database migrations)
+- ✅ **github.com/swaggo/swag v1.16.6** (OpenAPI documentation)
 
 ### API Endpoints (All Implemented)
 
@@ -53,12 +60,14 @@ A **production-ready microservice** has been successfully implemented following 
 |--------|----------------|---------------|--------|---------------------------|
 | ✅ GET    | `/health`      | None          | ✅     | Health check              |
 | ✅ GET    | `/metrics`     | None          | ✅     | Prometheus metrics        |
+| ✅ GET    | `/swagger/*`   | None          | ✅     | OpenAPI/Swagger documentation |
 
 ### Database (100% Complete)
 - ✅ PostgreSQL with GORM
 - ✅ User model: `{ID uint, Name string, Email string, PasswordHash string, Role string}`
 - ✅ GORM tags for validation
-- ✅ AutoMigrate for idempotent migrations
+- ✅ **Version-controlled migrations with golang-migrate**
+- ✅ **Automatic migration on startup with fallback to AutoMigrate**
 - ✅ Repository pattern for database operations
 
 ### Authentication & Authorization (100% Complete)
@@ -113,7 +122,7 @@ A **production-ready microservice** has been successfully implemented following 
 - ✅ Password hashing (bcrypt, cost factor: 12)
 - ✅ JWT for authentication
 - ✅ Role-based authorization
-- ✅ Rate limiting (100 req/s per IP, burst: 200)
+- ✅ **Configurable rate limiting** (per environment via YAML/env vars)
 - ✅ CORS middleware with configurable origins
 
 ### DevOps Automation (100% Complete)
@@ -135,13 +144,16 @@ A **production-ready microservice** has been successfully implemented following 
 - ✅ Configurable via values.yaml
 
 #### CI/CD (GitHub Actions) ✅
-- ✅ **Build workflow** - builds application
-- ✅ **Test workflow** - runs tests with coverage
+- ✅ **Build workflow** - builds application, generates swagger docs, verifies dependencies
+- ✅ **Test workflow** - runs tests with coverage, verifies dependencies
 - ✅ **Deploy workflow** - builds Docker image and deploys to K8s
+- ✅ **Dependency management** - automated `go mod tidy` verification
 
 ### Documentation (Comprehensive)
-- ✅ Complete README.md
-- ✅ OpenAPI 3.0 specification
+- ✅ Complete README.md with all features documented
+- ✅ **Auto-generated OpenAPI/Swagger documentation** (accessible at /swagger)
+- ✅ **Database migration guide** (docs/migrations.md)
+- ✅ **Makefile** with common development tasks
 - ✅ curl examples for all endpoints
 - ✅ Setup instructions
 - ✅ Testing guide
@@ -190,11 +202,12 @@ config/
 4. **Default values** (fallback)
 
 ### Key Features
-- ✅ Nested configuration structure (server, database, jwt)
+- ✅ Nested configuration structure (server, database, jwt, rate_limit)
 - ✅ Environment variable placeholders: `${DATABASE_URL}`
 - ✅ Multiple config paths supported
 - ✅ Automatic env var mapping (e.g., `server.port` → `SERVER_PORT`)
 - ✅ Default stage: development
+- ✅ **Configurable rate limiting per environment**
 
 ### Helm Integration
 - ✅ `config.stage` parameter (default: production)
@@ -209,9 +222,10 @@ config/
 - ✅ Helm configuration table and examples
 
 ### Testing
-- ✅ 13 new test cases for config loading
+- ✅ 13+ test cases for config loading
 - ✅ Stage-specific tests (dev, staging, production)
 - ✅ Environment variable override tests
+- ✅ **Rate limit configuration tests**
 - ✅ Backward compatibility verified
 - ✅ All existing tests pass
 
@@ -224,35 +238,43 @@ config/
 - ✅ Separation of concerns
 - ✅ Testable components
 
-### Project Files (73 files)
+### Project Files (80+ files)
 
 ```
 .
-├── .github/workflows/       # CI/CD (3 files)
-│   ├── build.yml
-│   ├── test.yml
-│   └── deploy.yml
+├── .github/workflows/       # CI/CD (4 files)
+│   ├── build.yml            # Build + swagger + dependency verification
+│   ├── test.yml             # Tests + dependency verification
+│   ├── deploy.yml
+│   └── scripts-test.yml
 ├── cmd/server/
-│   └── main.go             # Entry point with --stage flag
+│   └── main.go             # Entry point with --stage flag + swagger annotations
 ├── config/                 # YAML configuration files
-│   ├── base.yaml           # Base/shared config
+│   ├── base.yaml           # Base/shared config + rate limiting
 │   ├── development.yaml    # Dev overrides
 │   ├── staging.yaml        # Staging overrides
 │   └── production.yaml     # Production overrides
+├── migrations/             # Database migration files
+│   ├── 000001_create_users_table.up.sql
+│   └── 000001_create_users_table.down.sql
+├── docs/                   # Documentation
+│   ├── docs.go             # Generated swagger docs
+│   ├── swagger.json        # OpenAPI specification
+│   ├── swagger.yaml        # OpenAPI specification
+│   ├── migrations.md       # Migration guide
+│   └── yaml-config-migration.md
 ├── internal/
-│   ├── handlers/           # HTTP handlers (3 files)
+│   ├── handlers/           # HTTP handlers with swagger annotations (3 files)
 │   ├── middleware/         # Auth, logging, metrics (4 files)
 │   ├── models/            # GORM models (2 files)
 │   ├── repository/        # Data layer (3 files)
-│   └── routes/            # Route setup (1 file)
+│   └── routes/            # Route setup with swagger endpoint (1 file)
 ├── pkg/
 │   ├── config/            # Configuration loader with stage support (2 files)
 │   ├── logger/            # Logging setup (1 file)
+│   ├── migration/         # Database migration runner (1 file)
 │   └── utils/             # JWT, hashing (2 files)
-├── docs/                  # Documentation
-│   ├── yaml-config-options.md      # Config options analysis
-│   └── yaml-config-migration.md    # Migration guide
-├── helm/myapp/            # Kubernetes (9 files)
+├── helm/myapp/            # Kubernetes Helm chart (9 files)
 │   ├── Chart.yaml
 │   ├── values.yaml
 │   └── templates/         # 7 K8s resources (includes ConfigMap)
@@ -261,18 +283,22 @@ config/
 │   ├── test.sh/ps1        # Run tests
 │   ├── run-background.sh/ps1  # Start server in background
 │   └── stop.sh/ps1        # Stop server
-├── Dockerfile             # Multi-stage build
+├── Dockerfile             # Multi-stage build with migrations
 ├── docker-compose.yml     # Local development
-├── test-api.sh           # API testing script
+├── Makefile               # Development tasks (build, test, swagger, migrations)
+├── test-api.sh/ps1        # API testing scripts
 ├── go.mod                # Dependencies
 ├── go.sum                # Checksums
-└── README.md             # Documentation
+└── README.md             # Comprehensive documentation
 ```
 
 ## 🚀 How to Use
 
 ### Local Development
 ```bash
+# Using Makefile (recommended)
+make run
+
 # With Docker Compose
 docker-compose up -d
 
@@ -291,6 +317,9 @@ $env:JWT_SECRET="your-secret-key"
 
 ### Testing
 ```bash
+# Using Makefile
+make test
+make test-coverage
 # Linux/macOS
 ./scripts/test.sh
 
@@ -394,18 +423,22 @@ go_info{version="..."}          # Go version info
 1. ✅ JWT secrets from environment variables
 2. ✅ Passwords never logged or returned
 3. ✅ HTTPS recommended (configure in K8s ingress)
-4. ✅ Rate limiting (can be added via middleware)
-5. ✅ CORS (can be configured in Gin)
+4. ✅ **Configurable rate limiting** (per environment)
+5. ✅ CORS configuration
+6. ✅ Input validation on all endpoints
 
 ## 📝 Next Steps (Optional Enhancements)
 
 While the current implementation is production-ready, these could be added:
 
-- [x] Rate limiting middleware ✅ (Added)
+- [x] Rate limiting middleware ✅ (Added - configurable)
 - [x] CORS configuration ✅ (Added)
 - [x] OpenTelemetry tracing ✅ (Added)
 - [x] W3C trace context support ✅ (Added)
 - [x] API versioning ✅ (Added)
+- [x] **Database migrations** ✅ (Added - golang-migrate)
+- [x] **OpenAPI/Swagger documentation** ✅ (Added - auto-generated)
+- [x] **CI dependency management** ✅ (Added - go mod tidy)
 - [ ] Request/response caching
 - [ ] Email verification
 - [ ] Password reset flow
