@@ -22,7 +22,7 @@ echo ""
 
 # Create a regular user
 echo "2. Creating a regular user..."
-USER_RESPONSE=$(curl -s -X POST "$BASE_URL/users" \
+USER_RESPONSE=$(curl -s -X POST "$BASE_URL/v1/users" \
   -H "Content-Type: application/json" \
   -d '{
     "name": "John Doe",
@@ -36,7 +36,7 @@ echo ""
 
 # Create an admin user
 echo "3. Creating an admin user..."
-ADMIN_RESPONSE=$(curl -s -X POST "$BASE_URL/users" \
+ADMIN_RESPONSE=$(curl -s -X POST "$BASE_URL/v1/users" \
   -H "Content-Type: application/json" \
   -d '{
     "name": "Admin User",
@@ -50,7 +50,7 @@ echo ""
 
 # Login as admin
 echo "4. Logging in as admin..."
-LOGIN_RESPONSE=$(curl -s -X POST "$BASE_URL/login" \
+LOGIN_RESPONSE=$(curl -s -X POST "$BASE_URL/v1/login" \
   -H "Content-Type: application/json" \
   -d '{
     "email": "admin@example.com",
@@ -62,7 +62,7 @@ echo ""
 
 # Login as regular user
 echo "5. Logging in as regular user..."
-USER_LOGIN_RESPONSE=$(curl -s -X POST "$BASE_URL/login" \
+USER_LOGIN_RESPONSE=$(curl -s -X POST "$BASE_URL/v1/login" \
   -H "Content-Type: application/json" \
   -d '{
     "email": "john@example.com",
@@ -74,25 +74,25 @@ echo ""
 
 # Get all users (admin only)
 echo "6. Getting all users (admin token)..."
-curl -s -X GET "$BASE_URL/users" \
+curl -s -X GET "$BASE_URL/v1/users" \
   -H "Authorization: Bearer $ADMIN_TOKEN" | jq .
 echo ""
 
 # Try to get all users as regular user (should fail)
 echo "7. Trying to get all users as regular user (should fail)..."
-curl -s -X GET "$BASE_URL/users" \
+curl -s -X GET "$BASE_URL/v1/users" \
   -H "Authorization: Bearer $USER_TOKEN" | jq .
 echo ""
 
 # Get user by ID
 echo "8. Getting user by ID..."
-curl -s -X GET "$BASE_URL/users/$USER_ID" \
+curl -s -X GET "$BASE_URL/v1/users/$USER_ID" \
   -H "Authorization: Bearer $USER_TOKEN" | jq .
 echo ""
 
 # Update user
 echo "9. Updating user..."
-curl -s -X PUT "$BASE_URL/users/$USER_ID" \
+curl -s -X PUT "$BASE_URL/v1/users/$USER_ID" \
   -H "Authorization: Bearer $USER_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
@@ -103,7 +103,7 @@ echo ""
 
 # Delete user (admin only)
 echo "10. Deleting user as admin..."
-curl -s -X DELETE "$BASE_URL/users/$USER_ID" \
+curl -s -X DELETE "$BASE_URL/v1/users/$USER_ID" \
   -H "Authorization: Bearer $ADMIN_TOKEN" \
   -w "\nHTTP Status: %{http_code}\n"
 echo ""

@@ -4,12 +4,12 @@ $ErrorActionPreference = "Stop"
 $local:PID_FILE = "server.pid"
 
 if (-not (Test-Path $PID_FILE)) {
-    Write-Host "⚠️  No PID file found. Server may not be running." -ForegroundColor Yellow
+    Write-Host "No PID file found. Server may not be running." -ForegroundColor Yellow
     exit 1
 }
 
 $local:PID_TO_STOP = Get-Content $PID_FILE
-Write-Host "📋 PID file content: $PID_TO_STOP" -ForegroundColor Cyan
+Write-Host "PID file content: $PID_TO_STOP" -ForegroundColor Cyan
 $local:process = Get-Process -Id $PID_TO_STOP -ErrorAction SilentlyContinue
 
 if ($process) {
@@ -26,8 +26,8 @@ if ($process) {
     }
     
     Remove-Item -Path $PID_FILE -ErrorAction SilentlyContinue
-    Write-Host "✅ Server stopped" -ForegroundColor Green
+    Write-Host "Server stopped" -ForegroundColor Green
 } else {
-    Write-Host "⚠️  Server with PID $PID_TO_STOP is not running" -ForegroundColor Yellow
+    Write-Host "Server with PID $PID_TO_STOP is not running" -ForegroundColor Yellow
     Remove-Item -Path $PID_FILE -ErrorAction SilentlyContinue
 }
