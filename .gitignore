@@ -51,4 +51,4 @@ temp/
 *.db
 *.sqlite
 data/
-/logfile
+logfile

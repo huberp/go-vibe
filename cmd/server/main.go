@@ -25,7 +25,7 @@ func main() {
 	cfg := config.Load()
 
 	// Connect to database
-	db, err := gorm.Open(postgres.Open(cfg.DatabaseURL), &gorm.Config{})
+	db, err := gorm.Open(postgres.Open(cfg.Database.URL), &gorm.Config{})
 	if err != nil {
 		logger.Log.Fatal("Failed to connect to database", zap.Error(err))
 	}
