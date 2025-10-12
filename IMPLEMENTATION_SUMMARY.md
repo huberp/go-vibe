@@ -12,14 +12,14 @@ A **production-ready microservice** has been successfully implemented following 
 - ✅ Proper separation of concerns (handlers, models, repository, middleware, routes)
 
 ### Dependencies (All Exact Versions)
-- ✅ github.com/gin-gonic/gin **v1.10.0**
-- ✅ gorm.io/gorm **v1.25.10**
-- ✅ gorm.io/driver/postgres **v1.5.9**
-- ✅ github.com/golang-jwt/jwt/v5 **v5.2.1**
+- ✅ github.com/gin-gonic/gin **v1.11.0**
+- ✅ gorm.io/gorm **v1.31.0**
+- ✅ gorm.io/driver/postgres **v1.6.0**
+- ✅ github.com/golang-jwt/jwt/v5 **v5.3.0**
 - ✅ github.com/spf13/viper **v1.21.0**
 - ✅ go.uber.org/zap **v1.27.0**
 - ✅ github.com/stretchr/testify **v1.11.1**
-- ✅ github.com/prometheus/client_golang **v1.19.1**
+- ✅ github.com/prometheus/client_golang **v1.23.2**
 
 ### API Endpoints (All Implemented)
 
