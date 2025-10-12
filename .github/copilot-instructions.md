@@ -4,7 +4,7 @@ This document provides overarching guidelines and best practices for contributin
 
 ## Project Overview
 
-go-vibe is a production-ready user management microservice built with Go 1.24, following Test-Driven Development (TDD) principles and designed for cloud-native Kubernetes deployment.
+go-vibe is a production-ready user management microservice built with Go 1.25, following Test-Driven Development (TDD) principles and designed for cloud-native Kubernetes deployment.
 
 **Target Audience**: Backend developers working on Go microservices with PostgreSQL databases, deployed on Kubernetes.
 
@@ -17,7 +17,7 @@ go-vibe is a production-ready user management microservice built with Go 1.24, f
 
 ## Tech Stack
 
-- **Language**: Go 1.24+
+- **Language**: Go 1.25+
 - **Web Framework**: Gin v1.10.0
 - **ORM**: GORM v1.25.10
 - **Database**: PostgreSQL 13+

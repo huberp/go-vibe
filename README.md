@@ -1,6 +1,6 @@
 # Production-Ready User Management Microservice
 
-A production-ready microservice built with Go 1.24, Gin v1.10.0, following TDD principles and designed for Kubernetes deployment.
+A production-ready microservice built with Go 1.25, Gin v1.10.0, following TDD principles and designed for Kubernetes deployment.
 
 ## Features
 
@@ -41,7 +41,7 @@ myapp/
 
 | Component | Version | Purpose |
 |-----------|---------|---------|
-| Go | 1.24 | Programming language |
+| Go | 1.25 | Programming language |
 | Gin | v1.10.0 | HTTP framework |
 | GORM | v1.25.10 | ORM |
 | PostgreSQL Driver | v1.5.9 | Database driver |
@@ -53,7 +53,7 @@ myapp/
 
 ## Prerequisites
 
-- Go 1.24+
+- Go 1.25+
 - PostgreSQL 13+
 - Docker (for containerization)
 - Kubernetes cluster (for deployment)
