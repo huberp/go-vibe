@@ -16,7 +16,7 @@ choco install postgresql
 
 This installs PostgreSQL binaries.
 - The default install location is `C:\Program Files\PostgreSQL\<version>`.
-- choco adds PostgreSQL CLI tools (like `psql` and `pg_ctl`) to your PATH.. Simply open new PS after install.
+- choco adds PostgreSQL CLI tools (like `psql` and `pg_ctl`) to your PATH. Simply open new PS after install.
 - The installer adds a windows service and starts it as well. go to "services", find the service, stop it and set it's run type to "manual"
 ---
 
@@ -35,7 +35,7 @@ If not already initialized,
 initdb -D ".\data" -U myapp -A password -W --encoding=UTF8 --locale=en_US.UTF-8
 ```
 
-- Right at the beginning you are going to be asked about a password: for dev purpose it's save to use ``myapp``
+- Right at the beginning you are going to be asked about a password: for dev purpose it's safe to use ``myapp``
 - This creates the data directory and sets up the initial database.
 
 ### Configure PostgreSQL to Listen on localhost:5432
