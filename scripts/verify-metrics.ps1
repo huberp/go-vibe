@@ -75,11 +75,11 @@ Stop-Process -Id $goProc.Id -Force
 Remove-Item $metricsDemoPath -Force
 
 Write-Host "=========================================="
-Write-Host "✓ Verification Complete!"
+Write-Host " Verification Complete!"
 Write-Host "=========================================="
 Write-Host ""
 Write-Host "Summary:"
-Write-Host "- ✓ Metrics are in Prometheus format (# TYPE, # HELP)"
-Write-Host "- ✓ runtime.MemStats are exposed (go_memstats_*)"
-Write-Host "- ✓ Go runtime metrics are exposed (go_goroutines, go_threads, etc.)"
-Write-Host "- ✓ Custom metrics work alongside runtime metrics"
+Write-Host "- Metrics are in Prometheus format (# TYPE, # HELP)"
+Write-Host "- runtime.MemStats are exposed (go_memstats_*)"
+Write-Host "- Go runtime metrics are exposed (go_goroutines, go_threads, etc.)"
+Write-Host "- Custom metrics work alongside runtime metrics"

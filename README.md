@@ -93,6 +93,8 @@ export JWT_SECRET="your-secret-key-change-in-production"
 export SERVER_PORT="8080"
 ```
 
+Note: When using Powershell it's allways good to remember ``Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass``
+
 ```powershell
 $env:DATABASE_URL="postgres://myapp:myapp@localhost:5432/myapp?sslmode=disable"
 $env:JWT_SECRET="your-secret-key-change-in-production"
