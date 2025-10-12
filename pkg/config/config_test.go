@@ -21,7 +21,7 @@ func TestLoad(t *testing.T) {
 
 		cfg := Load()
 
-		assert.Equal(t, "postgres://testuser:testpass@testhost:5432/testdb", cfg.DatabaseURL)
+		assert.Equal(t, "postgres://testuser:testpass@testhost:5432/testdb", cfg.Database.URL)
 		assert.Equal(t, "test-jwt-secret", cfg.JWTSecret)
 		assert.Equal(t, "9090", cfg.ServerPort)
 	})
@@ -34,7 +34,7 @@ func TestLoad(t *testing.T) {
 
 		cfg := Load()
 
-		assert.Equal(t, "postgres://user:password@localhost:5432/myapp?sslmode=disable", cfg.DatabaseURL)
+		assert.Equal(t, "postgres://user:password@localhost:5432/myapp?sslmode=disable", cfg.Database.URL)
 		assert.Equal(t, "your-secret-key", cfg.JWTSecret)
 		assert.Equal(t, "8080", cfg.ServerPort)
 	})
@@ -50,7 +50,7 @@ func TestLoad(t *testing.T) {
 
 		cfg := Load()
 
-		assert.Equal(t, "postgres://user:password@localhost:5432/myapp?sslmode=disable", cfg.DatabaseURL)
+		assert.Equal(t, "postgres://user:password@localhost:5432/myapp?sslmode=disable", cfg.Database.URL)
 		assert.Equal(t, "custom-secret", cfg.JWTSecret)
 		assert.Equal(t, "8080", cfg.ServerPort)
 	})
