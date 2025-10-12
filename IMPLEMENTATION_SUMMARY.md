@@ -2,7 +2,9 @@
 
 ## 🎯 Mission Accomplished
 
-A **production-ready microservice** has been successfully implemented following **TDD principles** and adhering to all specified requirements.
+A **production-ready microservice** has been successfully implemented following **TDD principles** and adhering to all specified requirements. 
+
+**Latest Enhancement:** YAML-based configuration system with multi-stage support (development, staging, production) providing flexible, maintainable configuration management while maintaining full backward compatibility.
 
 ## ✅ Requirements Checklist
 
@@ -163,6 +165,56 @@ A **production-ready microservice** has been successfully implemented following 
 - Middleware: **38.8%** (all auth flows tested)
 - Utils: **100%** (complete coverage)
 
+## 📝 YAML Configuration System
+
+### Overview
+- ✅ **File-per-Stage Approach**: Base config + stage-specific overrides
+- ✅ **Three Stages**: development, staging, production
+- ✅ **Flexible Loading**: YAML files + environment variable overrides
+- ✅ **Backward Compatible**: Existing env-only deployments work unchanged
+- ✅ **Stage Selection**: CLI flag (`--stage=production`) or env var (`APP_STAGE`)
+
+### Configuration Structure
+```
+config/
+├── base.yaml              # Shared defaults
+├── development.yaml       # Dev overrides (dev-secret-key)
+├── staging.yaml          # Staging overrides (50 max_open_conns)
+└── production.yaml       # Production overrides (100 max_open_conns)
+```
+
+### Loading Priority (highest to lowest)
+1. **Environment Variables** (secrets, runtime overrides)
+2. **Stage-specific YAML** (e.g., production.yaml)
+3. **Base YAML** (base.yaml)
+4. **Default values** (fallback)
+
+### Key Features
+- ✅ Nested configuration structure (server, database, jwt)
+- ✅ Environment variable placeholders: `${DATABASE_URL}`
+- ✅ Multiple config paths supported
+- ✅ Automatic env var mapping (e.g., `server.port` → `SERVER_PORT`)
+- ✅ Default stage: development
+
+### Helm Integration
+- ✅ `config.stage` parameter (default: production)
+- ✅ Optional ConfigMap-based config mounting
+- ✅ Automatic `APP_STAGE` environment variable injection
+- ✅ Volume mount support for YAML files
+
+### Documentation
+- ✅ Comprehensive Configuration section in README.md
+- ✅ Migration guide: `docs/yaml-config-migration.md`
+- ✅ Options analysis: `docs/yaml-config-options.md`
+- ✅ Helm configuration table and examples
+
+### Testing
+- ✅ 13 new test cases for config loading
+- ✅ Stage-specific tests (dev, staging, production)
+- ✅ Environment variable override tests
+- ✅ Backward compatibility verified
+- ✅ All existing tests pass
+
 ## 🏗️ Architecture
 
 ### Clean Architecture Principles
@@ -172,7 +224,7 @@ A **production-ready microservice** has been successfully implemented following 
 - ✅ Separation of concerns
 - ✅ Testable components
 
-### Project Files (27 files)
+### Project Files (73 files)
 
 ```
 .
@@ -181,7 +233,12 @@ A **production-ready microservice** has been successfully implemented following 
 │   ├── test.yml
 │   └── deploy.yml
 ├── cmd/server/
-│   └── main.go             # Entry point
+│   └── main.go             # Entry point with --stage flag
+├── config/                 # YAML configuration files
+│   ├── base.yaml           # Base/shared config
+│   ├── development.yaml    # Dev overrides
+│   ├── staging.yaml        # Staging overrides
+│   └── production.yaml     # Production overrides
 ├── internal/
 │   ├── handlers/           # HTTP handlers (3 files)
 │   ├── middleware/         # Auth, logging, metrics (4 files)
@@ -189,13 +246,16 @@ A **production-ready microservice** has been successfully implemented following 
 │   ├── repository/        # Data layer (3 files)
 │   └── routes/            # Route setup (1 file)
 ├── pkg/
-│   ├── config/            # Configuration with Viper (2 files)
+│   ├── config/            # Configuration loader with stage support (2 files)
 │   ├── logger/            # Logging setup (1 file)
 │   └── utils/             # JWT, hashing (2 files)
-├── helm/myapp/            # Kubernetes (8 files)
+├── docs/                  # Documentation
+│   ├── yaml-config-options.md      # Config options analysis
+│   └── yaml-config-migration.md    # Migration guide
+├── helm/myapp/            # Kubernetes (9 files)
 │   ├── Chart.yaml
 │   ├── values.yaml
-│   └── templates/         # 6 K8s resources
+│   └── templates/         # 7 K8s resources (includes ConfigMap)
 ├── scripts/               # Build and deployment scripts
 │   ├── build.sh/ps1       # Build application
 │   ├── test.sh/ps1        # Run tests
