@@ -7,14 +7,14 @@ Write-Host "Running tests with coverage..." -ForegroundColor Cyan
 go test -v -race -coverprofile=coverage.out -covermode=atomic ./...
 
 if ($LASTEXITCODE -ne 0) {
-    Write-Host "❌ Tests failed!" -ForegroundColor Red
+    Write-Host "Error: Tests failed!" -ForegroundColor Red
     exit 1
 }
 
 # Generate HTML coverage report
 go tool cover -html=coverage.out -o coverage.html
 
-Write-Host "✅ Coverage report generated!" -ForegroundColor Green
+Write-Host "Success: Coverage report generated!" -ForegroundColor Green
 Write-Host "   Text report: coverage.out" -ForegroundColor Cyan
 Write-Host "   HTML report: coverage.html" -ForegroundColor Cyan
 Write-Host ""

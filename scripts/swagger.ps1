@@ -14,9 +14,9 @@ if (-not $swagPath) {
 swag init -g cmd/server/main.go --output docs --parseDependency --parseInternal
 
 if ($LASTEXITCODE -eq 0) {
-    Write-Host "✅ Swagger documentation generated in ./docs" -ForegroundColor Green
+    Write-Host "Success: Swagger documentation generated in ./docs" -ForegroundColor Green
     Write-Host "   View at: http://localhost:8080/swagger/index.html (when server is running)" -ForegroundColor Cyan
 } else {
-    Write-Host "❌ Failed to generate Swagger documentation!" -ForegroundColor Red
+    Write-Host "Error: Failed to generate Swagger documentation!" -ForegroundColor Red
     exit 1
 }
