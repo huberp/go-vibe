@@ -29,9 +29,10 @@ If not already initialized,
 - change to the root folder of your project, 
 - create a folder "data" 
 - and run the following
+- Note: encoding UTF8 is essential for go to go ;-)
 
 ```powershell
-initdb -D ".\data" -U myapp -A password -W
+initdb -D ".\data" -U myapp -A password -W --encoding=UTF8 --locale=en_US.UTF-8
 ```
 
 - Right at the beginning you are going to be asked about a password: for dev purpose it's save to use ``myapp``
@@ -55,10 +56,11 @@ notepad "C:\Program Files\PostgreSQL\<version>\data\postgresql.conf"
 
 ## 3. Start PostgreSQL Server
 
-Use the `pg_ctl` command to start the server:
+Use the `pg_ctl` command to start the server. 
+Change into the folder of your project!
 
 ```powershell
-pg_ctl -D "C:\Program Files\PostgreSQL\<version>\data" start
+pg_ctl -D ".\data" start
 ```
 
 - The server will run on `localhost:5432`.
@@ -66,7 +68,7 @@ pg_ctl -D "C:\Program Files\PostgreSQL\<version>\data" start
 To stop the server:
 
 ```powershell
-pg_ctl -D "C:\Program Files\PostgreSQL\<version>\data" stop
+pg_ctl -D ".\data" stop
 ```
 
 ## 4. Just once - Create the myappDB
@@ -76,6 +78,7 @@ use psql to connect to a freshly setup db and just once create the DB "myapp"
 ```powershell
 psql -U myapp  postgres
 ```
+Type ``myapp`` when asked for the password
 
 then at the prompt enter
 ```
@@ -86,7 +89,9 @@ After this verify that the new db exists
 ```powershell
 psql -U myapp  myapp
 ```
-Now you get a different prompt
+
+Again type ``myapp``
+Note: Now you get a different prompt
 ```
 myapp=#
 ```
