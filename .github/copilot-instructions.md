@@ -547,7 +547,7 @@ go mod verify
 - **UUID**: github.com/google/uuid (already in use)
 - **JWT**: github.com/golang-jwt/jwt/v5 (already in use)
 - **Validation**: Use Gin's built-in validator
-- **Environment**: Standard `os.Getenv()` or viper if needed
+- **Environment**: Viper for configuration management (preferred) or `os.Getenv()`
 
 **Avoid**:
 - Unnecessary web frameworks (stick with Gin)

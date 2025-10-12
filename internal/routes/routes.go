@@ -4,6 +4,8 @@ import (
 	"myapp/internal/handlers"
 	"myapp/internal/middleware"
 	"myapp/internal/repository"
+	"myapp/pkg/config"
+	"time"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -15,6 +17,20 @@ import (
 
 // SetupRoutes configures all application routes
 func SetupRoutes(router *gin.Engine, db *gorm.DB, logger *zap.Logger, jwtSecret string) {
+	// Load configuration
+	cfg := config.Load()
+
+	// Configure connection pool settings
+	sqlDB, err := db.DB()
+	if err != nil {
+		logger.Fatal("Failed to get database connection", zap.Error(err))
+	}
+
+	// Apply settings from Viper configuration
+	sqlDB.SetMaxOpenConns(cfg.Database.MaxOpenConns)
+	sqlDB.SetMaxIdleConns(cfg.Database.MaxIdleConns)
+	sqlDB.SetConnMaxLifetime(time.Duration(cfg.Database.ConnMaxLifetime) * time.Minute)
+
 	// Create repository
 	userRepo := repository.NewPostgresUserRepository(db)
 
