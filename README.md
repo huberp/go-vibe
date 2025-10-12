@@ -9,7 +9,13 @@ A production-ready microservice built with Go 1.25.2, Gin v1.11.0, following TDD
 - ✅ Role-based access control (admin/user)
 - ✅ PostgreSQL database with GORM
 - ✅ Structured logging with Zap
-- ✅ Prometheus metrics
+- ✅ W3C trace context support for distributed tracing
+- ✅ OpenTelemetry (OTEL) tracing integration
+- ✅ Prometheus metrics (including user count)
+- ✅ Rate limiting middleware (100 req/s per IP)
+- ✅ CORS middleware for cross-origin requests
+- ✅ API versioning (/v1/...) for backward compatibility
+- ✅ Enhanced bcrypt security (cost factor: 12)
 - ✅ 100% test coverage for handlers and middleware
 - ✅ Multi-stage Docker build (Alpine-based)
 - ✅ Helm chart for Kubernetes deployment
@@ -50,6 +56,9 @@ myapp/
 | Zap | v1.27.0 | Structured logging |
 | Testify | v1.11.1 | Testing framework |
 | Prometheus | v1.23.2 | Metrics |
+| OpenTelemetry | v1.33.0 | Distributed tracing |
+| CORS | v1.7.0 | Cross-origin resource sharing |
+| Rate Limiter | golang.org/x/time | Request rate limiting |
 
 ## Prerequisites
 
@@ -91,6 +100,14 @@ go run ./cmd/server
 The server will start on `http://localhost:8080`
 
 ## API Documentation
+
+### API Versioning
+
+The API supports versioning for backward compatibility:
+- **v1 endpoints**: `/v1/login`, `/v1/users`, `/v1/users/{id}` (recommended)
+- **Legacy endpoints**: `/login`, `/users`, `/users/{id}` (for backward compatibility)
+
+All new integrations should use the v1 endpoints.
 
 ### OpenAPI Specification
 
@@ -653,6 +670,7 @@ The application exposes the following metrics at `/metrics`:
 #### HTTP Metrics
 - `http_requests_total`: Total HTTP requests (labeled by method, path, status)
 - `http_request_duration_seconds`: HTTP request duration histogram
+- `users_total`: Total number of users in the database (gauge)
 
 #### Go Runtime Metrics (runtime.MemStats)
 - `go_memstats_alloc_bytes`: Bytes of allocated heap objects
@@ -674,12 +692,47 @@ The application exposes the following metrics at `/metrics`:
 ### Structured Logging
 
 All requests are logged with:
-- `request_id`: Unique request identifier
+- `request_id`: Unique request identifier (UUID or W3C trace ID)
 - `method`: HTTP method
 - `path`: Request path
 - `status`: Response status code
 - `duration`: Request duration
 - `client_ip`: Client IP address
+- `trace_id`: OpenTelemetry trace ID (if available)
+- `span_id`: OpenTelemetry span ID (if available)
+
+### W3C Trace Context Support
+
+The logging middleware supports W3C trace context propagation:
+- Accepts `traceparent` header for distributed tracing
+- Extracts trace ID from W3C traceparent format
+- Integrates with OpenTelemetry for end-to-end tracing
+
+### Rate Limiting
+
+Rate limiting is enforced per IP address:
+- **Default limit**: 100 requests per second
+- **Burst capacity**: 200 requests
+- **Response**: HTTP 429 (Too Many Requests) when limit exceeded
+
+### CORS Configuration
+
+CORS middleware is configured to:
+- Allow all origins (configure for production)
+- Support methods: GET, POST, PUT, DELETE, OPTIONS
+- Accept headers: Origin, Content-Type, Authorization, traceparent, tracestate
+- Support credentials for authenticated requests
+
+**Production Note**: Update `AllowOrigins` in routes.go to restrict to your frontend domain(s).
+
+## Security
+
+- **Password Hashing**: bcrypt with cost factor 12 (enhanced from default 10)
+- **JWT Authentication**: HS256 algorithm with configurable secret
+- **Input Validation**: Gin validator tags on all request models
+- **SQL Injection Prevention**: GORM parameterized queries
+- **Rate Limiting**: Per-IP request limiting to prevent abuse
+- **CORS**: Configurable cross-origin policy
 
 ## Performance
 

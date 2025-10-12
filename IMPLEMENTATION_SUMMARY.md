@@ -20,9 +20,23 @@ A **production-ready microservice** has been successfully implemented following 
 - ✅ go.uber.org/zap **v1.27.0**
 - ✅ github.com/stretchr/testify **v1.11.1**
 - ✅ github.com/prometheus/client_golang **v1.23.2**
+- ✅ go.opentelemetry.io/otel **v1.33.0** (OpenTelemetry tracing)
+- ✅ github.com/gin-contrib/cors **v1.7.0** (CORS middleware)
+- ✅ golang.org/x/time/rate (Rate limiting)
 
 ### API Endpoints (All Implemented)
 
+**v1 API (Recommended):**
+| Method | Endpoint       | Auth          | Status | Description               |
+|--------|----------------|---------------|--------|---------------------------|
+| ✅ GET    | `/v1/users`       | JWT (admin)   | ✅     | List all users            |
+| ✅ POST   | `/v1/users`       | None (signup) | ✅     | Create a user             |
+| ✅ GET    | `/v1/users/{id}`  | JWT (owner/admin) | ✅ | Get user by ID      |
+| ✅ PUT    | `/v1/users/{id}`  | JWT (owner/admin) | ✅ | Update user by ID   |
+| ✅ DELETE | `/v1/users/{id}`  | JWT (admin)   | ✅     | Delete user by ID         |
+| ✅ POST   | `/v1/login`       | None          | ✅     | Authenticate user         |
+
+**Legacy API (Backward Compatibility):**
 | Method | Endpoint       | Auth          | Status | Description               |
 |--------|----------------|---------------|--------|---------------------------|
 | ✅ GET    | `/users`       | JWT (admin)   | ✅     | List all users            |
@@ -31,6 +45,10 @@ A **production-ready microservice** has been successfully implemented following 
 | ✅ PUT    | `/users/{id}`  | JWT (owner/admin) | ✅ | Update user by ID   |
 | ✅ DELETE | `/users/{id}`  | JWT (admin)   | ✅     | Delete user by ID         |
 | ✅ POST   | `/login`       | None          | ✅     | Authenticate user         |
+
+**Monitoring & Health:**
+| Method | Endpoint       | Auth          | Status | Description               |
+|--------|----------------|---------------|--------|---------------------------|
 | ✅ GET    | `/health`      | None          | ✅     | Health check              |
 | ✅ GET    | `/metrics`     | None          | ✅     | Prometheus metrics        |
 
@@ -45,7 +63,7 @@ A **production-ready microservice** has been successfully implemented following 
 - ✅ JWT (HS256) implementation
 - ✅ Environment variable for JWT secret
 - ✅ Role-based access control (admin/user)
-- ✅ Password hashing with bcrypt
+- ✅ Password hashing with bcrypt (cost factor: 12)
 - ✅ Token validation middleware
 
 ### Quality Standards (All Met)
@@ -57,8 +75,10 @@ A **production-ready microservice** has been successfully implemented following 
 
 #### Logging ✅
 - ✅ Structured logging with Zap
-- ✅ Request ID tracking (UUID)
-- ✅ Logs include: method, path, status, duration, client_ip
+- ✅ Request ID tracking (UUID or W3C trace ID)
+- ✅ W3C trace context support (traceparent header)
+- ✅ OpenTelemetry trace/span IDs included when available
+- ✅ Logs include: method, path, status, duration, client_ip, trace_id, span_id
 
 #### Testing ✅
 - ✅ **TDD approach** - tests written before implementation
@@ -75,18 +95,24 @@ A **production-ready microservice** has been successfully implemented following 
 - ✅ Prometheus metrics:
   - `http_requests_total` (method, path, status)
   - `http_request_duration_seconds` (method, path)
+  - `users_total` (total user count gauge)
   - `go_memstats_*` (runtime.MemStats: memory, heap, GC metrics)
   - `go_goroutines`, `go_threads` (runtime metrics)
   - `go_gc_duration_seconds` (GC performance)
 - ✅ Metrics endpoint at `/metrics` (Prometheus format)
 - ✅ Structured logging with Zap
+- ✅ W3C trace context support (traceparent header)
+- ✅ OpenTelemetry tracing integration
+- ✅ Request ID tracking (UUID or trace ID)
 
 #### Security ✅
 - ✅ Input validation (Gin validator)
 - ✅ SQL injection prevention (GORM parameterized queries)
-- ✅ Password hashing (bcrypt)
+- ✅ Password hashing (bcrypt, cost factor: 12)
 - ✅ JWT for authentication
 - ✅ Role-based authorization
+- ✅ Rate limiting (100 req/s per IP, burst: 200)
+- ✅ CORS middleware with configurable origins
 
 ### DevOps Automation (100% Complete)
 
@@ -315,8 +341,11 @@ go_info{version="..."}          # Go version info
 
 While the current implementation is production-ready, these could be added:
 
-- [ ] Rate limiting middleware
-- [ ] CORS configuration
+- [x] Rate limiting middleware ✅ (Added)
+- [x] CORS configuration ✅ (Added)
+- [x] OpenTelemetry tracing ✅ (Added)
+- [x] W3C trace context support ✅ (Added)
+- [x] API versioning ✅ (Added)
 - [ ] Request/response caching
 - [ ] Email verification
 - [ ] Password reset flow
