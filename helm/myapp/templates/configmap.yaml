@@ -1,0 +1,49 @@
+{{- if .Values.config.useConfigMap }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Chart.Name }}-config
+  labels:
+    app: {{ .Chart.Name }}
+data:
+  base.yaml: |
+    server:
+      port: "8080"
+
+    database:
+      url: "postgres://user:password@localhost:5432/myapp?sslmode=disable"
+      max_open_conns: 25
+      max_idle_conns: 10
+      conn_max_lifetime: 30
+
+    jwt:
+      secret: "your-secret-key"
+
+  development.yaml: |
+    database:
+      url: "postgres://user:password@localhost:5432/myapp?sslmode=disable"
+
+    jwt:
+      secret: "dev-secret-key"
+
+  staging.yaml: |
+    database:
+      url: "${DATABASE_URL}"
+      max_open_conns: 50
+
+    jwt:
+      secret: "${JWT_SECRET}"
+
+  production.yaml: |
+    database:
+      url: "${DATABASE_URL}"
+      max_open_conns: 100
+      max_idle_conns: 25
+      conn_max_lifetime: 60
+
+    jwt:
+      secret: "${JWT_SECRET}"
+
+    server:
+      port: "${SERVER_PORT:8080}"
+{{- end }}
