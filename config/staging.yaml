@@ -1,0 +1,9 @@
+# Staging Configuration
+# Overrides base.yaml values for staging environment
+
+database:
+  url: "postgres://user:password@staging-db:5432/myapp?sslmode=disable"
+  max_open_conns: 50
+
+jwt:
+  secret: "${JWT_SECRET}"  # Use environment variable for secrets

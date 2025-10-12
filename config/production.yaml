@@ -1,0 +1,14 @@
+# Production Configuration
+# Overrides base.yaml values for production environment
+
+database:
+  url: "${DATABASE_URL}"  # Use environment variable for production database
+  max_open_conns: 100
+  max_idle_conns: 25
+  conn_max_lifetime: 60
+
+jwt:
+  secret: "${JWT_SECRET}"  # Use environment variable for secrets
+
+server:
+  port: "${SERVER_PORT:8080}"  # Default to 8080 if not set
