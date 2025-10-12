@@ -10,6 +10,8 @@ import (
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 	"go.opentelemetry.io/contrib/instrumentation/github.com/gin-gonic/gin/otelgin"
 	"go.uber.org/zap"
 	"gorm.io/gorm"
@@ -56,8 +58,8 @@ func SetupRoutes(router *gin.Engine, db *gorm.DB, logger *zap.Logger, jwtSecret 
 	// Logging middleware (with W3C trace context support)
 	router.Use(middleware.LoggingMiddleware(logger))
 
-	// Rate limiting middleware - 100 requests per second with burst of 200
-	router.Use(middleware.RateLimitMiddleware(100, 200))
+	// Rate limiting middleware - configurable via YAML/environment variables
+	router.Use(middleware.RateLimitMiddleware(cfg.RateLimit.RequestsPerSecond, cfg.RateLimit.Burst))
 
 	// Prometheus metrics middleware
 	router.Use(middleware.PrometheusMiddleware())
@@ -67,6 +69,9 @@ func SetupRoutes(router *gin.Engine, db *gorm.DB, logger *zap.Logger, jwtSecret 
 
 	// Metrics endpoint
 	router.GET("/metrics", gin.WrapH(promhttp.Handler()))
+
+	// Swagger documentation endpoint
+	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	// Health check
 	router.GET("/health", func(c *gin.Context) {

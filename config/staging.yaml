@@ -7,3 +7,7 @@ database:
 
 jwt:
   secret: "${JWT_SECRET}"  # Use environment variable for secrets
+
+rate_limit:
+  requests_per_second: 50  # Lower rate limit for staging
+  burst: 100

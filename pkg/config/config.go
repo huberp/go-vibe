@@ -26,11 +26,18 @@ type JWTConfig struct {
 	Secret string `mapstructure:"secret"`
 }
 
+// RateLimitConfig holds rate limiting configuration
+type RateLimitConfig struct {
+	RequestsPerSecond float64 `mapstructure:"requests_per_second"`
+	Burst             int     `mapstructure:"burst"`
+}
+
 // Config holds application configuration
 type Config struct {
-	Server   ServerConfig   `mapstructure:"server"`
-	Database DatabaseConfig `mapstructure:"database"`
-	JWT      JWTConfig      `mapstructure:"jwt"`
+	Server    ServerConfig    `mapstructure:"server"`
+	Database  DatabaseConfig  `mapstructure:"database"`
+	JWT       JWTConfig       `mapstructure:"jwt"`
+	RateLimit RateLimitConfig `mapstructure:"rate_limit"`
 }
 
 // Load reads configuration from YAML files and environment variables using Viper
@@ -75,6 +82,8 @@ func LoadWithStage(stage string) *Config {
 	v.BindEnv("database.max_idle_conns", "DB_MAX_IDLE_CONNS")
 	v.BindEnv("database.conn_max_lifetime", "DB_CONN_MAX_LIFETIME")
 	v.BindEnv("jwt.secret", "JWT_SECRET")
+	v.BindEnv("rate_limit.requests_per_second", "RATE_LIMIT_REQUESTS_PER_SECOND")
+	v.BindEnv("rate_limit.burst", "RATE_LIMIT_BURST")
 
 	// Unmarshal configuration into struct
 	var config Config
@@ -102,4 +111,6 @@ func setDefaults(v *viper.Viper) {
 	v.SetDefault("database.max_idle_conns", 10)
 	v.SetDefault("database.conn_max_lifetime", 30)
 	v.SetDefault("jwt.secret", "your-secret-key")
+	v.SetDefault("rate_limit.requests_per_second", 100)
+	v.SetDefault("rate_limit.burst", 200)
 }

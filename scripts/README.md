@@ -30,6 +30,82 @@ Runs all tests.
 .\scripts\test.ps1
 ```
 
+### Test with Coverage
+Runs tests and generates coverage reports (HTML and text).
+
+**Linux/macOS:**
+```bash
+./scripts/test-coverage.sh
+```
+
+**Windows PowerShell:**
+```powershell
+.\scripts\test-coverage.ps1
+```
+
+This generates:
+- `coverage.out` - Text coverage data
+- `coverage.html` - Interactive HTML coverage report
+
+### Generate Swagger Documentation
+Generates OpenAPI/Swagger documentation from code annotations.
+
+**Linux/macOS:**
+```bash
+./scripts/swagger.sh
+```
+
+**Windows PowerShell:**
+```powershell
+.\scripts\swagger.ps1
+```
+
+View the generated docs at `http://localhost:8080/swagger/index.html` when the server is running.
+
+### Database Migrations
+Manage database schema migrations using golang-migrate.
+
+**Linux/macOS:**
+```bash
+# Apply all pending migrations
+./scripts/migrate.sh up
+
+# Rollback last migration
+./scripts/migrate.sh down
+
+# Create new migration
+./scripts/migrate.sh create add_user_profile
+
+# Force to specific version (recovery)
+./scripts/migrate.sh force 1
+
+# Show current version
+./scripts/migrate.sh version
+```
+
+**Windows PowerShell:**
+```powershell
+# Apply all pending migrations
+.\scripts\migrate.ps1 up
+
+# Rollback last migration
+.\scripts\migrate.ps1 down
+
+# Create new migration
+.\scripts\migrate.ps1 create add_user_profile
+
+# Force to specific version (recovery)
+.\scripts\migrate.ps1 force 1
+
+# Show current version
+.\scripts\migrate.ps1 version
+```
+
+**Note:** Set `DATABASE_URL` environment variable before running migrations:
+```bash
+export DATABASE_URL="postgres://user:pass@localhost:5432/myapp?sslmode=disable"
+```
+
 ### Run Server in Background
 Builds and starts the server in the background. The server PID is saved to `server.pid`.
 
