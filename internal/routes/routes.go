@@ -5,8 +5,10 @@ import (
 	"myapp/internal/middleware"
 	"myapp/internal/repository"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"go.opentelemetry.io/contrib/instrumentation/github.com/gin-gonic/gin/otelgin"
 	"go.uber.org/zap"
 	"gorm.io/gorm"
 )
@@ -20,9 +22,31 @@ func SetupRoutes(router *gin.Engine, db *gorm.DB, logger *zap.Logger, jwtSecret 
 	userHandler := handlers.NewUserHandler(userRepo)
 	authHandler := handlers.NewAuthHandler(db, jwtSecret)
 
-	// Middleware
+	// Register user count metric collector
+	middleware.RegisterUserCountCollector(db)
+
+	// CORS middleware - allow all origins in development, configure for production
+	router.Use(cors.New(cors.Config{
+		AllowOrigins:     []string{"*"}, // Configure this for production
+		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization", "traceparent", "tracestate"},
+		ExposeHeaders:    []string{"Content-Length"},
+		AllowCredentials: true,
+	}))
+
+	// OpenTelemetry tracing middleware
+	router.Use(otelgin.Middleware("myapp"))
+
+	// Logging middleware (with W3C trace context support)
 	router.Use(middleware.LoggingMiddleware(logger))
+
+	// Rate limiting middleware - 100 requests per second with burst of 200
+	router.Use(middleware.RateLimitMiddleware(100, 200))
+
+	// Prometheus metrics middleware
 	router.Use(middleware.PrometheusMiddleware())
+
+	// Recovery middleware
 	router.Use(gin.Recovery())
 
 	// Metrics endpoint
@@ -33,15 +57,38 @@ func SetupRoutes(router *gin.Engine, db *gorm.DB, logger *zap.Logger, jwtSecret 
 		c.JSON(200, gin.H{"status": "healthy"})
 	})
 
-	// Public routes
-	router.POST("/login", authHandler.Login)
-	router.POST("/users", userHandler.CreateUser) // Public signup
+	// API v1 routes
+	v1 := router.Group("/v1")
+	{
+		// Public routes
+		v1.POST("/login", authHandler.Login)
+		v1.POST("/users", userHandler.CreateUser) // Public signup
 
-	// Protected routes
+		// Protected routes
+		protected := v1.Group("/")
+		protected.Use(middleware.JWTAuthMiddleware(jwtSecret))
+		{
+			// Admin-only routes
+			admin := protected.Group("/")
+			admin.Use(middleware.RequireRole("admin"))
+			{
+				admin.GET("/users", userHandler.GetUsers)
+				admin.DELETE("/users/:id", userHandler.DeleteUser)
+			}
+
+			// Owner or admin routes
+			protected.GET("/users/:id", userHandler.GetUserByID)
+			protected.PUT("/users/:id", userHandler.UpdateUser)
+		}
+	}
+
+	// Legacy routes (backward compatibility) - redirect to v1
+	router.POST("/login", authHandler.Login)
+	router.POST("/users", userHandler.CreateUser)
+
 	protected := router.Group("/")
 	protected.Use(middleware.JWTAuthMiddleware(jwtSecret))
 	{
-		// Admin-only routes
 		admin := protected.Group("/")
 		admin.Use(middleware.RequireRole("admin"))
 		{
@@ -49,7 +96,6 @@ func SetupRoutes(router *gin.Engine, db *gorm.DB, logger *zap.Logger, jwtSecret 
 			admin.DELETE("/users/:id", userHandler.DeleteUser)
 		}
 
-		// Owner or admin routes
 		protected.GET("/users/:id", userHandler.GetUserByID)
 		protected.PUT("/users/:id", userHandler.UpdateUser)
 	}
