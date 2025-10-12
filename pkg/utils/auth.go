@@ -7,9 +7,15 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+const (
+	// BcryptCost is the cost factor for bcrypt hashing
+	// 12 provides a good balance between security and performance
+	BcryptCost = 12
+)
+
 // HashPassword creates a bcrypt hash of the password
 func HashPassword(password string) (string, error) {
-	bytes, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	bytes, err := bcrypt.GenerateFromPassword([]byte(password), BcryptCost)
 	return string(bytes), err
 }
 
