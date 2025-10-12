@@ -650,8 +650,26 @@ Add these secrets to your GitHub repository:
 
 The application exposes the following metrics at `/metrics`:
 
+#### HTTP Metrics
 - `http_requests_total`: Total HTTP requests (labeled by method, path, status)
 - `http_request_duration_seconds`: HTTP request duration histogram
+
+#### Go Runtime Metrics (runtime.MemStats)
+- `go_memstats_alloc_bytes`: Bytes of allocated heap objects
+- `go_memstats_sys_bytes`: Total bytes of memory obtained from OS
+- `go_memstats_heap_alloc_bytes`: Heap bytes allocated and still in use
+- `go_memstats_heap_sys_bytes`: Heap memory obtained from OS
+- `go_memstats_heap_idle_bytes`: Heap bytes waiting to be used
+- `go_memstats_heap_inuse_bytes`: Heap bytes that are in use
+- `go_memstats_heap_released_bytes`: Heap bytes released to OS
+- `go_memstats_heap_objects`: Number of allocated heap objects
+- `go_memstats_mallocs_total`: Total number of heap allocations
+- `go_memstats_frees_total`: Total number of heap frees
+- `go_memstats_gc_sys_bytes`: Bytes used for garbage collection metadata
+- `go_goroutines`: Number of goroutines
+- `go_threads`: Number of OS threads
+- `go_gc_duration_seconds`: GC duration distribution
+- `go_info`: Go version information
 
 ### Structured Logging
 

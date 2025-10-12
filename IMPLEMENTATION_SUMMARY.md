@@ -75,7 +75,11 @@ A **production-ready microservice** has been successfully implemented following 
 - ✅ Prometheus metrics:
   - `http_requests_total` (method, path, status)
   - `http_request_duration_seconds` (method, path)
-- ✅ Metrics endpoint at `/metrics`
+  - `go_memstats_*` (runtime.MemStats: memory, heap, GC metrics)
+  - `go_goroutines`, `go_threads` (runtime metrics)
+  - `go_gc_duration_seconds` (GC performance)
+- ✅ Metrics endpoint at `/metrics` (Prometheus format)
+- ✅ Structured logging with Zap
 
 #### Security ✅
 - ✅ Input validation (Gin validator)
@@ -275,11 +279,28 @@ Every component was developed using **Test-Driven Development**:
 ## 📈 Metrics Available
 
 ```
-# Request metrics
+# HTTP Request Metrics
 http_requests_total{method="GET",path="/users",status="200"}
 http_request_duration_seconds{method="GET",path="/users"}
 
-# Custom metrics can be added easily
+# Go Runtime Metrics (runtime.MemStats)
+go_memstats_alloc_bytes          # Bytes of allocated heap objects
+go_memstats_sys_bytes            # Total bytes from OS
+go_memstats_heap_alloc_bytes     # Heap bytes allocated
+go_memstats_heap_sys_bytes       # Heap memory from OS
+go_memstats_heap_idle_bytes      # Heap bytes waiting to be used
+go_memstats_heap_inuse_bytes     # Heap bytes in use
+go_memstats_heap_released_bytes  # Heap bytes released to OS
+go_memstats_heap_objects         # Number of heap objects
+go_memstats_mallocs_total        # Total heap allocations
+go_memstats_frees_total          # Total heap frees
+go_memstats_gc_sys_bytes         # GC metadata bytes
+go_goroutines                    # Number of goroutines
+go_threads                       # Number of OS threads
+go_gc_duration_seconds           # GC duration distribution
+go_info{version="..."}          # Go version info
+
+# All metrics exposed in Prometheus format at /metrics endpoint
 ```
 
 ## 🔐 Security Considerations
