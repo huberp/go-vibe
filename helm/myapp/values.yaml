@@ -35,6 +35,14 @@ autoscaling:
   maxReplicas: 10
   targetCPUUtilizationPercentage: 80
 
+# Configuration stage: development, staging, or production
+# Can be overridden at deployment time with --set config.stage=production
+config:
+  stage: "production"  # Default to production for Helm deployments
+  # Optional: Mount custom config files via ConfigMap
+  # Set to true to use ConfigMap instead of environment variables
+  useConfigMap: false
+
 database:
   url: "postgres://user:password@postgres:5432/myapp?sslmode=disable"
 
