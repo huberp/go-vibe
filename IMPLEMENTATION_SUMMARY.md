@@ -153,13 +153,13 @@ A **production-ready microservice** has been successfully implemented following 
 - ✅ Complete README.md with all features documented
 - ✅ **Auto-generated OpenAPI/Swagger documentation** (accessible at /swagger)
 - ✅ **Database migration guide** (docs/migrations.md)
-- ✅ **Makefile** with common development tasks
+- ✅ **Shell and PowerShell scripts** for all development tasks (swagger, migrations, testing, etc.)
 - ✅ curl examples for all endpoints
 - ✅ Setup instructions
 - ✅ Testing guide
 - ✅ Deployment instructions
 - ✅ API test script (test-api.sh)
-- ✅ Shell and PowerShell scripts for build, test, and server management
+- ✅ Comprehensive scripts documentation (scripts/README.md)
 
 ## 📊 Test Results
 
@@ -281,11 +281,13 @@ config/
 ├── scripts/               # Build and deployment scripts
 │   ├── build.sh/ps1       # Build application
 │   ├── test.sh/ps1        # Run tests
+│   ├── test-coverage.sh/ps1  # Tests with coverage
+│   ├── swagger.sh/ps1     # Generate Swagger docs
+│   ├── migrate.sh/ps1     # Database migrations
 │   ├── run-background.sh/ps1  # Start server in background
 │   └── stop.sh/ps1        # Stop server
 ├── Dockerfile             # Multi-stage build with migrations
 ├── docker-compose.yml     # Local development
-├── Makefile               # Development tasks (build, test, swagger, migrations)
 ├── test-api.sh/ps1        # API testing scripts
 ├── go.mod                # Dependencies
 ├── go.sum                # Checksums
@@ -296,8 +298,11 @@ config/
 
 ### Local Development
 ```bash
-# Using Makefile (recommended)
-make run
+# Using scripts (Linux/macOS)
+./scripts/swagger.sh && go run ./cmd/server
+
+# Using scripts (Windows PowerShell)
+.\scripts\swagger.ps1; go run ./cmd/server
 
 # With Docker Compose
 docker-compose up -d
@@ -317,11 +322,9 @@ $env:JWT_SECRET="your-secret-key"
 
 ### Testing
 ```bash
-# Using Makefile
-make test
-make test-coverage
 # Linux/macOS
 ./scripts/test.sh
+./scripts/test-coverage.sh  # With coverage report
 
 # Windows PowerShell
 .\scripts\test.ps1

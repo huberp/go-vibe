@@ -115,10 +115,13 @@ $env:SERVER_PORT="8080"
 
 ### 4. Run the application
 
-Using Makefile (recommended):
+Using scripts:
 ```bash
-# Generate swagger docs and run the server
-make run
+# Linux/macOS: Generate swagger docs and run the server
+./scripts/swagger.sh && go run ./cmd/server
+
+# Windows PowerShell:
+.\scripts\swagger.ps1; go run ./cmd/server
 ```
 
 Or directly with Go:
@@ -135,46 +138,62 @@ Open your browser and navigate to:
 - **Health Check**: http://localhost:8080/health
 - **Metrics**: http://localhost:8080/metrics
 
-## Development Commands (Makefile)
+## Development Commands
 
-The project includes a Makefile for common development tasks:
+The project includes shell scripts in `scripts/` for common development tasks. See [scripts/README.md](scripts/README.md) for full documentation.
 
+### Quick Reference
+
+**Linux/macOS:**
 ```bash
-# View all available commands
-make help
-
 # Build the application
-make build
+./scripts/build.sh
 
 # Run tests
-make test
+./scripts/test.sh
 
 # Run tests with coverage
-make test-coverage
+./scripts/test-coverage.sh
 
 # Generate Swagger documentation
-make swagger
-
-# Run the application (includes swagger generation)
-make run
-
-# Format code
-make fmt
-
-# Clean build artifacts
-make clean
-
-# Tidy dependencies
-make tidy
+./scripts/swagger.sh
 
 # Database migrations
-make migrate-up              # Apply all migrations
-make migrate-down            # Rollback last migration
-make migrate-create NAME=xxx # Create new migration
+./scripts/migrate.sh up              # Apply all migrations
+./scripts/migrate.sh down            # Rollback last migration
+./scripts/migrate.sh create xxx      # Create new migration
 
-# Docker commands
-make docker-build            # Build Docker image
-make docker-run              # Run Docker container
+# Run server in background
+./scripts/run-background.sh
+
+# Stop server
+./scripts/stop.sh
+```
+
+**Windows PowerShell:**
+```powershell
+# Build the application
+.\scripts\build.ps1
+
+# Run tests
+.\scripts\test.ps1
+
+# Run tests with coverage
+.\scripts\test-coverage.ps1
+
+# Generate Swagger documentation
+.\scripts\swagger.ps1
+
+# Database migrations
+.\scripts\migrate.ps1 up              # Apply all migrations
+.\scripts\migrate.ps1 down            # Rollback last migration
+.\scripts\migrate.ps1 create xxx      # Create new migration
+
+# Run server in background
+.\scripts\run-background.ps1
+
+# Stop server
+.\scripts\stop.ps1
 ```
 
 ## Configuration
@@ -343,8 +362,13 @@ Features:
 
 To regenerate Swagger docs after code changes:
 ```bash
-make swagger
-# or
+# Linux/macOS
+./scripts/swagger.sh
+
+# Windows PowerShell
+.\scripts\swagger.ps1
+
+# Or directly with swag CLI
 swag init -g cmd/server/main.go --output docs --parseDependency --parseInternal
 ```
 
@@ -697,11 +721,18 @@ migrations/
 
 ### Creating New Migrations
 
+**Linux/macOS:**
 ```bash
-# Using Makefile
-make migrate-create NAME=add_user_profile
+./scripts/migrate.sh create add_user_profile
+```
 
-# Or using migrate CLI
+**Windows PowerShell:**
+```powershell
+.\scripts\migrate.ps1 create add_user_profile
+```
+
+**Or using migrate CLI directly:**
+```bash
 migrate create -ext sql -dir migrations -seq add_user_profile
 ```
 
@@ -711,18 +742,34 @@ This creates:
 
 ### Manual Migration Commands
 
+**Linux/macOS:**
 ```bash
 # Apply all pending migrations
-make migrate-up
+./scripts/migrate.sh up
 
 # Rollback last migration
-make migrate-down
+./scripts/migrate.sh down
 
 # Create new migration
-make migrate-create NAME=migration_name
+./scripts/migrate.sh create migration_name
 
 # Force to specific version (recovery)
-make migrate-force VERSION=1
+./scripts/migrate.sh force 1
+```
+
+**Windows PowerShell:**
+```powershell
+# Apply all pending migrations
+.\scripts\migrate.ps1 up
+
+# Rollback last migration
+.\scripts\migrate.ps1 down
+
+# Create new migration
+.\scripts\migrate.ps1 create migration_name
+
+# Force to specific version (recovery)
+.\scripts\migrate.ps1 force 1
 ```
 
 ### Migration Best Practices
