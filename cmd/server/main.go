@@ -8,6 +8,7 @@ import (
 	"myapp/internal/routes"
 	"myapp/pkg/config"
 	"myapp/pkg/logger"
+	"myapp/pkg/migration"
 	"os"
 
 	_ "myapp/docs" // Import generated docs
@@ -73,9 +74,13 @@ func main() {
 		logger.Log.Fatal("Failed to connect to database", zap.Error(err))
 	}
 
-	// Run migrations
-	if err := db.AutoMigrate(&models.User{}); err != nil {
-		logger.Log.Fatal("Failed to run migrations", zap.Error(err))
+	// Run migrations (recommended approach)
+	if err := migration.RunMigrations(cfg.Database.URL, logger.Log); err != nil {
+		logger.Log.Warn("Failed to run migrations, falling back to AutoMigrate", zap.Error(err))
+		// Fallback to GORM AutoMigrate for backward compatibility
+		if err := db.AutoMigrate(&models.User{}); err != nil {
+			logger.Log.Fatal("Failed to run AutoMigrate", zap.Error(err))
+		}
 	}
 
 	// Setup Gin

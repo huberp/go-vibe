@@ -40,3 +40,22 @@ docker-build: ## Build Docker image
 
 docker-run: ## Run Docker container
 	docker run -p 8080:8080 myapp:latest
+
+migrate-up: ## Run database migrations
+	@command -v migrate >/dev/null 2>&1 || { echo "migrate CLI not installed. Install from https://github.com/golang-migrate/migrate"; exit 1; }
+	migrate -path migrations -database "${DATABASE_URL}" up
+
+migrate-down: ## Rollback last migration
+	@command -v migrate >/dev/null 2>&1 || { echo "migrate CLI not installed. Install from https://github.com/golang-migrate/migrate"; exit 1; }
+	migrate -path migrations -database "${DATABASE_URL}" down 1
+
+migrate-create: ## Create a new migration (usage: make migrate-create NAME=migration_name)
+	@command -v migrate >/dev/null 2>&1 || { echo "migrate CLI not installed. Install from https://github.com/golang-migrate/migrate"; exit 1; }
+	@test -n "$(NAME)" || { echo "NAME is required. Usage: make migrate-create NAME=migration_name"; exit 1; }
+	migrate create -ext sql -dir migrations -seq $(NAME)
+
+migrate-force: ## Force migration version (usage: make migrate-force VERSION=1)
+	@command -v migrate >/dev/null 2>&1 || { echo "migrate CLI not installed. Install from https://github.com/golang-migrate/migrate"; exit 1; }
+	@test -n "$(VERSION)" || { echo "VERSION is required. Usage: make migrate-force VERSION=1"; exit 1; }
+	migrate -path migrations -database "${DATABASE_URL}" force $(VERSION)
+

@@ -8,20 +8,24 @@ A production-ready microservice built with Go 1.25.2, Gin v1.11.0, following TDD
 - ✅ JWT-based authentication and authorization
 - ✅ Role-based access control (admin/user)
 - ✅ PostgreSQL database with GORM
+- ✅ **Database migrations with golang-migrate** (version-controlled schema changes)
+- ✅ **Auto-generated OpenAPI/Swagger documentation** (accessible at /swagger)
 - ✅ YAML-based configuration with stage support (development, staging, production)
 - ✅ Flexible configuration: YAML files + environment variable overrides
+- ✅ **Configurable rate limiting** (via YAML/environment variables)
 - ✅ Structured logging with Zap
 - ✅ W3C trace context support for distributed tracing
 - ✅ OpenTelemetry (OTEL) tracing integration
 - ✅ Prometheus metrics (including user count)
-- ✅ Rate limiting middleware (100 req/s per IP)
 - ✅ CORS middleware for cross-origin requests
 - ✅ API versioning (/v1/...) for backward compatibility
 - ✅ Enhanced bcrypt security (cost factor: 12)
 - ✅ 100% test coverage for handlers and middleware
+- ✅ **Dependency management with go mod tidy in CI**
 - ✅ Multi-stage Docker build (Alpine-based)
 - ✅ Helm chart for Kubernetes deployment
 - ✅ GitHub Actions CI/CD pipelines
+- ✅ **Makefile for common development tasks**
 
 ## Architecture
 
@@ -37,10 +41,14 @@ myapp/
 ├── pkg/
 │   ├── config/                 # Configuration
 │   ├── logger/                 # Zap logger
+│   ├── migration/              # Database migrations
 │   └── utils/                  # Utilities (JWT, hashing)
+├── migrations/                 # SQL migration files
+├── docs/                       # Generated Swagger docs
 ├── helm/                       # Helm chart
 ├── .github/workflows/          # CI/CD pipelines
 ├── Dockerfile                  # Multi-stage build
+├── Makefile                    # Development tasks
 ├── go.mod
 └── README.md
 ```
@@ -53,14 +61,16 @@ myapp/
 | Gin | v1.11.0 | HTTP framework |
 | GORM | v1.31.0 | ORM |
 | PostgreSQL Driver | v1.6.0 | Database driver |
+| **golang-migrate** | **v4.19.0** | **Database migrations** |
 | JWT | v5.3.0 | Authentication |
 | Viper | v1.21.0 | Configuration management |
 | Zap | v1.27.0 | Structured logging |
 | Testify | v1.11.1 | Testing framework |
 | Prometheus | v1.23.2 | Metrics |
-| OpenTelemetry | v1.33.0 | Distributed tracing |
+| OpenTelemetry | v1.37.0 | Distributed tracing |
 | CORS | v1.7.0 | Cross-origin resource sharing |
 | Rate Limiter | golang.org/x/time | Request rate limiting |
+| **Swagger** | **v1.16.6** | **API documentation** |
 
 ## Prerequisites
 
@@ -105,11 +115,67 @@ $env:SERVER_PORT="8080"
 
 ### 4. Run the application
 
+Using Makefile (recommended):
+```bash
+# Generate swagger docs and run the server
+make run
+```
+
+Or directly with Go:
 ```bash
 go run ./cmd/server
 ```
 
 The server will start on `http://localhost:8080`
+
+### 5. Access API Documentation
+
+Open your browser and navigate to:
+- **Swagger UI**: http://localhost:8080/swagger/index.html
+- **Health Check**: http://localhost:8080/health
+- **Metrics**: http://localhost:8080/metrics
+
+## Development Commands (Makefile)
+
+The project includes a Makefile for common development tasks:
+
+```bash
+# View all available commands
+make help
+
+# Build the application
+make build
+
+# Run tests
+make test
+
+# Run tests with coverage
+make test-coverage
+
+# Generate Swagger documentation
+make swagger
+
+# Run the application (includes swagger generation)
+make run
+
+# Format code
+make fmt
+
+# Clean build artifacts
+make clean
+
+# Tidy dependencies
+make tidy
+
+# Database migrations
+make migrate-up              # Apply all migrations
+make migrate-down            # Rollback last migration
+make migrate-create NAME=xxx # Create new migration
+
+# Docker commands
+make docker-build            # Build Docker image
+make docker-run              # Run Docker container
+```
 
 ## Configuration
 
@@ -172,6 +238,10 @@ database:
 
 jwt:
   secret: "your-secret-key"
+
+rate_limit:
+  requests_per_second: 100
+  burst: 200
 ```
 
 **Stage-Specific Overrides:**
@@ -191,6 +261,10 @@ jwt:
 
 server:
   port: "${SERVER_PORT:8080}"  # Default to 8080 if not set
+
+rate_limit:
+  requests_per_second: 50  # More conservative for production
+  burst: 100
 ```
 
 ### Configuration Loading Order
@@ -211,6 +285,8 @@ YAML keys map to environment variables using underscores:
 | `database.max_idle_conns` | `DB_MAX_IDLE_CONNS` |
 | `database.conn_max_lifetime` | `DB_CONN_MAX_LIFETIME` |
 | `jwt.secret` | `JWT_SECRET` |
+| `rate_limit.requests_per_second` | `RATE_LIMIT_REQUESTS_PER_SECOND` |
+| `rate_limit.burst` | `RATE_LIMIT_BURST` |
 
 ### Configuration Examples
 
@@ -253,6 +329,24 @@ export SERVER_PORT="8080"
 - ✅ In Kubernetes, use Secrets for sensitive values
 
 ## API Documentation
+
+### Interactive API Documentation (Swagger)
+
+The API documentation is automatically generated from code annotations and available at:
+- **Swagger UI**: http://localhost:8080/swagger/index.html
+
+Features:
+- Interactive API explorer
+- Try out endpoints directly from the browser
+- Auto-generated from code (always up-to-date)
+- Request/response examples
+
+To regenerate Swagger docs after code changes:
+```bash
+make swagger
+# or
+swag init -g cmd/server/main.go --output docs --parseDependency --parseInternal
+```
 
 ### API Versioning
 
@@ -581,6 +675,65 @@ Example output:
 http_requests_total{method="GET",path="/v1/users",status="200"} 42
 users_total 156
 ```
+
+## Database Migrations
+
+This project uses [golang-migrate](https://github.com/golang-migrate/migrate) for database schema version control.
+
+### How Migrations Work
+
+1. **Automatic**: Migrations run automatically when the application starts
+2. **Version-controlled**: All schema changes are tracked in `migrations/` directory
+3. **Rollback support**: Each migration has up and down SQL files
+4. **Idempotent**: Can safely re-run migrations
+
+### Migration Files
+
+```
+migrations/
+├── 000001_create_users_table.up.sql    # Create users table
+└── 000001_create_users_table.down.sql  # Drop users table
+```
+
+### Creating New Migrations
+
+```bash
+# Using Makefile
+make migrate-create NAME=add_user_profile
+
+# Or using migrate CLI
+migrate create -ext sql -dir migrations -seq add_user_profile
+```
+
+This creates:
+- `migrations/000002_add_user_profile.up.sql` - Apply changes
+- `migrations/000002_add_user_profile.down.sql` - Revert changes
+
+### Manual Migration Commands
+
+```bash
+# Apply all pending migrations
+make migrate-up
+
+# Rollback last migration
+make migrate-down
+
+# Create new migration
+make migrate-create NAME=migration_name
+
+# Force to specific version (recovery)
+make migrate-force VERSION=1
+```
+
+### Migration Best Practices
+
+1. **Always test both directions**: up and down migrations
+2. **Make migrations idempotent**: Use `IF NOT EXISTS`, `IF EXISTS`
+3. **Never modify existing migrations**: Create new ones instead
+4. **Keep migrations small**: One logical change per migration
+5. **Review generated SQL**: Ensure it's safe for production
+
+For detailed migration documentation, see [docs/migrations.md](docs/migrations.md)
 
 ## Testing
 

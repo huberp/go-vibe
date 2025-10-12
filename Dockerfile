@@ -35,6 +35,9 @@ WORKDIR /home/appuser
 # Copy binary from builder
 COPY --from=builder /app/server .
 
+# Copy migrations from builder
+COPY --from=builder /app/migrations ./migrations
+
 # Change ownership
 RUN chown -R appuser:appuser /home/appuser
 
