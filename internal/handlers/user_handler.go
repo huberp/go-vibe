@@ -36,6 +36,15 @@ type UpdateUserRequest struct {
 }
 
 // GetUsers retrieves all users
+// @Summary Get all users
+// @Description Get list of all users (Admin only)
+// @Tags users
+// @Produce json
+// @Security BearerAuth
+// @Success 200 {array} models.User
+// @Failure 401 {object} map[string]string "Unauthorized"
+// @Failure 403 {object} map[string]string "Forbidden"
+// @Router /v1/users [get]
 func (h *UserHandler) GetUsers(c *gin.Context) {
 	users, err := h.repo.FindAll(c.Request.Context())
 	if err != nil {
@@ -47,6 +56,16 @@ func (h *UserHandler) GetUsers(c *gin.Context) {
 }
 
 // CreateUser creates a new user
+// @Summary Create a new user
+// @Description Register a new user account
+// @Tags users
+// @Accept json
+// @Produce json
+// @Param request body CreateUserRequest true "User information"
+// @Success 201 {object} models.User
+// @Failure 400 {object} map[string]string "Invalid request"
+// @Failure 500 {object} map[string]string "Server error"
+// @Router /v1/users [post]
 func (h *UserHandler) CreateUser(c *gin.Context) {
 	var req CreateUserRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -83,6 +102,17 @@ func (h *UserHandler) CreateUser(c *gin.Context) {
 }
 
 // GetUserByID retrieves a user by ID
+// @Summary Get user by ID
+// @Description Get user details by ID (Owner or Admin)
+// @Tags users
+// @Produce json
+// @Security BearerAuth
+// @Param id path int true "User ID"
+// @Success 200 {object} models.User
+// @Failure 400 {object} map[string]string "Invalid ID"
+// @Failure 401 {object} map[string]string "Unauthorized"
+// @Failure 404 {object} map[string]string "User not found"
+// @Router /v1/users/{id} [get]
 func (h *UserHandler) GetUserByID(c *gin.Context) {
 	idStr := c.Param("id")
 	id, err := strconv.ParseUint(idStr, 10, 32)
@@ -105,6 +135,19 @@ func (h *UserHandler) GetUserByID(c *gin.Context) {
 }
 
 // UpdateUser updates a user by ID
+// @Summary Update user
+// @Description Update user details (Owner or Admin)
+// @Tags users
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param id path int true "User ID"
+// @Param request body UpdateUserRequest true "User update information"
+// @Success 200 {object} models.User
+// @Failure 400 {object} map[string]string "Invalid request"
+// @Failure 401 {object} map[string]string "Unauthorized"
+// @Failure 404 {object} map[string]string "User not found"
+// @Router /v1/users/{id} [put]
 func (h *UserHandler) UpdateUser(c *gin.Context) {
 	idStr := c.Param("id")
 	id, err := strconv.ParseUint(idStr, 10, 32)
@@ -147,6 +190,17 @@ func (h *UserHandler) UpdateUser(c *gin.Context) {
 }
 
 // DeleteUser deletes a user by ID
+// @Summary Delete user
+// @Description Delete user by ID (Admin only)
+// @Tags users
+// @Security BearerAuth
+// @Param id path int true "User ID"
+// @Success 204 "No Content"
+// @Failure 400 {object} map[string]string "Invalid ID"
+// @Failure 401 {object} map[string]string "Unauthorized"
+// @Failure 403 {object} map[string]string "Forbidden"
+// @Failure 404 {object} map[string]string "User not found"
+// @Router /v1/users/{id} [delete]
 func (h *UserHandler) DeleteUser(c *gin.Context) {
 	idStr := c.Param("id")
 	id, err := strconv.ParseUint(idStr, 10, 32)
