@@ -22,6 +22,8 @@ spec:
         - containerPort: 8080
           name: http
         env:
+        - name: APP_STAGE
+          value: {{ .Values.config.stage | quote }}
         {{- range .Values.env }}
         - name: {{ .name }}
           {{- if .value }}
@@ -30,6 +32,12 @@ spec:
           valueFrom:
             {{- toYaml .valueFrom | nindent 12 }}
           {{- end }}
+        {{- end }}
+        {{- if .Values.config.useConfigMap }}
+        volumeMounts:
+        - name: config
+          mountPath: /etc/myapp/config
+          readOnly: true
         {{- end }}
         livenessProbe:
           httpGet:
@@ -45,3 +53,9 @@ spec:
           periodSeconds: 5
         resources:
           {{- toYaml .Values.resources | nindent 10 }}
+      {{- if .Values.config.useConfigMap }}
+      volumes:
+      - name: config
+        configMap:
+          name: {{ .Chart.Name }}-config
+      {{- end }}

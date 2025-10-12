@@ -1,0 +1,15 @@
+# Base Configuration
+# This file contains default configuration shared across all stages
+# Stage-specific files can override these values
+
+server:
+  port: "8080"
+
+database:
+  url: "postgres://user:password@localhost:5432/myapp?sslmode=disable"
+  max_open_conns: 25
+  max_idle_conns: 10
+  conn_max_lifetime: 30
+
+jwt:
+  secret: "your-secret-key"

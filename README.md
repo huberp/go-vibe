@@ -8,6 +8,8 @@ A production-ready microservice built with Go 1.25.2, Gin v1.11.0, following TDD
 - ✅ JWT-based authentication and authorization
 - ✅ Role-based access control (admin/user)
 - ✅ PostgreSQL database with GORM
+- ✅ YAML-based configuration with stage support (development, staging, production)
+- ✅ Flexible configuration: YAML files + environment variable overrides
 - ✅ Structured logging with Zap
 - ✅ W3C trace context support for distributed tracing
 - ✅ OpenTelemetry (OTEL) tracing integration
@@ -108,6 +110,147 @@ go run ./cmd/server
 ```
 
 The server will start on `http://localhost:8080`
+
+## Configuration
+
+The application supports flexible YAML-based configuration with multiple deployment stages, while maintaining full backward compatibility with environment variables.
+
+### Configuration Methods
+
+#### 1. YAML Configuration Files (Recommended)
+
+Configuration files are organized by stage in the `config/` directory:
+
+```
+config/
+├── base.yaml              # Base/shared configuration
+├── development.yaml       # Development overrides
+├── staging.yaml          # Staging overrides
+└── production.yaml       # Production overrides
+```
+
+**Stage Selection:**
+
+Using command line flag:
+```bash
+./server --stage=production
+```
+
+Using environment variable:
+```bash
+export APP_STAGE=production
+./server
+```
+
+Default stage is `development` if not specified.
+
+#### 2. Environment Variables (Backward Compatible)
+
+All configuration values can be overridden with environment variables:
+
+```bash
+export DATABASE_URL="postgres://user:pass@host:5432/db"
+export JWT_SECRET="your-secret-key"
+export SERVER_PORT="8080"
+./server
+```
+
+Environment variables take precedence over YAML configuration.
+
+### Configuration Structure
+
+**Base Configuration (config/base.yaml):**
+```yaml
+server:
+  port: "8080"
+
+database:
+  url: "postgres://user:password@localhost:5432/myapp?sslmode=disable"
+  max_open_conns: 25
+  max_idle_conns: 10
+  conn_max_lifetime: 30
+
+jwt:
+  secret: "your-secret-key"
+```
+
+**Stage-Specific Overrides:**
+
+Each stage file (development.yaml, staging.yaml, production.yaml) can override base values:
+
+```yaml
+# config/production.yaml
+database:
+  url: "${DATABASE_URL}"  # Use environment variable
+  max_open_conns: 100
+  max_idle_conns: 25
+  conn_max_lifetime: 60
+
+jwt:
+  secret: "${JWT_SECRET}"  # Use environment variable
+
+server:
+  port: "${SERVER_PORT:8080}"  # Default to 8080 if not set
+```
+
+### Configuration Loading Order
+
+1. Load `config/base.yaml` (shared defaults)
+2. Merge `config/{stage}.yaml` (stage-specific overrides)
+3. Apply environment variable overrides (highest priority)
+
+### Environment Variable Mapping
+
+YAML keys map to environment variables using underscores:
+
+| YAML Path | Environment Variable |
+|-----------|---------------------|
+| `server.port` | `SERVER_PORT` |
+| `database.url` | `DATABASE_URL` |
+| `database.max_open_conns` | `DB_MAX_OPEN_CONNS` |
+| `database.max_idle_conns` | `DB_MAX_IDLE_CONNS` |
+| `database.conn_max_lifetime` | `DB_CONN_MAX_LIFETIME` |
+| `jwt.secret` | `JWT_SECRET` |
+
+### Configuration Examples
+
+**Development (default):**
+```bash
+# Uses config/development.yaml
+./server
+```
+
+**Staging with secret override:**
+```bash
+export JWT_SECRET="staging-secret-key"
+./server --stage=staging
+```
+
+**Production with all secrets from environment:**
+```bash
+export APP_STAGE=production
+export DATABASE_URL="postgres://prod-user:pass@prod-host:5432/proddb"
+export JWT_SECRET="production-secret-key"
+export SERVER_PORT="8080"
+./server
+```
+
+**Backward compatible (environment only):**
+```bash
+# No YAML files needed - works as before
+export DATABASE_URL="postgres://user:pass@localhost:5432/db"
+export JWT_SECRET="secret"
+export SERVER_PORT="8080"
+./server
+```
+
+### Security Best Practices
+
+- ✅ Store secrets (DATABASE_URL, JWT_SECRET) in environment variables, not in YAML files
+- ✅ Use placeholders in YAML: `${JWT_SECRET}` to reference environment variables
+- ✅ Never commit production secrets to version control
+- ✅ Use different secrets for each stage
+- ✅ In Kubernetes, use Secrets for sensitive values
 
 ## API Documentation
 
@@ -536,17 +679,54 @@ kubectl create secret generic myapp-secrets \
 
 2. **Install with Helm:**
 
+**Basic installation with production stage:**
 ```bash
 helm install myapp ./helm/myapp \
   --namespace production \
   --create-namespace
 ```
 
+**Install with specific stage:**
+```bash
+# Development
+helm install myapp ./helm/myapp \
+  --namespace development \
+  --set config.stage=development \
+  --create-namespace
+
+# Staging
+helm install myapp ./helm/myapp \
+  --namespace staging \
+  --set config.stage=staging \
+  --create-namespace
+
+# Production (default)
+helm install myapp ./helm/myapp \
+  --namespace production \
+  --set config.stage=production \
+  --create-namespace
+```
+
+**Install with ConfigMap-based configuration (optional):**
+```bash
+helm install myapp ./helm/myapp \
+  --namespace production \
+  --set config.stage=production \
+  --set config.useConfigMap=true \
+  --create-namespace
+```
+
 3. **Update deployment:**
 
 ```bash
+# Update image version
 helm upgrade myapp ./helm/myapp \
   --set image.tag=v1.0.1 \
+  -n production
+
+# Change configuration stage
+helm upgrade myapp ./helm/myapp \
+  --set config.stage=staging \
   -n production
 ```
 
@@ -555,6 +735,23 @@ helm upgrade myapp ./helm/myapp \
 ```bash
 helm uninstall myapp -n production
 ```
+
+### Helm Configuration Options
+
+The Helm chart supports the following configuration values:
+
+| Parameter | Description | Default |
+|-----------|-------------|---------|
+| `config.stage` | Configuration stage (development, staging, production) | `production` |
+| `config.useConfigMap` | Mount config files via ConfigMap instead of using env vars | `false` |
+| `replicaCount` | Number of replicas | `2` |
+| `image.repository` | Docker image repository | `myapp` |
+| `image.tag` | Docker image tag | `latest` |
+| `autoscaling.enabled` | Enable horizontal pod autoscaling | `true` |
+| `autoscaling.minReplicas` | Minimum replicas | `2` |
+| `autoscaling.maxReplicas` | Maximum replicas | `10` |
+
+**Note:** When `config.stage` is set, the `APP_STAGE` environment variable is automatically configured in the pods.
 
 ### Local Testing with Kind
 
