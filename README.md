@@ -334,10 +334,12 @@ paths:
 
 ## API Examples
 
+### Using v1 API (Recommended)
+
 ### 1. Create a user (Public signup)
 
 ```bash
-curl -X POST http://localhost:8080/users \
+curl -X POST http://localhost:8080/v1/users \
   -H "Content-Type: application/json" \
   -d '{
     "name": "John Doe",
@@ -350,7 +352,7 @@ curl -X POST http://localhost:8080/users \
 ### 2. Login
 
 ```bash
-curl -X POST http://localhost:8080/login \
+curl -X POST http://localhost:8080/v1/login \
   -H "Content-Type: application/json" \
   -d '{
     "email": "john@example.com",
@@ -371,19 +373,20 @@ Response:
 }
 ```
 
-### 3. Get all users (Admin only)
+### 3. Get all users (Admin only) with W3C trace context
 
 ```bash
 TOKEN="your-jwt-token"
-curl -X GET http://localhost:8080/users \
-  -H "Authorization: Bearer $TOKEN"
+curl -X GET http://localhost:8080/v1/users \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "traceparent: 00-0af7651916cd43dd8448eb211c80319c-b7ad6b7169203331-01"
 ```
 
 ### 4. Get user by ID
 
 ```bash
 TOKEN="your-jwt-token"
-curl -X GET http://localhost:8080/users/1 \
+curl -X GET http://localhost:8080/v1/users/1 \
   -H "Authorization: Bearer $TOKEN"
 ```
 
@@ -391,7 +394,7 @@ curl -X GET http://localhost:8080/users/1 \
 
 ```bash
 TOKEN="your-jwt-token"
-curl -X PUT http://localhost:8080/users/1 \
+curl -X PUT http://localhost:8080/v1/users/1 \
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
@@ -404,7 +407,7 @@ curl -X PUT http://localhost:8080/users/1 \
 
 ```bash
 TOKEN="your-jwt-token"
-curl -X DELETE http://localhost:8080/users/1 \
+curl -X DELETE http://localhost:8080/v1/users/1 \
   -H "Authorization: Bearer $TOKEN"
 ```
 
@@ -414,10 +417,16 @@ curl -X DELETE http://localhost:8080/users/1 \
 curl http://localhost:8080/health
 ```
 
-### 8. Prometheus metrics
+### 8. Prometheus metrics (includes users_total)
 
 ```bash
-curl http://localhost:8080/metrics
+curl http://localhost:8080/metrics | grep -E "(http_requests_total|users_total)"
+```
+
+Example output:
+```
+http_requests_total{method="GET",path="/v1/users",status="200"} 42
+users_total 156
 ```
 
 ## Testing
