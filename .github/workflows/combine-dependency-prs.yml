@@ -20,6 +20,10 @@ on:
 jobs:
   combine-prs:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write        # Create/delete branches, merge operations
+      pull-requests: write   # Create combined PR
+      issues: write          # Add labels and post comments
 
     steps:
       - name: Checkout repository

@@ -16,6 +16,10 @@ jobs:
       startsWith(github.event.pull_request.title, 'chore(deps): Combined dependency updates')
 
     runs-on: ubuntu-latest
+    permissions:
+      contents: write        # Delete branches after cleanup
+      pull-requests: write   # Close source PRs
+      issues: write          # Post cleanup comments
 
     steps:
       - name: Cleanup Source PRs
