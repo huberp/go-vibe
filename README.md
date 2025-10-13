@@ -1041,23 +1041,46 @@ helm install myapp ./helm/myapp -f my-values.yaml -n production
 
 ## CI/CD
 
-The project includes three GitHub Actions workflows:
+The project includes GitHub Actions workflows for building, testing, deployment, and dependency management:
 
-### 1. Build (`build.yml`)
+### Core Workflows
+
+#### 1. Build (`build.yml`)
 - Triggers on push to main/develop or PR to main
 - Builds the application
 - Uploads binary artifact
 
-### 2. Test (`test.yml`)
+#### 2. Test (`test.yml`)
 - Triggers on push to main/develop or PR to main
 - Runs all tests with race detection
 - Generates coverage report
 - Uploads to Codecov
 
-### 3. Deploy (`deploy.yml`)
+#### 3. Deploy (`deploy.yml`)
 - Triggers on push to main or version tags
 - Builds and pushes Docker image to GHCR
 - Deploys to Kubernetes using Helm
+
+### Dependency Management Workflows
+
+#### 4. Combine Dependency PRs (`combine-dependency-prs.yml`)
+- **Purpose**: Combines multiple chore(deps) PRs into a single PR
+- **Trigger**: Manual (workflow_dispatch)
+- **Filters**: Only PRs with labels `dependencies` AND `go` that pass Build and Test
+- **Benefits**: Reduces PR clutter, easier review process
+
+**How to use:**
+1. Go to Actions tab → "Combine Dependency PRs"
+2. Click "Run workflow"
+3. Review and merge the combined PR
+4. Source PRs are automatically closed after merge
+
+See [Combine Dependency PRs Documentation](docs/COMBINE_DEPENDENCY_PRS.md) for detailed usage.
+
+#### 5. Cleanup Combined PRs (`cleanup-combined-prs.yml`)
+- **Purpose**: Automatically closes source PRs after combined PR is merged
+- **Trigger**: Automatic when combined PR is merged
+- **Actions**: Closes source PRs, deletes branches, adds comments
 
 ### Setup GitHub Secrets
 
