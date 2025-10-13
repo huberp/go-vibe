@@ -73,6 +73,18 @@ The workflow only combines PRs that meet ALL of these criteria:
 
 ## Configuration
 
+### Repository Settings (Required)
+
+**Important:** Before using this workflow, you must enable GitHub Actions to create pull requests:
+
+1. Go to your repository **Settings** → **Actions** → **General**
+2. Scroll down to **Workflow permissions**
+3. Select **"Read and write permissions"**
+4. Check **"Allow GitHub Actions to create and approve pull requests"**
+5. Click **Save**
+
+Without this setting enabled, the workflow will fail with: `"GitHub Actions is not permitted to create or approve pull requests"`
+
 ### Combine Dependency PRs Workflow
 
 You can customize the workflow inputs when running manually:
@@ -136,6 +148,22 @@ The cleanup workflow runs automatically when:
 - Conflicting PR remains open for manual resolution
 
 ## Troubleshooting
+
+### GitHub Actions Not Permitted to Create PRs
+
+**Error:** `"GitHub Actions is not permitted to create or approve pull requests"`
+
+**Cause:** Repository settings prevent GitHub Actions from creating pull requests.
+
+**Solution:**
+1. Go to repository **Settings** → **Actions** → **General**
+2. Scroll to **Workflow permissions**
+3. Enable **"Read and write permissions"**
+4. Check **"Allow GitHub Actions to create and approve pull requests"**
+5. Click **Save**
+6. Re-run the failed workflow
+
+This is a **required one-time setup** for the workflow to function.
 
 ### No PRs Found
 
