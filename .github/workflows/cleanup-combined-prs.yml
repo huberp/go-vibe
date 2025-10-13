@@ -1,0 +1,116 @@
+name: 'Cleanup Combined Dependency PRs'
+
+# This workflow runs when a combined dependency PR is merged
+# It closes source PRs and deletes their branches
+
+on:
+  pull_request:
+    types: [closed]
+    branches: [main]
+
+jobs:
+  cleanup-source-prs:
+    # Only run if PR was merged and has the right title pattern
+    if: |
+      github.event.pull_request.merged == true &&
+      startsWith(github.event.pull_request.title, 'chore(deps): Combined dependency updates')
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Cleanup Source PRs
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{secrets.GITHUB_TOKEN}}
+          script: |
+            const mergedPR = context.payload.pull_request;
+            console.log(`Combined PR #${mergedPR.number} was merged`);
+            console.log(`Title: ${mergedPR.title}`);
+
+            // Extract PR numbers from the merged PR body
+            const prNumberRegex = /#(\d+)/g;
+            const matches = [...mergedPR.body.matchAll(prNumberRegex)];
+            const sourcePRNumbers = matches
+              .map(match => parseInt(match[1]))
+              .filter(num => num !== mergedPR.number); // Exclude the combined PR itself
+
+            console.log(`Found ${sourcePRNumbers.length} source PR references`);
+
+            if (sourcePRNumbers.length === 0) {
+              console.log('No source PRs found to clean up');
+              return;
+            }
+
+            // Close source PRs and delete their branches
+            for (const prNumber of sourcePRNumbers) {
+              try {
+                // Get PR details
+                const { data: pr } = await github.rest.pulls.get({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  pull_number: prNumber
+                });
+
+                // Only close if PR is still open
+                if (pr.state === 'open') {
+                  console.log(`Closing PR #${prNumber}: ${pr.title}`);
+
+                  // Add comment before closing
+                  await github.rest.issues.createComment({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    issue_number: prNumber,
+                    body: `✅ This PR was successfully combined and merged in #${mergedPR.number}. Closing and cleaning up.`
+                  });
+
+                  // Close the PR
+                  await github.rest.pulls.update({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    pull_number: prNumber,
+                    state: 'closed'
+                  });
+
+                  console.log(`✅ Closed PR #${prNumber}`);
+
+                  // Delete the branch
+                  const branchName = pr.head.ref;
+                  try {
+                    await github.rest.git.deleteRef({
+                      owner: context.repo.owner,
+                      repo: context.repo.repo,
+                      ref: `heads/${branchName}`
+                    });
+                    console.log(`✅ Deleted branch: ${branchName}`);
+                  } catch (error) {
+                    console.log(`⚠️ Could not delete branch ${branchName}: ${error.message}`);
+                  }
+                } else {
+                  console.log(`ℹ️ PR #${prNumber} is already ${pr.state}`);
+                }
+              } catch (error) {
+                console.log(`❌ Error processing PR #${prNumber}: ${error.message}`);
+              }
+            }
+
+            // Delete combined PR branch
+            const combinedBranchName = mergedPR.head.ref;
+            try {
+              await github.rest.git.deleteRef({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                ref: `heads/${combinedBranchName}`
+              });
+              console.log(`✅ Deleted combined branch: ${combinedBranchName}`);
+            } catch (error) {
+              console.log(`⚠️ Could not delete combined branch ${combinedBranchName}: ${error.message}`);
+            }
+
+            console.log('\n✅ Cleanup completed successfully');
+
+      - name: Workflow Summary
+        if: success()
+        run: |
+          echo "### ✅ Source PRs Cleaned Up" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Successfully closed source PRs and deleted branches after combined PR merge." >> $GITHUB_STEP_SUMMARY

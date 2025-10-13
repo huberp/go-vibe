@@ -1,0 +1,279 @@
+name: 'Combine Dependency PRs'
+
+# This workflow combines chore(deps) PRs with specific labels into a single PR
+# It only combines PRs that have passed Build and Test workflows
+# Source PRs are deleted only after the combined PR passes all checks
+
+on:
+  workflow_dispatch:
+    inputs:
+      combineBranchName:
+        description: 'Name of the branch to combine PRs into'
+        required: true
+        default: 'combined-dependency-updates'
+      deleteStaleBranch:
+        description: 'Delete existing combined branch if it exists'
+        type: boolean
+        required: true
+        default: true
+
+jobs:
+  combine-prs:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Combine Dependency PRs
+        id: combine-prs
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{secrets.GITHUB_TOKEN}}
+          script: |
+            const combineBranchName = '${{ github.event.inputs.combineBranchName }}';
+            const deleteStaleBranch = ${{ github.event.inputs.deleteStaleBranch }};
+
+            // Get all open PRs
+            const pulls = await github.paginate('GET /repos/:owner/:repo/pulls', {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open'
+            });
+
+            console.log(`Found ${pulls.length} open PRs`);
+
+            let eligiblePRs = [];
+            let baseBranch = null;
+            let baseBranchSHA = null;
+
+            // Filter PRs that have both 'dependencies' and 'go' labels
+            for (const pull of pulls) {
+              const labels = pull.labels.map(label => label.name);
+              console.log(`PR #${pull.number}: ${pull.title}`);
+              console.log(`  Labels: ${labels.join(', ')}`);
+
+              // Check if PR has both required labels
+              if (!labels.includes('dependencies') || !labels.includes('go')) {
+                console.log(`  Skipping: Missing required labels (needs both 'dependencies' and 'go')`);
+                continue;
+              }
+
+              // Check if title starts with 'chore(deps)' or 'chore:'
+              if (!pull.title.startsWith('chore(deps)') && !pull.title.startsWith('chore:')) {
+                console.log(`  Skipping: Title doesn't start with 'chore(deps)' or 'chore:'`);
+                continue;
+              }
+
+              // Check if PR has green status (all checks passed)
+              console.log(`  Checking build/test status...`);
+
+              const stateQuery = `query($owner: String!, $repo: String!, $pull_number: Int!) {
+                repository(owner: $owner, name: $repo) {
+                  pullRequest(number: $pull_number) {
+                    commits(last: 1) {
+                      nodes {
+                        commit {
+                          statusCheckRollup {
+                            state
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }`;
+
+              const vars = {
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: pull.number
+              };
+
+              try {
+                const result = await github.graphql(stateQuery, vars);
+                const [{ commit }] = result.repository.pullRequest.commits.nodes;
+                const state = commit.statusCheckRollup?.state;
+
+                console.log(`  Status: ${state}`);
+
+                if (state !== 'SUCCESS') {
+                  console.log(`  Skipping: Build/test status is not SUCCESS (is ${state})`);
+                  continue;
+                }
+              } catch (error) {
+                console.log(`  Error checking status: ${error.message}`);
+                console.log(`  Skipping this PR`);
+                continue;
+              }
+
+              // PR is eligible
+              console.log(`  ✅ Eligible for combining`);
+              eligiblePRs.push({
+                number: pull.number,
+                title: pull.title,
+                branch: pull.head.ref,
+                prString: `#${pull.number} ${pull.title}`
+              });
+
+              // Use the base branch from the first eligible PR
+              if (!baseBranch) {
+                baseBranch = pull.base.ref;
+                baseBranchSHA = pull.base.sha;
+              }
+            }
+
+            console.log(`\n${eligiblePRs.length} eligible PRs found for combining`);
+
+            if (eligiblePRs.length === 0) {
+              console.log('No PRs matched criteria. Requirements:');
+              console.log('  - Must have labels: dependencies AND go');
+              console.log('  - Title must start with: chore(deps) or chore:');
+              console.log('  - Build and Test status must be: SUCCESS');
+              core.setFailed('No PRs matched criteria');
+              return;
+            }
+
+            if (eligiblePRs.length === 1) {
+              console.log('Only one PR matched criteria. No need to combine.');
+              core.setFailed('Only one PR matched criteria - no combining needed');
+              return;
+            }
+
+            // Check if combined branch already exists
+            try {
+              const { data: existingBranch } = await github.rest.git.getRef({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                ref: `heads/${combineBranchName}`
+              });
+
+              console.log(`\nBranch ${combineBranchName} already exists`);
+
+              if (deleteStaleBranch) {
+                console.log('Deleting existing branch...');
+                await github.rest.git.deleteRef({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  ref: `heads/${combineBranchName}`
+                });
+                console.log('Deleted existing branch');
+              } else {
+                core.setFailed(`Branch ${combineBranchName} already exists. Set deleteStaleBranch to true to delete it.`);
+                return;
+              }
+            } catch (error) {
+              // Branch doesn't exist, which is fine
+              console.log(`\nBranch ${combineBranchName} does not exist (this is expected)`);
+            }
+
+            // Create combined branch
+            console.log(`\nCreating combined branch: ${combineBranchName}`);
+            try {
+              await github.rest.git.createRef({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                ref: `refs/heads/${combineBranchName}`,
+                sha: baseBranchSHA
+              });
+              console.log('Combined branch created successfully');
+            } catch (error) {
+              console.log(error);
+              core.setFailed('Failed to create combined branch');
+              return;
+            }
+
+            // Merge all eligible PRs into combined branch
+            let combinedPRs = [];
+            let mergeFailedPRs = [];
+
+            console.log('\nMerging PRs into combined branch...');
+            for (const pr of eligiblePRs) {
+              try {
+                await github.rest.repos.merge({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  base: combineBranchName,
+                  head: pr.branch,
+                });
+                console.log(`✅ Merged: ${pr.prString}`);
+                combinedPRs.push(pr.prString);
+              } catch (error) {
+                console.log(`❌ Failed to merge: ${pr.prString} - ${error.message}`);
+                mergeFailedPRs.push(pr.prString);
+              }
+            }
+
+            if (combinedPRs.length === 0) {
+              core.setFailed('Failed to merge any PRs - likely due to conflicts');
+              return;
+            }
+
+            // Create combined PR
+            console.log('\nCreating combined PR...');
+            const combinedPRsString = combinedPRs.join('\n');
+            let body = '🔄 **Combined Dependency Updates**\n\n';
+            body += 'This PR combines the following dependency update PRs:\n\n';
+            body += combinedPRsString;
+            body += '\n\n---\n\n';
+            body += '✅ All source PRs have passed Build and Test workflows.\n\n';
+            body += '⚠️ **Note**: Source PRs will be automatically closed and their branches deleted only after this combined PR is merged and passes all checks.\n';
+
+            if (mergeFailedPRs.length > 0) {
+              const mergeFailedPRsString = mergeFailedPRs.join('\n');
+              body += '\n\n⚠️ **Merge Conflicts**\n\n';
+              body += 'The following PRs were excluded due to merge conflicts:\n\n';
+              body += mergeFailedPRsString;
+            }
+
+            const { data: combinedPR } = await github.rest.pulls.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: 'chore(deps): Combined dependency updates',
+              head: combineBranchName,
+              base: baseBranch,
+              body: body
+            });
+
+            console.log(`\n✅ Combined PR created: #${combinedPR.number}`);
+            console.log(`   URL: ${combinedPR.html_url}`);
+
+            // Add labels to combined PR
+            await github.rest.issues.addLabels({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: combinedPR.number,
+              labels: ['dependencies', 'go']
+            });
+
+            // Store PR numbers for cleanup step
+            core.setOutput('combined_pr_number', combinedPR.number);
+            core.setOutput('source_pr_numbers', JSON.stringify(eligiblePRs.map(pr => pr.number)));
+
+            // Add comment to source PRs
+            for (const pr of eligiblePRs) {
+              if (combinedPRs.includes(pr.prString)) {
+                await github.rest.issues.createComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: pr.number,
+                  body: `🔄 This PR has been combined into #${combinedPR.number}. It will be automatically closed after the combined PR is merged and passes all checks.`
+                });
+              }
+            }
+
+            console.log('\n✅ Workflow completed successfully');
+            console.log(`\nNext steps:`);
+            console.log(`1. Review combined PR #${combinedPR.number}`);
+            console.log(`2. Wait for Build and Test workflows to pass`);
+            console.log(`3. Merge the combined PR`);
+            console.log(`4. Source PRs will be automatically closed`);
+
+      - name: Workflow Summary
+        if: success()
+        run: |
+          echo "### ✅ Combined PR Created Successfully" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Combined PR: #${{ steps.combine-prs.outputs.combined_pr_number }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Source PRs will be closed after the combined PR is merged and passes all checks." >> $GITHUB_STEP_SUMMARY
