@@ -1069,6 +1069,13 @@ The project includes GitHub Actions workflows for building, testing, deployment,
 - **Filters**: Only PRs with labels `dependencies` AND `go` that pass Build and Test
 - **Benefits**: Reduces PR clutter, easier review process
 
+**Setup Required (One-Time):**
+Before using this workflow, enable PR creation in repository settings:
+1. Go to **Settings** → **Actions** → **General**
+2. Under **Workflow permissions**, select **"Read and write permissions"**
+3. Check **"Allow GitHub Actions to create and approve pull requests"**
+4. Click **Save**
+
 **How to use:**
 1. Go to Actions tab → "Combine Dependency PRs"
 2. Click "Run workflow"
