@@ -1188,6 +1188,45 @@ CORS middleware is configured to:
 - Health checks with liveness/readiness probes
 - Multi-stage Docker build for minimal image size
 
+## Contributing
+
+We welcome contributions to go-vibe! To ensure consistency and quality across the codebase, please follow our comprehensive development guidelines.
+
+### Development Guidelines
+
+All coding standards, best practices, and architectural patterns are documented in our **[Copilot Instructions](.github/copilot-instructions.md)**. This file provides:
+
+- 📋 Project overview and tech stack
+- 🏗️ Architecture patterns and design principles
+- 📝 Code style and naming conventions
+- ✅ Testing strategy (TDD approach)
+- 🔒 Security best practices
+- 🗄️ Database and GORM guidelines
+- 🚀 Development workflow and common commands
+- 📚 External resources and documentation
+
+**Quick Start for Contributors:**
+
+1. Read the [Copilot Instructions](.github/copilot-instructions.md)
+2. Follow the TDD approach: write tests first
+3. Ensure all tests pass: `go test ./... -v`
+4. Run code coverage: `go test ./... -coverprofile=coverage.out`
+5. Follow commit message conventions (Conventional Commits)
+6. Submit PR following the guidelines in the instructions
+
+### Code Review Checklist
+
+Before submitting a PR, ensure:
+- [ ] Tests written and passing (TDD approach)
+- [ ] Error handling implemented correctly
+- [ ] Logging added with appropriate context
+- [ ] Security best practices followed
+- [ ] Input validation included
+- [ ] Documentation updated (if needed)
+- [ ] No sensitive data in logs or responses
+- [ ] Code follows Go conventions
+- [ ] Dependencies are justified and minimal
+
 ## License
 
 MIT

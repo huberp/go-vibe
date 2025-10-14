@@ -1,6 +1,34 @@
 # Copilot Instructions for go-vibe
 
+> **📘 Note**: This file provides comprehensive development guidelines for GitHub Copilot and other AI coding assistants, as well as human contributors. It ensures consistent code quality and adherence to project standards.
+
 This document provides overarching guidelines and best practices for contributing to the go-vibe project. These instructions apply across the entire codebase.
+
+## Table of Contents
+
+- [Project Overview](#project-overview)
+- [Tech Stack](#tech-stack)
+- [Architecture Patterns](#architecture-patterns)
+- [Code Style and Standards](#code-style-and-standards)
+- [Testing Strategy](#testing-strategy)
+- [Security Best Practices](#security-best-practices)
+- [Database Guidelines](#database-guidelines)
+- [HTTP Handlers](#http-handlers)
+- [Environment Configuration](#environment-configuration)
+- [Docker & Kubernetes](#docker--kubernetes)
+- [CI/CD](#cicd)
+- [Observability](#observability)
+- [API Design](#api-design)
+- [Development Workflow](#development-workflow)
+- [Code Review Checklist](#code-review-checklist)
+- [Common Patterns](#common-patterns)
+- [Performance Considerations](#performance-considerations)
+- [Communication and Contribution](#communication-and-contribution)
+- [Do's and Don'ts](#dos-and-donts)
+- [Dependency Management](#dependency-management)
+- [External Resources](#external-resources)
+- [Maintenance](#maintenance)
+- [PowerShell Development Guidelines](#powershell-development-guidelines)
 
 ## Project Overview
 
