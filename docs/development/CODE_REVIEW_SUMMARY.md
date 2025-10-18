@@ -96,8 +96,8 @@ New tests added:
 ### New Files
 1. `internal/middleware/ratelimit.go` - Rate limiting implementation
 2. `internal/middleware/ratelimit_test.go` - Rate limiting tests
-3. `docs/code-review-improvements.sh` - Demonstration script
-4. `docs/CODE_REVIEW_SUMMARY.md` - This summary document
+3. `docs/development/code-review-improvements.sh` - Demonstration script
+4. `docs/development/CODE_REVIEW_SUMMARY.md` - This summary document
 
 ### Modified Files
 1. `internal/middleware/logging.go` - W3C trace context support
@@ -135,7 +135,7 @@ go tool cover -html=coverage.out
 
 ### Run Demonstration
 ```bash
-./docs/code-review-improvements.sh
+./docs/development/code-review-improvements.sh
 ```
 
 ## 📖 Documentation Updates
