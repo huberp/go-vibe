@@ -58,7 +58,7 @@ jobs:
               console.log(`  Labels: ${labels.join(', ')}`);
 
               // Check if PR has both required labels
-              if (!labels.includes('dependencies') || !labels.includes('go')) {
+              if (!labels.includes('dependencies')) {
                 console.log(`  Skipping: Missing required labels (needs both 'dependencies' and 'go')`);
                 continue;
               }
