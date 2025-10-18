@@ -6,6 +6,8 @@ The `info` package provides an extensible framework for aggregating and exposing
 
 This package implements a pluggable provider pattern inspired by Spring Boot's actuator info endpoint. It allows applications to expose various types of information (build details, statistics, custom metrics) through a simple and extensible interface.
 
+The `/info` endpoint includes built-in bulkhead protection with rate limiting (10 requests/second, burst of 20) to prevent DOS attacks, in addition to the global rate limiting middleware.
+
 ## Core Components
 
 ### InfoProvider Interface
@@ -80,6 +82,17 @@ Returns:
   }
 }
 ```
+
+## Security Features
+
+### Bulkhead Rate Limiting
+
+The info handler includes built-in rate limiting (bulkhead pattern) to protect against DOS attacks:
+- **Rate**: 10 requests per second
+- **Burst**: 20 requests
+- **Response on limit**: HTTP 429 (Too Many Requests)
+
+This is more restrictive than the global rate limit because the `/info` endpoint queries the database, making it a potential target for resource exhaustion attacks.
 
 ## Usage Example
 
@@ -173,7 +186,7 @@ registry.Register(NewDatabaseStatsProvider(db))
 
 ## Thread Safety
 
-The `Registry` is thread-safe and can be safely accessed from multiple goroutines. All built-in providers are also designed to be thread-safe.
+The `Registry` is thread-safe and can be safely accessed from multiple goroutines. All built-in providers are also designed to be thread-safe. The info handler includes mutex protection for its rate limiter.
 
 ## Error Handling
 
@@ -211,6 +224,7 @@ cp pkg/info/build_provider.go ./providers/
 3. **Performance**: Keep `Info()` methods lightweight - avoid expensive operations
 4. **Data Format**: Return JSON-serializable data (primitives, maps, slices)
 5. **Security**: Don't expose sensitive information (credentials, secrets, PII)
+6. **Rate Limiting**: The built-in bulkhead protection is sufficient for most use cases
 
 ## Testing
 
@@ -250,3 +264,18 @@ The aggregated info response follows this structure:
 ```
 
 Each provider's data is nested under its name, preventing key collisions.
+
+## Rate Limiting Responses
+
+When the bulkhead rate limit is exceeded:
+
+**Status Code**: `429 Too Many Requests`
+
+**Response**:
+```json
+{
+  "error": "rate limit exceeded for info endpoint"
+}
+```
+
+This indicates the endpoint is being accessed too frequently. The global rate limiter (configured via application settings) also applies before reaching the handler-specific bulkhead.
