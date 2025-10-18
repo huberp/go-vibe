@@ -152,7 +152,7 @@ A **production-ready microservice** has been successfully implemented following 
 ### Documentation (Comprehensive)
 - ✅ Complete README.md with all features documented
 - ✅ **Auto-generated OpenAPI/Swagger documentation** (accessible at /swagger)
-- ✅ **Database migration guide** (docs/migrations.md)
+- ✅ **Database migration guide** (docs/database/migrations.md)
 - ✅ **Shell and PowerShell scripts** for all development tasks (swagger, migrations, testing, etc.)
 - ✅ curl examples for all endpoints
 - ✅ Setup instructions
@@ -217,8 +217,8 @@ config/
 
 ### Documentation
 - ✅ Comprehensive Configuration section in README.md
-- ✅ Migration guide: `docs/yaml-config-migration.md`
-- ✅ Options analysis: `docs/yaml-config-options.md`
+- ✅ Migration guide: `docs/configuration/yaml-config-migration.md`
+- ✅ Options analysis: `docs/configuration/yaml-config-options.md`
 - ✅ Helm configuration table and examples
 
 ### Testing

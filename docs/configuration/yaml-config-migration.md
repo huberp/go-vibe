@@ -330,7 +330,7 @@ The application will log: "No base config file found, using defaults"
 
 - **Issue Tracker**: Report problems at GitHub Issues
 - **Documentation**: See README.md Configuration section
-- **Config Options**: Review `docs/yaml-config-options.md`
+- **Config Options**: Review `docs/configuration/yaml-config-options.md`
 
 ## Summary
 

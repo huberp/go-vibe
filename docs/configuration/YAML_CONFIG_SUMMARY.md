@@ -55,9 +55,9 @@ type Config struct {
 ### 5. Documentation
 
 **Created:**
-- `docs/yaml-config-options.md` - Analysis of 4 configuration approaches
-- `docs/yaml-config-migration.md` - Comprehensive migration guide
-- `docs/yaml-config-examples.sh` - Executable examples script
+- `docs/configuration/yaml-config-options.md` - Analysis of 4 configuration approaches
+- `docs/configuration/yaml-config-migration.md` - Comprehensive migration guide
+- `docs/configuration/yaml-config-examples.sh` - Executable examples script
 
 **Updated:**
 - `README.md` - Added Configuration section with examples
@@ -166,9 +166,9 @@ Use YAML for base config, override with env vars as needed.
 - `config/staging.yaml`
 - `config/production.yaml`
 - `helm/myapp/templates/configmap.yaml`
-- `docs/yaml-config-options.md`
-- `docs/yaml-config-migration.md`
-- `docs/yaml-config-examples.sh`
+- `docs/configuration/yaml-config-options.md`
+- `docs/configuration/yaml-config-migration.md`
+- `docs/configuration/yaml-config-examples.sh`
 
 **Modified (8 files):**
 - `pkg/config/config.go`

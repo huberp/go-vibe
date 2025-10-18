@@ -97,7 +97,7 @@ go mod download
 
 ### 3. Set environment variables
 
-Note: Please refer to ./docs/postgresql.md for installing postgre and setting up the User "myapp" and DB "myapp"
+Note: Please refer to ./docs/database/postgresql.md for installing postgre and setting up the User "myapp" and DB "myapp"
 
 ```bash
 export DATABASE_URL="postgres://myapp:myapp@localhost:5432/myapp?sslmode=disable"
@@ -780,7 +780,7 @@ This creates:
 4. **Keep migrations small**: One logical change per migration
 5. **Review generated SQL**: Ensure it's safe for production
 
-For detailed migration documentation, see [docs/migrations.md](docs/migrations.md)
+For detailed migration documentation, see [docs/database/migrations.md](docs/database/migrations.md)
 
 ## Testing
 
@@ -1000,7 +1000,7 @@ curl http://localhost:8080/metrics
 .\scripts\local-k8s-cleanup.ps1
 ```
 
-**Troubleshooting**: See [Local Kubernetes Troubleshooting Guide](docs/LOCAL_K8S_TROUBLESHOOTING.md) for common issues and solutions.
+**Troubleshooting**: See [Local Kubernetes Troubleshooting Guide](docs/deployment/LOCAL_K8S_TROUBLESHOOTING.md) for common issues and solutions.
 
 ### Custom values
 
@@ -1082,7 +1082,7 @@ Before using this workflow, enable PR creation in repository settings:
 3. Review and merge the combined PR
 4. Source PRs are automatically closed after merge
 
-See [Combine Dependency PRs Documentation](docs/COMBINE_DEPENDENCY_PRS.md) for detailed usage.
+See [Combine Dependency PRs Documentation](docs/development/COMBINE_DEPENDENCY_PRS.md) for detailed usage.
 
 #### 5. Cleanup Combined PRs (`cleanup-combined-prs.yml`)
 - **Purpose**: Automatically closes source PRs after combined PR is merged
