@@ -79,6 +79,7 @@ myapp/
 - Docker (for containerization)
 - Kubernetes cluster (for deployment)
 - Helm 3+ (for deployment)
+- **Windows PowerShell users**: Run `.\scripts\set-execution-policy.ps1` before using PowerShell scripts
 
 ## Quick Start
 
@@ -105,8 +106,12 @@ export JWT_SECRET="your-secret-key-change-in-production"
 export SERVER_PORT="8080"
 ```
 
-Note: When using Powershell it's allways good to remember ``Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass``
+**Windows PowerShell users**: Before running PowerShell scripts, set the execution policy:
+```powershell
+.\scripts\set-execution-policy.ps1
+```
 
+Then set environment variables:
 ```powershell
 $env:DATABASE_URL="postgres://myapp:myapp@localhost:5432/myapp?sslmode=disable"
 $env:JWT_SECRET="your-secret-key-change-in-production"
@@ -146,6 +151,10 @@ The project includes shell scripts in `scripts/` for common development tasks. S
 
 **Linux/macOS:**
 ```bash
+# Database management
+./scripts/db-start.sh          # Start PostgreSQL
+./scripts/db-stop.sh           # Stop PostgreSQL
+
 # Build the application
 ./scripts/build.sh
 
@@ -172,6 +181,10 @@ The project includes shell scripts in `scripts/` for common development tasks. S
 
 **Windows PowerShell:**
 ```powershell
+# Database management
+.\scripts\db-start.ps1         # Start PostgreSQL
+.\scripts\db-stop.ps1          # Stop PostgreSQL
+
 # Build the application
 .\scripts\build.ps1
 

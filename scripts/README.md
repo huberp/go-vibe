@@ -4,6 +4,30 @@ This directory contains shell scripts (.sh) for Linux/macOS and PowerShell scrip
 
 ## Available Scripts
 
+### Database Scripts
+
+Start and stop the PostgreSQL database server.
+
+**Linux/macOS:**
+```bash
+# Start database
+./scripts/db-start.sh
+
+# Stop database
+./scripts/db-stop.sh
+```
+
+**Windows PowerShell:**
+```powershell
+# Start database
+.\scripts\db-start.ps1
+
+# Stop database
+.\scripts\db-stop.ps1
+```
+
+**Note:** These scripts require PostgreSQL to be installed and the database to be initialized in the `./data` directory. See [docs/database/postgresql.md](../docs/database/postgresql.md) for setup instructions.
+
 ### Build Script
 Builds the application binary.
 

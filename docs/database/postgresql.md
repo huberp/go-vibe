@@ -59,6 +59,19 @@ notepad "C:\Program Files\PostgreSQL\<version>\data\postgresql.conf"
 Use the `pg_ctl` command to start the server. 
 Change into the folder of your project!
 
+**Using scripts (recommended):**
+
+Linux/macOS:
+```bash
+./scripts/db-start.sh
+```
+
+Windows PowerShell:
+```powershell
+.\scripts\db-start.ps1
+```
+
+**Or manually:**
 ```powershell
 pg_ctl -D ".\data" start
 ```
@@ -67,6 +80,19 @@ pg_ctl -D ".\data" start
 
 To stop the server:
 
+**Using scripts (recommended):**
+
+Linux/macOS:
+```bash
+./scripts/db-stop.sh
+```
+
+Windows PowerShell:
+```powershell
+.\scripts\db-stop.ps1
+```
+
+**Or manually:**
 ```powershell
 pg_ctl -D ".\data" stop
 ```
