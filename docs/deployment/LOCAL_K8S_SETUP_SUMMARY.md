@@ -52,7 +52,7 @@ This update adds comprehensive local Kubernetes deployment testing capabilities 
 
 ### 5. Documentation
 
-#### `docs/LOCAL_K8S_TROUBLESHOOTING.md`
+#### `docs/deployment/LOCAL_K8S_TROUBLESHOOTING.md`
 Comprehensive troubleshooting guide covering:
 - Common issues (DNS, image pulls, CRDs, crashes)
 - Environment-specific problems (CI/CD, corporate networks)

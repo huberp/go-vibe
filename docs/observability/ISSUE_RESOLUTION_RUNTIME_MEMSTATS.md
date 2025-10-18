@@ -28,7 +28,7 @@ The **runtime.MemStats metrics were already being exposed** automatically by the
 #### 3. Documentation
 - **Updated README.md**: Added detailed list of all runtime.MemStats metrics
 - **Updated IMPLEMENTATION_SUMMARY.md**: Added MemStats to metrics documentation
-- **Created docs/METRICS.md**: Comprehensive metrics documentation including:
+- **Created docs/observability/METRICS.md**: Comprehensive metrics documentation including:
   - All available metrics with descriptions
   - Prometheus format examples
   - Usage examples and PromQL queries
@@ -106,7 +106,7 @@ curl http://localhost:8080/metrics | grep go_memstats
 
 ### Added Files
 1. `internal/routes/routes_test.go` - Comprehensive test suite
-2. `docs/METRICS.md` - Detailed metrics documentation
+2. `docs/observability/METRICS.md` - Detailed metrics documentation
 3. `scripts/verify-metrics.sh` - Verification and demonstration script
 
 ### Modified Files
