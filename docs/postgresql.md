@@ -111,7 +111,7 @@ psql -U myapp -h localhost -p 5432
 ## 6. Configure your deployment stage for running the application locally
 
 Don't forget to configure your application configuration.
-Open File ``.\config\development.yaml`` (development is the default stage, see docu about selecting the stage elsewhere)
+Open File ``.\config\development.yaml`` (development is the default stage, see documentation about selecting the stage elsewhere)
 It should read
 ```
 database:
