@@ -2,7 +2,7 @@
 # Overrides base.yaml values for local development
 
 database:
-  url: "postgres://user:password@localhost:5432/myapp?sslmode=disable"
+  url: "postgres://myapp:myapp@localhost:5432/myapp?sslmode=disable"
 
 jwt:
   secret: "dev-secret-key"

@@ -71,7 +71,7 @@ To stop the server:
 pg_ctl -D ".\data" stop
 ```
 
-## 4. Just once - Create the myappDB
+## 4. Just once - Create the myapp DB in the postgresql server
 
 use psql to connect to a freshly setup db and just once create the DB "myapp"
 
@@ -100,15 +100,27 @@ myapp=#
 
 ## 5. Connect to PostgreSQL
 
-To connect using the CLI:
+To connect to the project DB using the CLI:
 
 ```powershell
-psql -U postgres -h localhost -p 5432
+psql -U myapp -h localhost -p 5432
 ```
 
 ---
 
-## 6. Troubleshooting
+## 6. Configure your deployment stage for running the application locally
+
+Don't forget to configure your application configuration.
+Open File ``.\config\development.yaml`` (development is the default stage, see documentation about selecting the stage elsewhere)
+It should read
+```
+database:
+  url: "postgres://myapp:myapp@localhost:5432/myapp?sslmode=disable"
+```
+
+---
+
+## 7. Troubleshooting
 
 - If port 5432 is in use, change the `port` setting in `postgresql.conf`.
 - Ensure Windows Firewall allows connections to port 5432.
