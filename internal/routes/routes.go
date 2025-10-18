@@ -5,6 +5,8 @@ import (
 	"myapp/internal/middleware"
 	"myapp/internal/repository"
 	"myapp/pkg/config"
+	"myapp/pkg/info"
+	"runtime"
 	"time"
 
 	"github.com/gin-contrib/cors"
@@ -39,6 +41,12 @@ func SetupRoutes(router *gin.Engine, db *gorm.DB, logger *zap.Logger, jwtSecret 
 	// Create handlers
 	userHandler := handlers.NewUserHandler(userRepo)
 	authHandler := handlers.NewAuthHandler(db, jwtSecret)
+
+	// Setup info providers
+	infoRegistry := info.NewRegistry()
+	infoRegistry.Register(info.NewBuildInfoProvider("dev", "unknown", "", runtime.Version()))
+	infoRegistry.Register(info.NewUserStatsProvider(db))
+	infoHandler := handlers.NewInfoHandler(infoRegistry)
 
 	// Register user count metric collector
 	middleware.RegisterUserCountCollector(db)
@@ -77,6 +85,9 @@ func SetupRoutes(router *gin.Engine, db *gorm.DB, logger *zap.Logger, jwtSecret 
 	router.GET("/health", func(c *gin.Context) {
 		c.JSON(200, gin.H{"status": "healthy"})
 	})
+
+	// Info endpoint
+	router.GET("/info", infoHandler.GetInfo)
 
 	// API v1 routes
 	v1 := router.Group("/v1")
