@@ -5,6 +5,7 @@ import (
 	"myapp/internal/middleware"
 	"myapp/internal/repository"
 	"myapp/pkg/config"
+	"myapp/pkg/health"
 	"myapp/pkg/info"
 	"runtime"
 	"time"
@@ -41,7 +42,11 @@ func SetupRoutes(router *gin.Engine, db *gorm.DB, logger *zap.Logger, jwtSecret 
 	// Create handlers
 	userHandler := handlers.NewUserHandler(userRepo)
 	authHandler := handlers.NewAuthHandler(db, jwtSecret)
-	healthHandler := handlers.NewHealthHandler(db)
+	
+	// Setup health check providers
+	healthRegistry := health.NewRegistry()
+	healthRegistry.Register(health.NewDatabaseHealthCheckProvider(db, health.ScopeStartup, health.ScopeReady))
+	healthHandler := handlers.NewHealthHandler(healthRegistry)
 
 	// Setup info providers
 	infoRegistry := info.NewRegistry()
