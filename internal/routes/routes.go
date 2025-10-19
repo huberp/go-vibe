@@ -41,6 +41,7 @@ func SetupRoutes(router *gin.Engine, db *gorm.DB, logger *zap.Logger, jwtSecret 
 	// Create handlers
 	userHandler := handlers.NewUserHandler(userRepo)
 	authHandler := handlers.NewAuthHandler(db, jwtSecret)
+	healthHandler := handlers.NewHealthHandler(db)
 
 	// Setup info providers
 	infoRegistry := info.NewRegistry()
@@ -81,10 +82,11 @@ func SetupRoutes(router *gin.Engine, db *gorm.DB, logger *zap.Logger, jwtSecret 
 	// Swagger documentation endpoint
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
-	// Health check
-	router.GET("/health", func(c *gin.Context) {
-		c.JSON(200, gin.H{"status": "healthy"})
-	})
+	// Health check endpoints
+	router.GET("/health", healthHandler.HealthCheck)
+	router.GET("/health/startup", healthHandler.StartupProbe)
+	router.GET("/health/liveness", healthHandler.LivenessProbe)
+	router.GET("/health/readiness", healthHandler.ReadinessProbe)
 
 	// Info endpoint
 	router.GET("/info", infoHandler.GetInfo)

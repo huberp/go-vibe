@@ -156,12 +156,53 @@ func TestMetricsEndpoint(t *testing.T) {
 func TestHealthEndpoint(t *testing.T) {
 	router := setupTestRouter()
 
-	t.Run("should return healthy status", func(t *testing.T) {
+	t.Run("should return healthy status with components", func(t *testing.T) {
 		req, _ := http.NewRequest("GET", "/health", nil)
 		w := httptest.NewRecorder()
 		router.ServeHTTP(w, req)
 
 		assert.Equal(t, http.StatusOK, w.Code)
-		assert.Contains(t, w.Body.String(), "healthy")
+		assert.Contains(t, w.Body.String(), "UP")
+		assert.Contains(t, w.Body.String(), "database")
+	})
+}
+
+func TestHealthStartupEndpoint(t *testing.T) {
+	router := setupTestRouter()
+
+	t.Run("should return startup probe status", func(t *testing.T) {
+		req, _ := http.NewRequest("GET", "/health/startup", nil)
+		w := httptest.NewRecorder()
+		router.ServeHTTP(w, req)
+
+		assert.Equal(t, http.StatusOK, w.Code)
+		assert.Contains(t, w.Body.String(), "UP")
+	})
+}
+
+func TestHealthLivenessEndpoint(t *testing.T) {
+	router := setupTestRouter()
+
+	t.Run("should return liveness probe status", func(t *testing.T) {
+		req, _ := http.NewRequest("GET", "/health/liveness", nil)
+		w := httptest.NewRecorder()
+		router.ServeHTTP(w, req)
+
+		assert.Equal(t, http.StatusOK, w.Code)
+		assert.Contains(t, w.Body.String(), "UP")
+	})
+}
+
+func TestHealthReadinessEndpoint(t *testing.T) {
+	router := setupTestRouter()
+
+	t.Run("should return readiness probe status", func(t *testing.T) {
+		req, _ := http.NewRequest("GET", "/health/readiness", nil)
+		w := httptest.NewRecorder()
+		router.ServeHTTP(w, req)
+
+		assert.Equal(t, http.StatusOK, w.Code)
+		assert.Contains(t, w.Body.String(), "UP")
+		assert.Contains(t, w.Body.String(), "database")
 	})
 }
