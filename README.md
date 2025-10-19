@@ -10,7 +10,7 @@ A production-ready microservice built with Go 1.25.2, Gin v1.11.0, following TDD
 - ✅ PostgreSQL database with GORM
 - ✅ **Database migrations with golang-migrate** (version-controlled schema changes)
 - ✅ **Auto-generated OpenAPI/Swagger documentation** (accessible at /swagger)
-- ✅ **Comprehensive Kubernetes health checks** (startup, liveness, readiness probes)
+- ✅ **Registrable health check system with scopes** (startup, liveness, readiness, base)
 - ✅ YAML-based configuration with stage support (development, staging, production)
 - ✅ Flexible configuration: YAML files + environment variable overrides
 - ✅ **Configurable rate limiting** (via YAML/environment variables)
@@ -740,7 +740,7 @@ curl -X DELETE http://localhost:8080/v1/users/1 \
 
 ### 7. Health checks
 
-The application provides comprehensive health check endpoints for Kubernetes probes:
+The application provides a **registrable health check system** with comprehensive endpoints for Kubernetes probes. Components can register custom health checks with specific scopes (base, startup, ready, live).
 
 ```bash
 # Overall health check (aggregates all checks)
@@ -773,6 +773,8 @@ Example response from `/health` endpoint:
   }
 }
 ```
+
+**For detailed information on creating custom health checks**, see [docs/HEALTH_CHECKS.md](docs/HEALTH_CHECKS.md).
 
 ### 8. Prometheus metrics (includes users_total)
 
