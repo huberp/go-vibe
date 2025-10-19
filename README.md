@@ -10,6 +10,7 @@ A production-ready microservice built with Go 1.25.2, Gin v1.11.0, following TDD
 - ✅ PostgreSQL database with GORM
 - ✅ **Database migrations with golang-migrate** (version-controlled schema changes)
 - ✅ **Auto-generated OpenAPI/Swagger documentation** (accessible at /swagger)
+- ✅ **Comprehensive Kubernetes health checks** (startup, liveness, readiness probes)
 - ✅ YAML-based configuration with stage support (development, staging, production)
 - ✅ Flexible configuration: YAML files + environment variable overrides
 - ✅ **Configurable rate limiting** (via YAML/environment variables)
@@ -140,7 +141,7 @@ The server will start on `http://localhost:8080`
 
 Open your browser and navigate to:
 - **Swagger UI**: http://localhost:8080/swagger/index.html
-- **Health Check**: http://localhost:8080/health
+- **Health Check**: http://localhost:8080/health (aggregated), http://localhost:8080/health/liveness, http://localhost:8080/health/readiness
 - **Metrics**: http://localhost:8080/metrics
 
 ## Development Commands
@@ -470,10 +471,11 @@ components:
 paths:
   /health:
     get:
-      summary: Health check
+      summary: Overall health check
+      description: Returns aggregated health status with all component checks
       responses:
         '200':
-          description: Service is healthy
+          description: All components are healthy
           content:
             application/json:
               schema:
@@ -481,7 +483,48 @@ paths:
                 properties:
                   status:
                     type: string
-                    example: healthy
+                    enum: [UP, DOWN]
+                  components:
+                    type: object
+                    properties:
+                      database:
+                        type: object
+                        properties:
+                          status:
+                            type: string
+                            enum: [UP, DOWN]
+                          details:
+                            type: object
+        '503':
+          description: One or more components are unhealthy
+
+  /health/startup:
+    get:
+      summary: Kubernetes startup probe
+      description: Indicates if the application has started successfully
+      responses:
+        '200':
+          description: Application has started
+        '503':
+          description: Application has not started
+
+  /health/liveness:
+    get:
+      summary: Kubernetes liveness probe
+      description: Indicates if the application is running and should not be restarted
+      responses:
+        '200':
+          description: Application is alive
+
+  /health/readiness:
+    get:
+      summary: Kubernetes readiness probe
+      description: Indicates if the application is ready to accept traffic
+      responses:
+        '200':
+          description: Application is ready
+        '503':
+          description: Application is not ready
 
   /login:
     post:
@@ -695,10 +738,40 @@ curl -X DELETE http://localhost:8080/v1/users/1 \
   -H "Authorization: Bearer $TOKEN"
 ```
 
-### 7. Health check
+### 7. Health checks
+
+The application provides comprehensive health check endpoints for Kubernetes probes:
 
 ```bash
+# Overall health check (aggregates all checks)
 curl http://localhost:8080/health
+
+# Startup probe (for Kubernetes startup probe)
+curl http://localhost:8080/health/startup
+
+# Liveness probe (for Kubernetes liveness probe)
+curl http://localhost:8080/health/liveness
+
+# Readiness probe (for Kubernetes readiness probe)
+curl http://localhost:8080/health/readiness
+```
+
+Example response from `/health` endpoint:
+```json
+{
+  "status": "UP",
+  "components": {
+    "database": {
+      "status": "UP",
+      "details": {
+        "idle": 2,
+        "in_use": 0,
+        "max_open_connections": 25,
+        "open_connections": 2
+      }
+    }
+  }
+}
 ```
 
 ### 8. Prometheus metrics (includes users_total)
@@ -1122,6 +1195,57 @@ Add these secrets to your GitHub repository:
 
 ## Monitoring
 
+### Health Checks
+
+The application provides comprehensive health check endpoints following Kubernetes best practices:
+
+#### Available Endpoints
+
+1. **Overall Health Check** (`/health`)
+   - Aggregates all component health statuses
+   - Returns `200 OK` when all components are healthy
+   - Returns `503 Service Unavailable` when any component is unhealthy
+   - Includes detailed component information (database connection stats, etc.)
+
+2. **Startup Probe** (`/health/startup`)
+   - Indicates if the application has successfully started
+   - Used by Kubernetes to know when the container is ready to start accepting traffic
+   - Checks database connectivity
+   - Configured with longer timeout to allow for slow startup
+
+3. **Liveness Probe** (`/health/liveness`)
+   - Indicates if the application is running and should not be restarted
+   - Simple check that doesn't depend on external services
+   - Used by Kubernetes to determine when to restart the container
+   - Always returns `200 OK` if the application can respond
+
+4. **Readiness Probe** (`/health/readiness`)
+   - Indicates if the application is ready to accept traffic
+   - Checks database connectivity and other critical dependencies
+   - Used by Kubernetes to determine when to route traffic to the pod
+   - Returns `503 Service Unavailable` if dependencies are not ready
+
+#### Health Check Response Format
+
+```json
+{
+  "status": "UP",
+  "components": {
+    "database": {
+      "status": "UP",
+      "details": {
+        "max_open_connections": 25,
+        "open_connections": 2,
+        "in_use": 0,
+        "idle": 2
+      }
+    }
+  }
+}
+```
+
+Status values: `UP` (healthy) or `DOWN` (unhealthy)
+
 ### Prometheus Metrics
 
 The application exposes the following metrics at `/metrics`:
@@ -1198,7 +1322,7 @@ CORS middleware is configured to:
 - Database connection pooling (GORM)
 - Horizontal pod autoscaling (Kubernetes)
 - Resource limits and requests
-- Health checks with liveness/readiness probes
+- Comprehensive health checks (startup, liveness, readiness probes)
 - Multi-stage Docker build for minimal image size
 
 ## Contributing
