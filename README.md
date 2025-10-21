@@ -2,6 +2,21 @@
 
 A production-ready microservice built with Go 1.25.2, Gin v1.11.0, following TDD principles and designed for Kubernetes deployment.
 
+---
+
+## ⚠️ ByteDance Dependency Notice
+
+This project currently has **3 indirect ByteDance (TikTok) dependencies** via the Gin framework. A comprehensive analysis and substitution plan has been prepared:
+
+- 📄 **[Quick Reference Summary](BYTEDANCE_SUBSTITUTION_SUMMARY.md)** - Easy-to-read options comparison
+- 📄 **[Detailed Analysis](BYTEDANCE_ANALYSIS.md)** - Complete technical analysis (13KB)
+
+**Recommended Action**: Replace ByteDance libraries with Go standard library `encoding/json` for maximum security and compliance. See documents for details and implementation plan.
+
+**Status**: Awaiting user decision on preferred substitution approach.
+
+---
+
 ## Features
 
 - ✅ RESTful API for user management (CRUD operations)
