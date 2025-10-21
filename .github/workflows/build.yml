@@ -41,7 +41,7 @@ jobs:
       run: swag init -g cmd/server/main.go --output docs --parseDependency --parseInternal
 
     - name: Build
-      run: go build -v ./cmd/server
+      run: go build -tags=go_json -v ./cmd/server
 
     - name: Upload artifact
       uses: actions/upload-artifact@v4
