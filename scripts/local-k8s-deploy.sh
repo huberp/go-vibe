@@ -31,7 +31,7 @@ kubectl config use-context "kind-${CLUSTER_NAME}"
 # Build the application locally first
 echo ""
 echo "Building application binary..."
-CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -installsuffix cgo -o ./server ./cmd/server
+CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -tags=go_json -a -installsuffix cgo -o ./server ./cmd/server
 
 # Build Docker image using pre-built binary
 echo ""

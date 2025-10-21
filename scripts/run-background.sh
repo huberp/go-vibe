@@ -14,7 +14,7 @@ fi
 
 # Build first
 echo "Building application..."
-go build -o server ./cmd/server
+go build -tags=go_json -o server ./cmd/server
 
 # Start server in background
 echo "Starting server in background..."

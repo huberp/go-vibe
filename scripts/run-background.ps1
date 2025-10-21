@@ -15,7 +15,7 @@ if (Test-Path $PID_FILE) {
 
 # Build first
 Write-Host "Building application..." -ForegroundColor Cyan
-go build -o server.exe ./cmd/server
+go build -tags=go_json -o server.exe ./cmd/server
 
 if ($LASTEXITCODE -ne 0) {
     Write-Host "Build failed!" -ForegroundColor Red

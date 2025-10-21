@@ -18,7 +18,7 @@ RUN go mod download
 COPY . .
 
 # Build the application
-RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -ldflags '-extldflags "-static"' -o /app/server ./cmd/server
+RUN CGO_ENABLED=0 GOOS=linux go build -tags=go_json -a -installsuffix cgo -ldflags '-extldflags "-static"' -o /app/server ./cmd/server
 
 # Stage 2: Production
 FROM alpine:latest
