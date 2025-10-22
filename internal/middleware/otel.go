@@ -17,36 +17,27 @@ func OtelMiddleware(serviceName string, enabled bool) gin.HandlerFunc {
 		}
 	}
 
-	// Paths to skip from tracing
-	skipPaths := []string{
-		"/health",
-		"/health/",
-		"/metrics",
-		"/info",
-	}
-
-	// Create the base otelgin middleware
-	otelMiddleware := otelgin.Middleware(serviceName)
-
-	return func(c *gin.Context) {
+	// Use otelgin's built-in filter to skip health checks, metrics, and info endpoints
+	filter := func(c *gin.Context) bool {
 		path := c.Request.URL.Path
-
-		// Check if path should be skipped
-		shouldSkip := false
+		
+		// Return true to filter out (skip) these paths
+		skipPaths := []string{
+			"/health",
+			"/health/",
+			"/metrics",
+			"/info",
+		}
+		
 		for _, skipPath := range skipPaths {
 			if path == skipPath || strings.HasPrefix(path, skipPath+"/") {
-				shouldSkip = true
-				break
+				return true
 			}
 		}
-
-		if shouldSkip {
-			// Skip OTEL tracing for this path
-			c.Next()
-			return
-		}
-
-		// Apply OTEL middleware
-		otelMiddleware(c)
+		
+		return false
 	}
+
+	// Create otelgin middleware with filter
+	return otelgin.Middleware(serviceName, otelgin.WithGinFilter(filter))
 }
