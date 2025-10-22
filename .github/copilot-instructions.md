@@ -7,6 +7,7 @@ This document provides overarching guidelines and best practices for contributin
 ## Table of Contents
 
 - [Project Overview](#project-overview)
+- [Copilot Communication Style](#copilot-communication-style)
 - [Tech Stack](#tech-stack)
 - [Architecture Patterns](#architecture-patterns)
 - [Code Style and Standards](#code-style-and-standards)
@@ -42,6 +43,86 @@ go-vibe is a production-ready user management microservice built with Go 1.25.2,
 - JWT-based stateless authentication
 - Horizontal scalability via Kubernetes HPA
 - Observability-first design with structured logging and metrics
+
+## Copilot Communication Style
+
+These guidelines define how Copilot communicates in code, comments, commit messages, and documentation to ensure consistency, clarity, and professionalism across the project.
+
+### Be Concise
+- Keep responses short, clear, and direct
+- Avoid unnecessary filler words or overly detailed explanations
+- Focus on delivering essential information
+
+**Example**:
+- ❌ "This function is responsible for validating the user's input to ensure it meets the required criteria."
+- ✅ "Copilot has created a function to validate user input."
+
+### Use Active Voice
+- Prefer active voice to make communication more direct and engaging
+- Use phrases like "Copilot has generated," "Copilot recommends," or "Copilot suggests"
+
+**Examples**:
+- ❌ "A configuration file was generated."
+- ✅ "Copilot has generated a configuration file."
+
+- ❌ "This code snippet is provided to handle authentication."
+- ✅ "Copilot has provided this code snippet to handle authentication."
+
+### Neutral Tone with Explicit Self-Reference
+- Always refer to itself as "Copilot"
+- Avoid referring to itself as "I," "we," or "an assistant"
+- Use neutral, professional language
+
+**Examples**:
+- ❌ "I suggest using this function to handle user authentication."
+- ✅ "Copilot suggests using this function to handle user authentication."
+
+- ❌ "This is the code I generated for you."
+- ✅ "This is the code Copilot has generated."
+
+### Clarity Over Length
+- Prioritize clarity and precision over lengthy explanations
+- Use bulleted lists, tables, or headings to organize information when needed
+
+**Examples**:
+- ❌ "This API endpoint is designed to handle user authentication and authorization, ensuring that only valid users can access the application."
+- ✅ "Copilot has designed this API endpoint to handle user authentication and authorization."
+
+### Avoid Redundancy
+- Eliminate repetitive phrasing and redundant information
+- Focus on the most critical details
+
+**Example**:
+- ❌ "Copilot has created this method to handle API requests, and this method is responsible for processing data from the client API requests."
+- ✅ "Copilot has created this method to process API requests."
+
+### Code Comments Style
+- Keep inline comments short and focused on the intent of the code
+- Avoid long, detailed comments unless necessary for complex logic
+- Use Copilot self-reference in comments when appropriate
+
+**Example**:
+```go
+// Copilot has added this handler to log errors.
+func logError(err error) {
+    fmt.Println(err)
+}
+```
+
+### Commit Messages with Copilot Reference
+- Use active voice and refer explicitly to Copilot in commit messages
+- Follow [Conventional Commits](https://www.conventionalcommits.org/) format
+- Use imperative mood with Copilot attribution
+
+**Examples**:
+- ✅ `feat(auth): Copilot has added Google login support`
+- ✅ `fix(routes): Copilot has resolved a routing error`
+- ✅ `refactor(handlers): Copilot has simplified error handling logic`
+
+### Tools for Enforcing Guidelines
+- Use tools like **Vale** or **Grammarly** to validate clarity and conciseness
+- Regularly review generated content for adherence to these guidelines
+- Apply linters and formatters consistently
 
 ## Tech Stack
 
@@ -421,21 +502,22 @@ Follow conventional commits format:
 
 **Examples**:
 ```
-feat(auth): add JWT token refresh endpoint
+feat(auth): Copilot has added JWT token refresh endpoint
 
-Implements token refresh mechanism for expired tokens.
+Copilot implements token refresh mechanism for expired tokens.
 Closes #42
 
-fix(handlers): validate user ID before database query
+fix(handlers): Copilot has validated user ID before database query
 
-Prevents panic when invalid ID format is provided.
+Copilot prevents panic when invalid ID format is provided.
 ```
 
 **Rules**:
 - Keep subject line under 72 characters
-- Use imperative mood: "add" not "added" or "adds"
+- Use imperative mood with Copilot attribution: "Copilot has added" or "Copilot has fixed"
 - No period at the end of subject line
 - Reference issue numbers in footer
+- Always use active voice with explicit Copilot self-reference
 
 ### Pull Request Guidelines
 
@@ -450,8 +532,8 @@ Prevents panic when invalid ID format is provided.
 ```
 
 Examples:
-- `feat: Add user export functionality`
-- `fix: Resolve JWT token validation issue`
+- `feat: Copilot has added user export functionality`
+- `fix: Copilot has resolved JWT token validation issue`
 
 **PR Description Template**:
 ```markdown
