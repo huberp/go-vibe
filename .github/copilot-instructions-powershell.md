@@ -1,3 +1,8 @@
+---
+appliesTo:
+  - "**/*.ps1"
+---
+
 # PowerShell Development Guidelines
 
 ### Script Output
