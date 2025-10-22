@@ -32,12 +32,18 @@ type RateLimitConfig struct {
 	Burst             int     `mapstructure:"burst"`
 }
 
+// ObservabilityConfig holds observability-specific configuration
+type ObservabilityConfig struct {
+	Otel bool `mapstructure:"otel"`
+}
+
 // Config holds application configuration
 type Config struct {
-	Server    ServerConfig    `mapstructure:"server"`
-	Database  DatabaseConfig  `mapstructure:"database"`
-	JWT       JWTConfig       `mapstructure:"jwt"`
-	RateLimit RateLimitConfig `mapstructure:"rate_limit"`
+	Server        ServerConfig        `mapstructure:"server"`
+	Database      DatabaseConfig      `mapstructure:"database"`
+	JWT           JWTConfig           `mapstructure:"jwt"`
+	RateLimit     RateLimitConfig     `mapstructure:"rate_limit"`
+	Observability ObservabilityConfig `mapstructure:"observability"`
 }
 
 // Load reads configuration from YAML files and environment variables using Viper
@@ -84,6 +90,7 @@ func LoadWithStage(stage string) *Config {
 	v.BindEnv("jwt.secret", "JWT_SECRET")
 	v.BindEnv("rate_limit.requests_per_second", "RATE_LIMIT_REQUESTS_PER_SECOND")
 	v.BindEnv("rate_limit.burst", "RATE_LIMIT_BURST")
+	v.BindEnv("observability.otel", "OBSERVABILITY_OTEL")
 
 	// Unmarshal configuration into struct
 	var config Config
@@ -113,4 +120,5 @@ func setDefaults(v *viper.Viper) {
 	v.SetDefault("jwt.secret", "your-secret-key")
 	v.SetDefault("rate_limit.requests_per_second", 100)
 	v.SetDefault("rate_limit.burst", 200)
+	v.SetDefault("observability.otel", false)
 }

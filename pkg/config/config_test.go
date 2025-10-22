@@ -166,3 +166,60 @@ func TestGetStage(t *testing.T) {
 	})
 }
 
+func TestObservabilityConfiguration(t *testing.T) {
+	t.Run("should load default observability values from base config", func(t *testing.T) {
+		os.Unsetenv("OBSERVABILITY_OTEL")
+		os.Setenv("APP_STAGE", "nonexistent")
+		defer os.Unsetenv("APP_STAGE")
+
+		cfg := Load()
+
+		// Base config has OTEL disabled by default
+		assert.False(t, cfg.Observability.Otel)
+	})
+
+	t.Run("should load OTEL enabled for development stage", func(t *testing.T) {
+		os.Unsetenv("OBSERVABILITY_OTEL")
+		
+		cfg := LoadWithStage("development")
+
+		// Development config has OTEL enabled
+		assert.True(t, cfg.Observability.Otel)
+	})
+
+	t.Run("should load OTEL enabled for production stage", func(t *testing.T) {
+		os.Setenv("DATABASE_URL", "postgres://prod:pass@prod-host:5432/prod")
+		os.Setenv("JWT_SECRET", "prod-secret")
+		os.Unsetenv("OBSERVABILITY_OTEL")
+		defer func() {
+			os.Unsetenv("DATABASE_URL")
+			os.Unsetenv("JWT_SECRET")
+		}()
+		
+		cfg := LoadWithStage("production")
+
+		// Production config has OTEL enabled
+		assert.True(t, cfg.Observability.Otel)
+	})
+
+	t.Run("should allow OTEL override via environment variable", func(t *testing.T) {
+		os.Setenv("OBSERVABILITY_OTEL", "false")
+		defer os.Unsetenv("OBSERVABILITY_OTEL")
+
+		cfg := LoadWithStage("development")
+
+		// Should be false even though development defaults to true
+		assert.False(t, cfg.Observability.Otel)
+	})
+
+	t.Run("should allow OTEL enable via environment variable", func(t *testing.T) {
+		os.Setenv("OBSERVABILITY_OTEL", "true")
+		os.Unsetenv("APP_STAGE")
+		defer os.Unsetenv("OBSERVABILITY_OTEL")
+
+		cfg := Load()
+
+		// Should be true even though base defaults to false
+		assert.True(t, cfg.Observability.Otel)
+	})
+}

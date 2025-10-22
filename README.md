@@ -16,7 +16,7 @@ A production-ready microservice built with Go 1.25.2, Gin v1.11.0, following TDD
 - ✅ **Configurable rate limiting** (via YAML/environment variables)
 - ✅ Structured logging with Zap
 - ✅ W3C trace context support for distributed tracing
-- ✅ OpenTelemetry (OTEL) tracing integration
+- ✅ **Configurable OpenTelemetry (OTEL) tracing** (with path filtering for health/metrics endpoints)
 - ✅ Prometheus metrics (including user count)
 - ✅ CORS middleware for cross-origin requests
 - ✅ API versioning (/v1/...) for backward compatibility
@@ -275,6 +275,9 @@ jwt:
 rate_limit:
   requests_per_second: 100
   burst: 200
+
+observability:
+  otel: false  # OpenTelemetry tracing disabled by default
 ```
 
 **Stage-Specific Overrides:**
@@ -298,6 +301,9 @@ server:
 rate_limit:
   requests_per_second: 50  # More conservative for production
   burst: 100
+
+observability:
+  otel: true  # Enable OpenTelemetry tracing in production
 ```
 
 ### Configuration Loading Order
@@ -320,6 +326,7 @@ YAML keys map to environment variables using underscores:
 | `jwt.secret` | `JWT_SECRET` |
 | `rate_limit.requests_per_second` | `RATE_LIMIT_REQUESTS_PER_SECOND` |
 | `rate_limit.burst` | `RATE_LIMIT_BURST` |
+| `observability.otel` | `OBSERVABILITY_OTEL` |
 
 ### Configuration Examples
 
@@ -1292,6 +1299,57 @@ The logging middleware supports W3C trace context propagation:
 - Accepts `traceparent` header for distributed tracing
 - Extracts trace ID from W3C traceparent format
 - Integrates with OpenTelemetry for end-to-end tracing
+
+### OpenTelemetry (OTEL) Tracing
+
+The application includes configurable OpenTelemetry tracing integration for distributed tracing across microservices.
+
+#### Configuration
+
+OpenTelemetry tracing can be enabled/disabled via configuration:
+
+**YAML Configuration:**
+```yaml
+# config/production.yaml
+observability:
+  otel: true  # Enable OTEL tracing
+```
+
+**Environment Variable:**
+```bash
+export OBSERVABILITY_OTEL=true
+./server
+```
+
+**Default Behavior:**
+- **Base config**: OTEL is disabled (`otel: false`)
+- **Development/Staging/Production**: OTEL is enabled (`otel: true`)
+
+#### Path Filtering
+
+OTEL tracing automatically excludes the following paths to avoid tracing overhead on health and metrics endpoints:
+- `/health` and `/health/*` (all health check endpoints)
+- `/metrics` (Prometheus metrics)
+- `/info` (application info)
+
+All other endpoints (API routes, authentication, etc.) are traced when OTEL is enabled.
+
+#### Integration with APM Systems
+
+To connect the application to an APM system (e.g., Jaeger, Zipkin, Datadog, New Relic):
+
+1. Deploy an OpenTelemetry Collector in your Kubernetes cluster
+2. Configure the collector to export to your APM backend
+3. Ensure the application can reach the collector endpoint
+4. The application will automatically send spans when `observability.otel: true`
+
+Example W3C trace context propagation:
+```bash
+# Make a request with trace context
+curl -X GET http://localhost:8080/v1/users \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "traceparent: 00-0af7651916cd43dd8448eb211c80319c-b7ad6b7169203331-01"
+```
 
 ### Rate Limiting
 

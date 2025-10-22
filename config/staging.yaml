@@ -11,3 +11,6 @@ jwt:
 rate_limit:
   requests_per_second: 50  # Lower rate limit for staging
   burst: 100
+
+observability:
+  otel: true

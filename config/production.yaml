@@ -16,3 +16,6 @@ server:
 rate_limit:
   requests_per_second: 50  # More conservative for public APIs
   burst: 100
+
+observability:
+  otel: true
