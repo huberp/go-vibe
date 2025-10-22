@@ -15,7 +15,6 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
-	"go.opentelemetry.io/contrib/instrumentation/github.com/gin-gonic/gin/otelgin"
 	"go.uber.org/zap"
 	"gorm.io/gorm"
 )
@@ -66,8 +65,8 @@ func SetupRoutes(router *gin.Engine, db *gorm.DB, logger *zap.Logger, jwtSecret 
 		AllowCredentials: true,
 	}))
 
-	// OpenTelemetry tracing middleware
-	router.Use(otelgin.Middleware("myapp"))
+	// OpenTelemetry tracing middleware (conditionally enabled)
+	router.Use(middleware.OtelMiddleware("myapp", cfg.Observability.Otel))
 
 	// Logging middleware (with W3C trace context support)
 	router.Use(middleware.LoggingMiddleware(logger))

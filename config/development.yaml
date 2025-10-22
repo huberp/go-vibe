@@ -10,3 +10,6 @@ jwt:
 rate_limit:
   requests_per_second: 100
   burst: 200
+
+observability:
+  otel: true
