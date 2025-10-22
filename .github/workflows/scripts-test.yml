@@ -145,7 +145,7 @@ jobs:
         # Start server in background
         .\scripts\run-background.ps1
         if ($LASTEXITCODE -ne 0) {
-          Write-Host "❌ Server failed to start. Dumping server.log:" -ForegroundColor Red
+          Write-Host "[FAILED] Server failed to start. Dumping server.log:" -ForegroundColor Red
           Get-Content server.log -ErrorAction SilentlyContinue
           Get-Content server-error.log -ErrorAction SilentlyContinue
           exit 1
@@ -155,15 +155,15 @@ jobs:
         Start-Sleep -Seconds 3
         
         # Dump server log for debugging
-        Write-Host "📋 Server log contents:" -ForegroundColor Cyan
+        Write-Host "Server log contents:" -ForegroundColor Cyan
         Get-Content server.log -ErrorAction SilentlyContinue
         
         # Check if server is responding
         try {
           Invoke-WebRequest -Uri http://localhost:8081/health -UseBasicParsing
-          Write-Host "✅ Health check passed" -ForegroundColor Green
+          Write-Host "[OK] Health check passed" -ForegroundColor Green
         } catch {
-          Write-Host "⚠️ Health check failed, but server may be running" -ForegroundColor Yellow
+          Write-Host "Warning: Health check failed, but server may be running" -ForegroundColor Yellow
         }
         
         # Stop server
@@ -173,10 +173,10 @@ jobs:
         Start-Sleep -Seconds 2
         try {
           Invoke-WebRequest -Uri http://localhost:8081/health -UseBasicParsing
-          Write-Host "❌ Server still running!" -ForegroundColor Red
+          Write-Host "[FAILED] Server still running!" -ForegroundColor Red
           exit 1
         } catch {
-          Write-Host "✅ Server stopped successfully" -ForegroundColor Green
+          Write-Host "[OK] Server stopped successfully" -ForegroundColor Green
         }
 
     - name: Cleanup
