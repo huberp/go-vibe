@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"net/http"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -18,10 +19,10 @@ func OtelMiddleware(serviceName string, enabled bool) gin.HandlerFunc {
 	}
 
 	// Use otelgin's built-in filter to skip health checks, metrics, and info endpoints
-	filter := func(c *gin.Context) bool {
-		path := c.Request.URL.Path
+	filter := func(req *http.Request) bool {
+		path := req.URL.Path
 		
-		// Return true to filter out (skip) these paths
+		// Return false to filter out (skip) these paths
 		skipPaths := []string{
 			"/health",
 			"/health/",
@@ -31,13 +32,13 @@ func OtelMiddleware(serviceName string, enabled bool) gin.HandlerFunc {
 		
 		for _, skipPath := range skipPaths {
 			if path == skipPath || strings.HasPrefix(path, skipPath+"/") {
-				return true
+				return false
 			}
 		}
 		
-		return false
+		return true
 	}
 
 	// Create otelgin middleware with filter
-	return otelgin.Middleware(serviceName, otelgin.WithGinFilter(filter))
+	return otelgin.Middleware(serviceName, otelgin.WithFilter(filter))
 }
