@@ -8,6 +8,30 @@ import (
 	"go.opentelemetry.io/contrib/instrumentation/github.com/gin-gonic/gin/otelgin"
 )
 
+// SkipPaths defines paths that should be excluded from OpenTelemetry tracing.
+// These typically include health checks, metrics, and informational endpoints.
+var SkipPaths = []string{
+	"/health",
+	"/health/",
+	"/metrics",
+	"/info",
+}
+
+// shouldTraceRequest determines if a request should be traced based on its path.
+// Returns true if the request should be traced, false if it should be skipped.
+func shouldTraceRequest(req *http.Request) bool {
+	path := req.URL.Path
+
+	// Return false to filter out (skip) these paths
+	for _, skipPath := range SkipPaths {
+		if path == skipPath || strings.HasPrefix(path, skipPath+"/") {
+			return false
+		}
+	}
+
+	return true
+}
+
 // OtelMiddleware returns a middleware that conditionally applies OpenTelemetry tracing.
 // It skips tracing for specified paths like health checks, metrics, and info endpoints.
 func OtelMiddleware(serviceName string, enabled bool) gin.HandlerFunc {
@@ -18,27 +42,6 @@ func OtelMiddleware(serviceName string, enabled bool) gin.HandlerFunc {
 		}
 	}
 
-	// Use otelgin's built-in filter to skip health checks, metrics, and info endpoints
-	filter := func(req *http.Request) bool {
-		path := req.URL.Path
-		
-		// Return false to filter out (skip) these paths
-		skipPaths := []string{
-			"/health",
-			"/health/",
-			"/metrics",
-			"/info",
-		}
-		
-		for _, skipPath := range skipPaths {
-			if path == skipPath || strings.HasPrefix(path, skipPath+"/") {
-				return false
-			}
-		}
-		
-		return true
-	}
-
 	// Create otelgin middleware with filter
-	return otelgin.Middleware(serviceName, otelgin.WithFilter(filter))
+	return otelgin.Middleware(serviceName, otelgin.WithFilter(shouldTraceRequest))
 }

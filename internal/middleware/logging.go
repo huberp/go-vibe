@@ -14,7 +14,7 @@ func LoggingMiddleware(logger *zap.Logger) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// Generate request ID or use existing trace ID from W3C trace context
 		var requestID string
-		
+
 		// Check for W3C traceparent header
 		traceparent := c.GetHeader("traceparent")
 		if traceparent != "" {
@@ -24,12 +24,12 @@ func LoggingMiddleware(logger *zap.Logger) gin.HandlerFunc {
 				requestID = traceparent[3:35] // Extract 32-char trace ID
 			}
 		}
-		
+
 		// If no traceparent or extraction failed, generate new UUID
 		if requestID == "" {
 			requestID = uuid.New().String()
 		}
-		
+
 		c.Set("request_id", requestID)
 
 		// Start timer
