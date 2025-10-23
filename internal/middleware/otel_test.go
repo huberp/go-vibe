@@ -10,13 +10,93 @@ import (
 	"go.opentelemetry.io/otel/trace"
 )
 
+func TestSkipPaths(t *testing.T) {
+	t.Run("should contain expected paths", func(t *testing.T) {
+		expectedPaths := []string{
+			"/health",
+			"/health/",
+			"/metrics",
+			"/info",
+		}
+
+		assert.Equal(t, expectedPaths, SkipPaths, "SkipPaths should contain the expected paths")
+	})
+}
+
+func TestShouldTraceRequest(t *testing.T) {
+	tests := []struct {
+		name     string
+		path     string
+		expected bool
+	}{
+		{
+			name:     "should skip /health",
+			path:     "/health",
+			expected: false,
+		},
+		{
+			name:     "should skip /health/",
+			path:     "/health/",
+			expected: false,
+		},
+		{
+			name:     "should skip /health/startup",
+			path:     "/health/startup",
+			expected: false,
+		},
+		{
+			name:     "should skip /health/liveness",
+			path:     "/health/liveness",
+			expected: false,
+		},
+		{
+			name:     "should skip /health/readiness",
+			path:     "/health/readiness",
+			expected: false,
+		},
+		{
+			name:     "should skip /metrics",
+			path:     "/metrics",
+			expected: false,
+		},
+		{
+			name:     "should skip /info",
+			path:     "/info",
+			expected: false,
+		},
+		{
+			name:     "should trace /api/users",
+			path:     "/api/users",
+			expected: true,
+		},
+		{
+			name:     "should trace /v1/users",
+			path:     "/v1/users",
+			expected: true,
+		},
+		{
+			name:     "should trace /other",
+			path:     "/other",
+			expected: true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			req, _ := http.NewRequest("GET", tt.path, nil)
+			result := shouldTraceRequest(req)
+			assert.Equal(t, tt.expected, result, "shouldTraceRequest returned unexpected result for path %s", tt.path)
+		})
+	}
+}
+
 func TestOtelMiddleware(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 
 	t.Run("should skip tracing when disabled", func(t *testing.T) {
 		router := gin.New()
 		router.Use(OtelMiddleware("test-service", false))
-		
+
 		router.GET("/test", func(c *gin.Context) {
 			// Check that no span exists in context
 			span := trace.SpanFromContext(c.Request.Context())
@@ -34,7 +114,7 @@ func TestOtelMiddleware(t *testing.T) {
 	t.Run("should skip tracing for /health endpoint", func(t *testing.T) {
 		router := gin.New()
 		router.Use(OtelMiddleware("test-service", true))
-		
+
 		router.GET("/health", func(c *gin.Context) {
 			// Check that no span exists in context
 			span := trace.SpanFromContext(c.Request.Context())
@@ -52,7 +132,7 @@ func TestOtelMiddleware(t *testing.T) {
 	t.Run("should skip tracing for /health/startup endpoint", func(t *testing.T) {
 		router := gin.New()
 		router.Use(OtelMiddleware("test-service", true))
-		
+
 		router.GET("/health/startup", func(c *gin.Context) {
 			// Check that no span exists in context
 			span := trace.SpanFromContext(c.Request.Context())
@@ -70,7 +150,7 @@ func TestOtelMiddleware(t *testing.T) {
 	t.Run("should skip tracing for /health/liveness endpoint", func(t *testing.T) {
 		router := gin.New()
 		router.Use(OtelMiddleware("test-service", true))
-		
+
 		router.GET("/health/liveness", func(c *gin.Context) {
 			// Check that no span exists in context
 			span := trace.SpanFromContext(c.Request.Context())
@@ -88,7 +168,7 @@ func TestOtelMiddleware(t *testing.T) {
 	t.Run("should skip tracing for /health/readiness endpoint", func(t *testing.T) {
 		router := gin.New()
 		router.Use(OtelMiddleware("test-service", true))
-		
+
 		router.GET("/health/readiness", func(c *gin.Context) {
 			// Check that no span exists in context
 			span := trace.SpanFromContext(c.Request.Context())
@@ -106,7 +186,7 @@ func TestOtelMiddleware(t *testing.T) {
 	t.Run("should skip tracing for /metrics endpoint", func(t *testing.T) {
 		router := gin.New()
 		router.Use(OtelMiddleware("test-service", true))
-		
+
 		router.GET("/metrics", func(c *gin.Context) {
 			// Check that no span exists in context
 			span := trace.SpanFromContext(c.Request.Context())
@@ -124,7 +204,7 @@ func TestOtelMiddleware(t *testing.T) {
 	t.Run("should skip tracing for /info endpoint", func(t *testing.T) {
 		router := gin.New()
 		router.Use(OtelMiddleware("test-service", true))
-		
+
 		router.GET("/info", func(c *gin.Context) {
 			// Check that no span exists in context
 			span := trace.SpanFromContext(c.Request.Context())
@@ -142,7 +222,7 @@ func TestOtelMiddleware(t *testing.T) {
 	t.Run("should apply tracing for other endpoints when enabled", func(t *testing.T) {
 		router := gin.New()
 		router.Use(OtelMiddleware("test-service", true))
-		
+
 		router.GET("/api/users", func(c *gin.Context) {
 			// When OTEL is enabled and path is not skipped, span should exist
 			// Note: In test environment without OTEL provider setup, span won't be recording
