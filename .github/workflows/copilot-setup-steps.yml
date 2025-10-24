@@ -8,8 +8,10 @@ on:
   workflow_dispatch:
   
 jobs:
-  setup:
+  copilot-setup-steps:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     
     steps:
       # Checkout repository to access go.mod and other project files
