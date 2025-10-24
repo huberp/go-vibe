@@ -27,7 +27,7 @@ func (u *UserStatsProvider) Name() string {
 // Info returns user statistics.
 func (u *UserStatsProvider) Info() (map[string]interface{}, error) {
 	ctx := context.Background()
-	
+
 	var totalUsers int64
 	if err := u.db.WithContext(ctx).Model(&models.User{}).Count(&totalUsers).Error; err != nil {
 		return nil, err

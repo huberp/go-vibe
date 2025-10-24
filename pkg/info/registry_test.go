@@ -41,10 +41,10 @@ func TestRegister(t *testing.T) {
 			name: "test",
 			data: map[string]interface{}{"key": "value"},
 		}
-		
+
 		registry.Register(provider)
 		result := registry.GetAll()
-		
+
 		assert.Len(t, result, 1)
 		assert.Contains(t, result, "test")
 		assert.Equal(t, map[string]interface{}{"key": "value"}, result["test"])
@@ -60,11 +60,11 @@ func TestRegister(t *testing.T) {
 			name: "provider2",
 			data: map[string]interface{}{"key2": "value2"},
 		}
-		
+
 		registry.Register(provider1)
 		registry.Register(provider2)
 		result := registry.GetAll()
-		
+
 		assert.Len(t, result, 2)
 		assert.Contains(t, result, "provider1")
 		assert.Contains(t, result, "provider2")
@@ -82,11 +82,11 @@ func TestGetAll(t *testing.T) {
 			name: "stats",
 			data: map[string]interface{}{"count": 42},
 		}
-		
+
 		registry.Register(provider1)
 		registry.Register(provider2)
 		result := registry.GetAll()
-		
+
 		assert.Equal(t, map[string]interface{}{
 			"build": map[string]interface{}{"version": "1.0.0"},
 			"stats": map[string]interface{}{"count": 42},
@@ -103,11 +103,11 @@ func TestGetAll(t *testing.T) {
 			name: "failing",
 			err:  errors.New("test error"),
 		}
-		
+
 		registry.Register(provider1)
 		registry.Register(provider2)
 		result := registry.GetAll()
-		
+
 		assert.Len(t, result, 1)
 		assert.Contains(t, result, "working")
 		assert.NotContains(t, result, "failing")
@@ -116,7 +116,7 @@ func TestGetAll(t *testing.T) {
 	t.Run("should return empty map when no providers registered", func(t *testing.T) {
 		registry := NewRegistry()
 		result := registry.GetAll()
-		
+
 		assert.Empty(t, result)
 	})
 }

@@ -197,7 +197,7 @@ func TestCheck(t *testing.T) {
 		}
 
 		registry.Register(provider)
-		
+
 		// When checking all (scope = nil), should appear only once
 		result := registry.Check(nil)
 

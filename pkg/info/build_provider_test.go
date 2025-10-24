@@ -9,7 +9,7 @@ import (
 func TestNewBuildInfoProvider(t *testing.T) {
 	t.Run("should create provider with specified values", func(t *testing.T) {
 		provider := NewBuildInfoProvider("1.0.0", "abc123", "2024-01-01T00:00:00Z", "go1.25.2")
-		
+
 		assert.NotNil(t, provider)
 		assert.Equal(t, "1.0.0", provider.Version)
 		assert.Equal(t, "abc123", provider.CommitSHA)
@@ -19,7 +19,7 @@ func TestNewBuildInfoProvider(t *testing.T) {
 
 	t.Run("should use defaults for empty values", func(t *testing.T) {
 		provider := NewBuildInfoProvider("", "", "", "")
-		
+
 		assert.NotNil(t, provider)
 		assert.Equal(t, "dev", provider.Version)
 		assert.Equal(t, "unknown", provider.CommitSHA)
@@ -38,9 +38,9 @@ func TestBuildInfoProvider_Name(t *testing.T) {
 func TestBuildInfoProvider_Info(t *testing.T) {
 	t.Run("should return build information", func(t *testing.T) {
 		provider := NewBuildInfoProvider("1.0.0", "abc123", "2024-01-01T00:00:00Z", "go1.25.2")
-		
+
 		info, err := provider.Info()
-		
+
 		assert.NoError(t, err)
 		assert.NotNil(t, info)
 		assert.Equal(t, "1.0.0", info["version"])
@@ -51,9 +51,9 @@ func TestBuildInfoProvider_Info(t *testing.T) {
 
 	t.Run("should return default values in info", func(t *testing.T) {
 		provider := NewBuildInfoProvider("", "", "", "")
-		
+
 		info, err := provider.Info()
-		
+
 		assert.NoError(t, err)
 		assert.NotNil(t, info)
 		assert.Equal(t, "dev", info["version"])

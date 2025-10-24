@@ -180,7 +180,7 @@ func TestObservabilityConfiguration(t *testing.T) {
 
 	t.Run("should load OTEL enabled for development stage", func(t *testing.T) {
 		os.Unsetenv("OBSERVABILITY_OTEL")
-		
+
 		cfg := LoadWithStage("development")
 
 		// Development config has OTEL enabled
@@ -195,7 +195,7 @@ func TestObservabilityConfiguration(t *testing.T) {
 			os.Unsetenv("DATABASE_URL")
 			os.Unsetenv("JWT_SECRET")
 		}()
-		
+
 		cfg := LoadWithStage("production")
 
 		// Production config has OTEL enabled

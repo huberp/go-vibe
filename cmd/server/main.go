@@ -64,7 +64,7 @@ func main() {
 	if activeStage == "" {
 		activeStage = "development"
 	}
-	logger.Log.Info("Starting server", 
+	logger.Log.Info("Starting server",
 		zap.String("stage", activeStage),
 		zap.String("port", cfg.Server.Port))
 

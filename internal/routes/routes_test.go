@@ -16,11 +16,11 @@ import (
 func setupTestRouter() *gin.Engine {
 	gin.SetMode(gin.TestMode)
 	router := gin.New()
-	
+
 	// Use in-memory SQLite for testing
 	db, _ := gorm.Open(sqlite.Open(":memory:"), &gorm.Config{})
 	logger := zap.NewNop()
-	
+
 	SetupRoutes(router, db, logger, "test-secret")
 	return router
 }
@@ -34,9 +34,9 @@ func TestMetricsEndpoint(t *testing.T) {
 		router.ServeHTTP(w, req)
 
 		assert.Equal(t, http.StatusOK, w.Code)
-		
+
 		body := w.Body.String()
-		
+
 		// Verify Prometheus format with TYPE and HELP comments
 		assert.Contains(t, body, "# TYPE", "Should contain Prometheus TYPE declarations")
 		assert.Contains(t, body, "# HELP", "Should contain Prometheus HELP descriptions")
@@ -48,9 +48,9 @@ func TestMetricsEndpoint(t *testing.T) {
 		router.ServeHTTP(w, req)
 
 		assert.Equal(t, http.StatusOK, w.Code)
-		
+
 		body := w.Body.String()
-		
+
 		// Verify key runtime.MemStats metrics are exposed
 		expectedMemStatsMetrics := []string{
 			"go_memstats_alloc_bytes",
@@ -65,7 +65,7 @@ func TestMetricsEndpoint(t *testing.T) {
 			"go_memstats_frees_total",
 			"go_memstats_gc_sys_bytes",
 		}
-		
+
 		for _, metric := range expectedMemStatsMetrics {
 			assert.Contains(t, body, metric, "Should expose %s metric", metric)
 		}
@@ -83,9 +83,9 @@ func TestMetricsEndpoint(t *testing.T) {
 		router.ServeHTTP(w, req)
 
 		assert.Equal(t, http.StatusOK, w.Code)
-		
+
 		body := w.Body.String()
-		
+
 		// Verify custom HTTP metrics are exposed
 		assert.Contains(t, body, "http_requests_total", "Should expose http_requests_total metric")
 		assert.Contains(t, body, "http_request_duration_seconds", "Should expose http_request_duration_seconds metric")
@@ -97,9 +97,9 @@ func TestMetricsEndpoint(t *testing.T) {
 		router.ServeHTTP(w, req)
 
 		assert.Equal(t, http.StatusOK, w.Code)
-		
+
 		body := w.Body.String()
-		
+
 		// Verify Go runtime metrics
 		goRuntimeMetrics := []string{
 			"go_goroutines",
@@ -107,7 +107,7 @@ func TestMetricsEndpoint(t *testing.T) {
 			"go_gc_duration_seconds",
 			"go_info",
 		}
-		
+
 		for _, metric := range goRuntimeMetrics {
 			assert.Contains(t, body, metric, "Should expose %s metric", metric)
 		}
@@ -119,20 +119,20 @@ func TestMetricsEndpoint(t *testing.T) {
 		router.ServeHTTP(w, req)
 
 		assert.Equal(t, http.StatusOK, w.Code)
-		
+
 		body := w.Body.String()
 		lines := strings.Split(body, "\n")
-		
+
 		// Verify format rules
 		for _, line := range lines {
 			if len(line) == 0 {
 				continue
 			}
-			
+
 			// Comments start with #
 			if strings.HasPrefix(line, "#") {
 				// TYPE or HELP comments
-				assert.True(t, 
+				assert.True(t,
 					strings.Contains(line, "# TYPE") || strings.Contains(line, "# HELP"),
 					"Comment lines should be TYPE or HELP declarations",
 				)
@@ -143,7 +143,7 @@ func TestMetricsEndpoint(t *testing.T) {
 				parts := strings.Fields(line)
 				if len(parts) >= 1 {
 					// First part should be metric name or metric with labels
-					assert.True(t, 
+					assert.True(t,
 						strings.Contains(parts[0], "_") || strings.Contains(parts[0], "{"),
 						"Metric lines should contain metric name with underscores or labels",
 					)

@@ -26,7 +26,7 @@ func TestNewUserStatsProvider(t *testing.T) {
 	t.Run("should create provider", func(t *testing.T) {
 		db := setupTestDB(t)
 		provider := NewUserStatsProvider(db)
-		
+
 		assert.NotNil(t, provider)
 		assert.NotNil(t, provider.db)
 	})
@@ -44,9 +44,9 @@ func TestUserStatsProvider_Info(t *testing.T) {
 	t.Run("should return zero counts for empty database", func(t *testing.T) {
 		db := setupTestDB(t)
 		provider := NewUserStatsProvider(db)
-		
+
 		info, err := provider.Info()
-		
+
 		assert.NoError(t, err)
 		assert.NotNil(t, info)
 		assert.Equal(t, int64(0), info["total"])
@@ -56,7 +56,7 @@ func TestUserStatsProvider_Info(t *testing.T) {
 
 	t.Run("should return correct user counts", func(t *testing.T) {
 		db := setupTestDB(t)
-		
+
 		// Create test users
 		users := []models.User{
 			{Name: "User1", Email: "user1@example.com", Role: "user", PasswordHash: "hash1"},
@@ -65,16 +65,16 @@ func TestUserStatsProvider_Info(t *testing.T) {
 			{Name: "Admin2", Email: "admin2@example.com", Role: "admin", PasswordHash: "hash4"},
 			{Name: "User3", Email: "user3@example.com", Role: "user", PasswordHash: "hash5"},
 		}
-		
+
 		for _, user := range users {
 			if err := db.Create(&user).Error; err != nil {
 				t.Fatalf("Failed to create test user: %v", err)
 			}
 		}
-		
+
 		provider := NewUserStatsProvider(db)
 		info, err := provider.Info()
-		
+
 		assert.NoError(t, err)
 		assert.NotNil(t, info)
 		assert.Equal(t, int64(5), info["total"])
@@ -84,22 +84,22 @@ func TestUserStatsProvider_Info(t *testing.T) {
 
 	t.Run("should handle only admin users", func(t *testing.T) {
 		db := setupTestDB(t)
-		
+
 		// Create only admin users
 		users := []models.User{
 			{Name: "Admin1", Email: "admin1@example.com", Role: "admin", PasswordHash: "hash1"},
 			{Name: "Admin2", Email: "admin2@example.com", Role: "admin", PasswordHash: "hash2"},
 		}
-		
+
 		for _, user := range users {
 			if err := db.Create(&user).Error; err != nil {
 				t.Fatalf("Failed to create test user: %v", err)
 			}
 		}
-		
+
 		provider := NewUserStatsProvider(db)
 		info, err := provider.Info()
-		
+
 		assert.NoError(t, err)
 		assert.NotNil(t, info)
 		assert.Equal(t, int64(2), info["total"])
