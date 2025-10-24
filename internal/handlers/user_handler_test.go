@@ -124,6 +124,10 @@ func TestGetUserByID(t *testing.T) {
 
 		handler := NewUserHandler(mockRepo)
 		router := gin.New()
+		router.Use(func(c *gin.Context) {
+			c.Set("user_id", uint(1))
+			c.Set("user_role", "user")
+		})
 		router.GET("/users/:id", handler.GetUserByID)
 
 		w := httptest.NewRecorder()
@@ -142,6 +146,10 @@ func TestGetUserByID(t *testing.T) {
 
 		handler := NewUserHandler(mockRepo)
 		router := gin.New()
+		router.Use(func(c *gin.Context) {
+			c.Set("user_id", uint(999))
+			c.Set("user_role", "user")
+		})
 		router.GET("/users/:id", handler.GetUserByID)
 
 		w := httptest.NewRecorder()
@@ -149,6 +157,72 @@ func TestGetUserByID(t *testing.T) {
 		router.ServeHTTP(w, req)
 
 		assert.Equal(t, http.StatusNotFound, w.Code)
+	})
+
+	t.Run("should allow admin to access any user", func(t *testing.T) {
+		user := &models.User{ID: 5, Name: "Bob", Email: "bob@example.com", Role: "user"}
+		mockRepo.EXPECT().FindByID(gomock.Any(), uint(5)).Return(user, nil)
+
+		handler := NewUserHandler(mockRepo)
+		router := gin.New()
+		router.Use(func(c *gin.Context) {
+			c.Set("user_id", uint(1))
+			c.Set("user_role", "admin")
+		})
+		router.GET("/users/:id", handler.GetUserByID)
+
+		w := httptest.NewRecorder()
+		req, _ := http.NewRequest("GET", "/users/5", nil)
+		router.ServeHTTP(w, req)
+
+		assert.Equal(t, http.StatusOK, w.Code)
+
+		var response models.User
+		json.Unmarshal(w.Body.Bytes(), &response)
+		assert.Equal(t, "Bob", response.Name)
+	})
+
+	t.Run("should allow user to access their own profile", func(t *testing.T) {
+		user := &models.User{ID: 3, Name: "Charlie", Email: "charlie@example.com", Role: "user"}
+		mockRepo.EXPECT().FindByID(gomock.Any(), uint(3)).Return(user, nil)
+
+		handler := NewUserHandler(mockRepo)
+		router := gin.New()
+		router.Use(func(c *gin.Context) {
+			c.Set("user_id", uint(3))
+			c.Set("user_role", "user")
+		})
+		router.GET("/users/:id", handler.GetUserByID)
+
+		w := httptest.NewRecorder()
+		req, _ := http.NewRequest("GET", "/users/3", nil)
+		router.ServeHTTP(w, req)
+
+		assert.Equal(t, http.StatusOK, w.Code)
+
+		var response models.User
+		json.Unmarshal(w.Body.Bytes(), &response)
+		assert.Equal(t, "Charlie", response.Name)
+	})
+
+	t.Run("should deny user from accessing another user's profile", func(t *testing.T) {
+		handler := NewUserHandler(mockRepo)
+		router := gin.New()
+		router.Use(func(c *gin.Context) {
+			c.Set("user_id", uint(3))
+			c.Set("user_role", "user")
+		})
+		router.GET("/users/:id", handler.GetUserByID)
+
+		w := httptest.NewRecorder()
+		req, _ := http.NewRequest("GET", "/users/10", nil)
+		router.ServeHTTP(w, req)
+
+		assert.Equal(t, http.StatusForbidden, w.Code)
+
+		var response map[string]string
+		json.Unmarshal(w.Body.Bytes(), &response)
+		assert.Equal(t, "insufficient permissions", response["error"])
 	})
 }
 
@@ -171,6 +245,10 @@ func TestUpdateUser(t *testing.T) {
 
 		handler := NewUserHandler(mockRepo)
 		router := gin.New()
+		router.Use(func(c *gin.Context) {
+			c.Set("user_id", uint(1))
+			c.Set("user_role", "user")
+		})
 		router.PUT("/users/:id", handler.UpdateUser)
 
 		body, _ := json.Marshal(updateInput)
@@ -180,6 +258,87 @@ func TestUpdateUser(t *testing.T) {
 		router.ServeHTTP(w, req)
 
 		assert.Equal(t, http.StatusOK, w.Code)
+	})
+
+	t.Run("should allow admin to update any user", func(t *testing.T) {
+		updateInput := UpdateUserRequest{
+			Name:  "Admin Updated",
+			Email: "admin.updated@example.com",
+		}
+
+		existingUser := &models.User{ID: 5, Name: "Original", Email: "original@example.com"}
+		mockRepo.EXPECT().FindByID(gomock.Any(), uint(5)).Return(existingUser, nil)
+		mockRepo.EXPECT().Update(gomock.Any(), gomock.Any()).Return(nil)
+
+		handler := NewUserHandler(mockRepo)
+		router := gin.New()
+		router.Use(func(c *gin.Context) {
+			c.Set("user_id", uint(1))
+			c.Set("user_role", "admin")
+		})
+		router.PUT("/users/:id", handler.UpdateUser)
+
+		body, _ := json.Marshal(updateInput)
+		w := httptest.NewRecorder()
+		req, _ := http.NewRequest("PUT", "/users/5", bytes.NewReader(body))
+		req.Header.Set("Content-Type", "application/json")
+		router.ServeHTTP(w, req)
+
+		assert.Equal(t, http.StatusOK, w.Code)
+	})
+
+	t.Run("should allow user to update their own profile", func(t *testing.T) {
+		updateInput := UpdateUserRequest{
+			Name:  "Self Updated",
+			Email: "self.updated@example.com",
+		}
+
+		existingUser := &models.User{ID: 7, Name: "Original", Email: "original@example.com"}
+		mockRepo.EXPECT().FindByID(gomock.Any(), uint(7)).Return(existingUser, nil)
+		mockRepo.EXPECT().Update(gomock.Any(), gomock.Any()).Return(nil)
+
+		handler := NewUserHandler(mockRepo)
+		router := gin.New()
+		router.Use(func(c *gin.Context) {
+			c.Set("user_id", uint(7))
+			c.Set("user_role", "user")
+		})
+		router.PUT("/users/:id", handler.UpdateUser)
+
+		body, _ := json.Marshal(updateInput)
+		w := httptest.NewRecorder()
+		req, _ := http.NewRequest("PUT", "/users/7", bytes.NewReader(body))
+		req.Header.Set("Content-Type", "application/json")
+		router.ServeHTTP(w, req)
+
+		assert.Equal(t, http.StatusOK, w.Code)
+	})
+
+	t.Run("should deny user from updating another user's profile", func(t *testing.T) {
+		updateInput := UpdateUserRequest{
+			Name:  "Unauthorized Update",
+			Email: "unauthorized@example.com",
+		}
+
+		handler := NewUserHandler(mockRepo)
+		router := gin.New()
+		router.Use(func(c *gin.Context) {
+			c.Set("user_id", uint(7))
+			c.Set("user_role", "user")
+		})
+		router.PUT("/users/:id", handler.UpdateUser)
+
+		body, _ := json.Marshal(updateInput)
+		w := httptest.NewRecorder()
+		req, _ := http.NewRequest("PUT", "/users/10", bytes.NewReader(body))
+		req.Header.Set("Content-Type", "application/json")
+		router.ServeHTTP(w, req)
+
+		assert.Equal(t, http.StatusForbidden, w.Code)
+
+		var response map[string]string
+		json.Unmarshal(w.Body.Bytes(), &response)
+		assert.Equal(t, "insufficient permissions", response["error"])
 	})
 }
 

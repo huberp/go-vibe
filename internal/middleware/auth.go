@@ -71,3 +71,27 @@ func RequireRole(role string) gin.HandlerFunc {
 		c.Next()
 	}
 }
+
+// IsOwnerOrAdmin checks if the authenticated user is either the resource owner or an admin
+// resourceUserID is the ID of the user resource being accessed
+func IsOwnerOrAdmin(c *gin.Context, resourceUserID uint) bool {
+	// Get the authenticated user's role
+	userRole, roleExists := c.Get("user_role")
+	if !roleExists {
+		return false
+	}
+
+	// Admin users can access any resource
+	if userRole == "admin" {
+		return true
+	}
+
+	// Get the authenticated user's ID
+	userID, idExists := c.Get("user_id")
+	if !idExists {
+		return false
+	}
+
+	// Regular users can only access their own resources
+	return userID == resourceUserID
+}
