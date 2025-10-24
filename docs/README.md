@@ -28,6 +28,7 @@ docs/
 │   ├── CODE_REVIEW_SUMMARY.md            # Code review improvements
 │   ├── COMBINE_DEPENDENCY_PRS.md         # Dependency management workflow
 │   ├── COPILOT_INSTRUCTIONS_SETUP.md     # Copilot setup documentation
+│   ├── COPILOT_SETUP_STEPS.md            # Copilot environment setup workflow
 │   └── code-review-improvements.sh       # Demo script for new features
 │
 ├── observability/         # Monitoring and metrics
@@ -57,6 +58,7 @@ docs/
 ### For Contributors
 - **Code Review Process**: See [development/CODE_REVIEW_SUMMARY.md](development/CODE_REVIEW_SUMMARY.md)
 - **Dependency Management**: See [development/COMBINE_DEPENDENCY_PRS.md](development/COMBINE_DEPENDENCY_PRS.md)
+- **Copilot Environment Setup**: See [development/COPILOT_SETUP_STEPS.md](development/COPILOT_SETUP_STEPS.md)
 
 ## Documentation Guidelines
 
