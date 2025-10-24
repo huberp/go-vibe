@@ -109,6 +109,139 @@ func TestCreateUser(t *testing.T) {
 
 		assert.Equal(t, http.StatusBadRequest, w.Code)
 	})
+
+	t.Run("should set default role when not provided", func(t *testing.T) {
+		userInput := CreateUserRequest{
+			Name:     "Jane Doe",
+			Email:    "jane@example.com",
+			Password: "password123",
+			// Role is omitted, should default to "user"
+		}
+
+		mockRepo.EXPECT().Create(gomock.Any(), gomock.Any()).DoAndReturn(
+			func(ctx context.Context, user *models.User) error {
+				assert.Equal(t, "user", user.Role)
+				user.ID = 2
+				return nil
+			},
+		)
+
+		handler := NewUserHandler(mockRepo)
+		router := gin.New()
+		router.POST("/users", handler.CreateUser)
+
+		body, _ := json.Marshal(userInput)
+		w := httptest.NewRecorder()
+		req, _ := http.NewRequest("POST", "/users", bytes.NewReader(body))
+		req.Header.Set("Content-Type", "application/json")
+		router.ServeHTTP(w, req)
+
+		assert.Equal(t, http.StatusCreated, w.Code)
+	})
+
+	t.Run("should handle repository create error", func(t *testing.T) {
+		userInput := CreateUserRequest{
+			Name:     "Error User",
+			Email:    "error@example.com",
+			Password: "password123",
+			Role:     "user",
+		}
+
+		mockRepo.EXPECT().Create(gomock.Any(), gomock.Any()).Return(errors.New("database connection failed"))
+
+		handler := NewUserHandler(mockRepo)
+		router := gin.New()
+		router.POST("/users", handler.CreateUser)
+
+		body, _ := json.Marshal(userInput)
+		w := httptest.NewRecorder()
+		req, _ := http.NewRequest("POST", "/users", bytes.NewReader(body))
+		req.Header.Set("Content-Type", "application/json")
+		router.ServeHTTP(w, req)
+
+		assert.Equal(t, http.StatusInternalServerError, w.Code)
+
+		var response map[string]string
+		json.Unmarshal(w.Body.Bytes(), &response)
+		assert.Equal(t, "failed to create user", response["error"])
+	})
+
+	t.Run("should reject missing required fields", func(t *testing.T) {
+		handler := NewUserHandler(mockRepo)
+		router := gin.New()
+		router.POST("/users", handler.CreateUser)
+
+		// Missing name
+		userInput := map[string]string{
+			"email":    "test@example.com",
+			"password": "password123",
+		}
+		body, _ := json.Marshal(userInput)
+		w := httptest.NewRecorder()
+		req, _ := http.NewRequest("POST", "/users", bytes.NewReader(body))
+		req.Header.Set("Content-Type", "application/json")
+		router.ServeHTTP(w, req)
+
+		assert.Equal(t, http.StatusBadRequest, w.Code)
+	})
+
+	t.Run("should reject invalid email format", func(t *testing.T) {
+		handler := NewUserHandler(mockRepo)
+		router := gin.New()
+		router.POST("/users", handler.CreateUser)
+
+		userInput := CreateUserRequest{
+			Name:     "Test User",
+			Email:    "not-an-email",
+			Password: "password123",
+		}
+		body, _ := json.Marshal(userInput)
+		w := httptest.NewRecorder()
+		req, _ := http.NewRequest("POST", "/users", bytes.NewReader(body))
+		req.Header.Set("Content-Type", "application/json")
+		router.ServeHTTP(w, req)
+
+		assert.Equal(t, http.StatusBadRequest, w.Code)
+	})
+
+	t.Run("should reject short password", func(t *testing.T) {
+		handler := NewUserHandler(mockRepo)
+		router := gin.New()
+		router.POST("/users", handler.CreateUser)
+
+		userInput := CreateUserRequest{
+			Name:     "Test User",
+			Email:    "test@example.com",
+			Password: "12345", // Less than 6 characters
+		}
+		body, _ := json.Marshal(userInput)
+		w := httptest.NewRecorder()
+		req, _ := http.NewRequest("POST", "/users", bytes.NewReader(body))
+		req.Header.Set("Content-Type", "application/json")
+		router.ServeHTTP(w, req)
+
+		assert.Equal(t, http.StatusBadRequest, w.Code)
+	})
+
+	t.Run("should reject invalid role", func(t *testing.T) {
+		handler := NewUserHandler(mockRepo)
+		router := gin.New()
+		router.POST("/users", handler.CreateUser)
+
+		userInput := CreateUserRequest{
+			Name:     "Test User",
+			Email:    "test@example.com",
+			Password: "password123",
+			Role:     "superadmin", // Not in allowed list
+		}
+		body, _ := json.Marshal(userInput)
+		w := httptest.NewRecorder()
+		req, _ := http.NewRequest("POST", "/users", bytes.NewReader(body))
+		req.Header.Set("Content-Type", "application/json")
+		router.ServeHTTP(w, req)
+
+		assert.Equal(t, http.StatusBadRequest, w.Code)
+	})
 }
 
 func TestGetUserByID(t *testing.T) {
@@ -223,6 +356,48 @@ func TestGetUserByID(t *testing.T) {
 		var response map[string]string
 		json.Unmarshal(w.Body.Bytes(), &response)
 		assert.Equal(t, "insufficient permissions", response["error"])
+	})
+
+	t.Run("should reject invalid user ID format", func(t *testing.T) {
+		handler := NewUserHandler(mockRepo)
+		router := gin.New()
+		router.Use(func(c *gin.Context) {
+			c.Set("user_id", uint(1))
+			c.Set("user_role", "admin")
+		})
+		router.GET("/users/:id", handler.GetUserByID)
+
+		w := httptest.NewRecorder()
+		req, _ := http.NewRequest("GET", "/users/invalid", nil)
+		router.ServeHTTP(w, req)
+
+		assert.Equal(t, http.StatusBadRequest, w.Code)
+
+		var response map[string]string
+		json.Unmarshal(w.Body.Bytes(), &response)
+		assert.Equal(t, "invalid user ID", response["error"])
+	})
+
+	t.Run("should handle database error when fetching user", func(t *testing.T) {
+		mockRepo.EXPECT().FindByID(gomock.Any(), uint(5)).Return(nil, errors.New("database connection lost"))
+
+		handler := NewUserHandler(mockRepo)
+		router := gin.New()
+		router.Use(func(c *gin.Context) {
+			c.Set("user_id", uint(1))
+			c.Set("user_role", "admin")
+		})
+		router.GET("/users/:id", handler.GetUserByID)
+
+		w := httptest.NewRecorder()
+		req, _ := http.NewRequest("GET", "/users/5", nil)
+		router.ServeHTTP(w, req)
+
+		assert.Equal(t, http.StatusInternalServerError, w.Code)
+
+		var response map[string]string
+		json.Unmarshal(w.Body.Bytes(), &response)
+		assert.Equal(t, "failed to fetch user", response["error"])
 	})
 }
 
@@ -340,6 +515,179 @@ func TestUpdateUser(t *testing.T) {
 		json.Unmarshal(w.Body.Bytes(), &response)
 		assert.Equal(t, "insufficient permissions", response["error"])
 	})
+
+	t.Run("should reject invalid user ID format", func(t *testing.T) {
+		handler := NewUserHandler(mockRepo)
+		router := gin.New()
+		router.Use(func(c *gin.Context) {
+			c.Set("user_id", uint(1))
+			c.Set("user_role", "admin")
+		})
+		router.PUT("/users/:id", handler.UpdateUser)
+
+		updateInput := UpdateUserRequest{Name: "Test"}
+		body, _ := json.Marshal(updateInput)
+		w := httptest.NewRecorder()
+		req, _ := http.NewRequest("PUT", "/users/abc", bytes.NewReader(body))
+		req.Header.Set("Content-Type", "application/json")
+		router.ServeHTTP(w, req)
+
+		assert.Equal(t, http.StatusBadRequest, w.Code)
+
+		var response map[string]string
+		json.Unmarshal(w.Body.Bytes(), &response)
+		assert.Equal(t, "invalid user ID", response["error"])
+	})
+
+	t.Run("should return 404 when user not found", func(t *testing.T) {
+		mockRepo.EXPECT().FindByID(gomock.Any(), uint(999)).Return(nil, repository.ErrUserNotFound)
+
+		handler := NewUserHandler(mockRepo)
+		router := gin.New()
+		router.Use(func(c *gin.Context) {
+			c.Set("user_id", uint(1))
+			c.Set("user_role", "admin")
+		})
+		router.PUT("/users/:id", handler.UpdateUser)
+
+		updateInput := UpdateUserRequest{Name: "Test"}
+		body, _ := json.Marshal(updateInput)
+		w := httptest.NewRecorder()
+		req, _ := http.NewRequest("PUT", "/users/999", bytes.NewReader(body))
+		req.Header.Set("Content-Type", "application/json")
+		router.ServeHTTP(w, req)
+
+		assert.Equal(t, http.StatusNotFound, w.Code)
+
+		var response map[string]string
+		json.Unmarshal(w.Body.Bytes(), &response)
+		assert.Equal(t, "user not found", response["error"])
+	})
+
+	t.Run("should handle database error when finding user", func(t *testing.T) {
+		mockRepo.EXPECT().FindByID(gomock.Any(), uint(5)).Return(nil, errors.New("database error"))
+
+		handler := NewUserHandler(mockRepo)
+		router := gin.New()
+		router.Use(func(c *gin.Context) {
+			c.Set("user_id", uint(1))
+			c.Set("user_role", "admin")
+		})
+		router.PUT("/users/:id", handler.UpdateUser)
+
+		updateInput := UpdateUserRequest{Name: "Test"}
+		body, _ := json.Marshal(updateInput)
+		w := httptest.NewRecorder()
+		req, _ := http.NewRequest("PUT", "/users/5", bytes.NewReader(body))
+		req.Header.Set("Content-Type", "application/json")
+		router.ServeHTTP(w, req)
+
+		assert.Equal(t, http.StatusInternalServerError, w.Code)
+
+		var response map[string]string
+		json.Unmarshal(w.Body.Bytes(), &response)
+		assert.Equal(t, "failed to fetch user", response["error"])
+	})
+
+	t.Run("should reject invalid JSON input", func(t *testing.T) {
+		existingUser := &models.User{ID: 1, Name: "Original", Email: "original@example.com"}
+		mockRepo.EXPECT().FindByID(gomock.Any(), uint(1)).Return(existingUser, nil)
+
+		handler := NewUserHandler(mockRepo)
+		router := gin.New()
+		router.Use(func(c *gin.Context) {
+			c.Set("user_id", uint(1))
+			c.Set("user_role", "user")
+		})
+		router.PUT("/users/:id", handler.UpdateUser)
+
+		w := httptest.NewRecorder()
+		req, _ := http.NewRequest("PUT", "/users/1", bytes.NewReader([]byte("invalid json")))
+		req.Header.Set("Content-Type", "application/json")
+		router.ServeHTTP(w, req)
+
+		assert.Equal(t, http.StatusBadRequest, w.Code)
+	})
+
+	t.Run("should handle repository update error", func(t *testing.T) {
+		existingUser := &models.User{ID: 1, Name: "Original", Email: "original@example.com"}
+		mockRepo.EXPECT().FindByID(gomock.Any(), uint(1)).Return(existingUser, nil)
+		mockRepo.EXPECT().Update(gomock.Any(), gomock.Any()).Return(errors.New("database write failed"))
+
+		handler := NewUserHandler(mockRepo)
+		router := gin.New()
+		router.Use(func(c *gin.Context) {
+			c.Set("user_id", uint(1))
+			c.Set("user_role", "user")
+		})
+		router.PUT("/users/:id", handler.UpdateUser)
+
+		updateInput := UpdateUserRequest{Name: "Updated"}
+		body, _ := json.Marshal(updateInput)
+		w := httptest.NewRecorder()
+		req, _ := http.NewRequest("PUT", "/users/1", bytes.NewReader(body))
+		req.Header.Set("Content-Type", "application/json")
+		router.ServeHTTP(w, req)
+
+		assert.Equal(t, http.StatusInternalServerError, w.Code)
+
+		var response map[string]string
+		json.Unmarshal(w.Body.Bytes(), &response)
+		assert.Equal(t, "failed to update user", response["error"])
+	})
+
+	t.Run("should update only provided fields", func(t *testing.T) {
+		existingUser := &models.User{ID: 1, Name: "Original Name", Email: "original@example.com"}
+		mockRepo.EXPECT().FindByID(gomock.Any(), uint(1)).Return(existingUser, nil)
+		mockRepo.EXPECT().Update(gomock.Any(), gomock.Any()).DoAndReturn(
+			func(ctx context.Context, user *models.User) error {
+				// Only name should be updated
+				assert.Equal(t, "Updated Name", user.Name)
+				assert.Equal(t, "original@example.com", user.Email)
+				return nil
+			},
+		)
+
+		handler := NewUserHandler(mockRepo)
+		router := gin.New()
+		router.Use(func(c *gin.Context) {
+			c.Set("user_id", uint(1))
+			c.Set("user_role", "user")
+		})
+		router.PUT("/users/:id", handler.UpdateUser)
+
+		// Only update name, not email
+		updateInput := UpdateUserRequest{Name: "Updated Name"}
+		body, _ := json.Marshal(updateInput)
+		w := httptest.NewRecorder()
+		req, _ := http.NewRequest("PUT", "/users/1", bytes.NewReader(body))
+		req.Header.Set("Content-Type", "application/json")
+		router.ServeHTTP(w, req)
+
+		assert.Equal(t, http.StatusOK, w.Code)
+	})
+
+	t.Run("should reject invalid email format", func(t *testing.T) {
+		existingUser := &models.User{ID: 1, Name: "Original", Email: "original@example.com"}
+		mockRepo.EXPECT().FindByID(gomock.Any(), uint(1)).Return(existingUser, nil)
+
+		handler := NewUserHandler(mockRepo)
+		router := gin.New()
+		router.Use(func(c *gin.Context) {
+			c.Set("user_id", uint(1))
+			c.Set("user_role", "user")
+		})
+		router.PUT("/users/:id", handler.UpdateUser)
+
+		updateInput := UpdateUserRequest{Email: "not-an-email"}
+		body, _ := json.Marshal(updateInput)
+		w := httptest.NewRecorder()
+		req, _ := http.NewRequest("PUT", "/users/1", bytes.NewReader(body))
+		req.Header.Set("Content-Type", "application/json")
+		router.ServeHTTP(w, req)
+
+		assert.Equal(t, http.StatusBadRequest, w.Code)
+	})
 }
 
 func TestDeleteUser(t *testing.T) {
@@ -375,5 +723,39 @@ func TestDeleteUser(t *testing.T) {
 		router.ServeHTTP(w, req)
 
 		assert.Equal(t, http.StatusNotFound, w.Code)
+	})
+
+	t.Run("should reject invalid user ID format", func(t *testing.T) {
+		handler := NewUserHandler(mockRepo)
+		router := gin.New()
+		router.DELETE("/users/:id", handler.DeleteUser)
+
+		w := httptest.NewRecorder()
+		req, _ := http.NewRequest("DELETE", "/users/invalid", nil)
+		router.ServeHTTP(w, req)
+
+		assert.Equal(t, http.StatusBadRequest, w.Code)
+
+		var response map[string]string
+		json.Unmarshal(w.Body.Bytes(), &response)
+		assert.Equal(t, "invalid user ID", response["error"])
+	})
+
+	t.Run("should handle repository delete error", func(t *testing.T) {
+		mockRepo.EXPECT().Delete(gomock.Any(), uint(5)).Return(errors.New("database error"))
+
+		handler := NewUserHandler(mockRepo)
+		router := gin.New()
+		router.DELETE("/users/:id", handler.DeleteUser)
+
+		w := httptest.NewRecorder()
+		req, _ := http.NewRequest("DELETE", "/users/5", nil)
+		router.ServeHTTP(w, req)
+
+		assert.Equal(t, http.StatusInternalServerError, w.Code)
+
+		var response map[string]string
+		json.Unmarshal(w.Body.Bytes(), &response)
+		assert.Equal(t, "failed to delete user", response["error"])
 	})
 }
