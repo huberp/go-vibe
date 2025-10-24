@@ -152,7 +152,7 @@ func TestPrometheusMiddleware(t *testing.T) {
 	t.Run("should record metrics for different paths", func(t *testing.T) {
 		router := gin.New()
 		router.Use(PrometheusMiddleware())
-		
+
 		router.GET("/api/users", func(c *gin.Context) {
 			c.JSON(http.StatusOK, gin.H{"message": "users"})
 		})
@@ -249,7 +249,7 @@ func TestRegisterUserCountCollector(t *testing.T) {
 
 		// Register the collector - should not panic
 		RegisterUserCountCollector(db)
-		
+
 		// Successfully registered (no panic)
 	})
 
@@ -268,7 +268,7 @@ func TestRegisterUserCountCollector(t *testing.T) {
 
 		// Register the collector - should not panic even if DB is closed
 		RegisterUserCountCollector(db)
-		
+
 		// The collector is registered and will silently handle errors when scraped
 	})
 
@@ -301,7 +301,7 @@ func TestPrometheusMiddleware_MetricsEndpoint(t *testing.T) {
 	t.Run("should not interfere with metrics endpoint", func(t *testing.T) {
 		router := gin.New()
 		router.Use(PrometheusMiddleware())
-		
+
 		// Simulate metrics endpoint
 		router.GET("/metrics", func(c *gin.Context) {
 			c.String(http.StatusOK, "# metrics data")

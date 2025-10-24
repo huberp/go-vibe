@@ -133,11 +133,11 @@ func TestLoggingMiddleware(t *testing.T) {
 		logger := zaptest.NewLogger(t)
 		router := gin.New()
 		router.Use(LoggingMiddleware(logger))
-		
+
 		handler := func(c *gin.Context) {
 			c.JSON(http.StatusOK, gin.H{"message": "success"})
 		}
-		
+
 		router.GET("/test", handler)
 		router.POST("/test", handler)
 		router.PUT("/test", handler)
@@ -156,7 +156,7 @@ func TestLoggingMiddleware(t *testing.T) {
 		logger := zaptest.NewLogger(t)
 		router := gin.New()
 		router.Use(LoggingMiddleware(logger))
-		
+
 		router.GET("/ok", func(c *gin.Context) {
 			c.JSON(http.StatusOK, gin.H{"message": "ok"})
 		})
@@ -195,19 +195,19 @@ func TestLoggingMiddleware(t *testing.T) {
 	t.Run("should include trace context from OpenTelemetry span", func(t *testing.T) {
 		logger := zaptest.NewLogger(t)
 		router := gin.New()
-		
+
 		// Create a tracer for testing
 		tracer := otel.Tracer("test-tracer")
-		
+
 		router.Use(LoggingMiddleware(logger))
 		router.GET("/test", func(c *gin.Context) {
 			// Create a span in the handler to simulate OTel middleware
 			ctx, span := tracer.Start(c.Request.Context(), "test-operation")
 			defer span.End()
-			
+
 			// Update request context
 			c.Request = c.Request.WithContext(ctx)
-			
+
 			c.JSON(http.StatusOK, gin.H{"message": "success"})
 		})
 
@@ -260,7 +260,7 @@ func TestLoggingMiddleware(t *testing.T) {
 func TestLoggingMiddleware_EmptyTraceparent(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	logger := zaptest.NewLogger(t)
-	
+
 	t.Run("should handle empty string traceparent", func(t *testing.T) {
 		router := gin.New()
 		router.Use(LoggingMiddleware(logger))
@@ -282,7 +282,7 @@ func TestLoggingMiddleware_EmptyTraceparent(t *testing.T) {
 
 func TestLoggingMiddleware_WithNilLogger(t *testing.T) {
 	gin.SetMode(gin.TestMode)
-	
+
 	t.Run("should handle nil logger gracefully", func(t *testing.T) {
 		// This tests defensive programming - what happens if logger is nil
 		// In practice, this shouldn't happen, but we test it anyway
@@ -310,11 +310,11 @@ func TestLoggingMiddleware_WithNilLogger(t *testing.T) {
 func TestLoggingMiddleware_TraceIDConsistency(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	logger := zaptest.NewLogger(t)
-	
+
 	t.Run("should consistently extract same trace ID from traceparent", func(t *testing.T) {
 		traceparent := "00-0af7651916cd43dd8448eb211c80319c-b7ad6b7169203331-01"
 		expectedTraceID := "0af7651916cd43dd8448eb211c80319c"
-		
+
 		for i := 0; i < 3; i++ {
 			router := gin.New()
 			router.Use(LoggingMiddleware(logger))

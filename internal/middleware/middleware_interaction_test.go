@@ -21,20 +21,20 @@ func TestMiddlewareOrdering(t *testing.T) {
 		executionOrder := []string{}
 
 		router := gin.New()
-		
+
 		// Add middleware that tracks execution order
 		router.Use(func(c *gin.Context) {
 			executionOrder = append(executionOrder, "first")
 			c.Next()
 			executionOrder = append(executionOrder, "first-after")
 		})
-		
+
 		router.Use(func(c *gin.Context) {
 			executionOrder = append(executionOrder, "second")
 			c.Next()
 			executionOrder = append(executionOrder, "second-after")
 		})
-		
+
 		router.Use(func(c *gin.Context) {
 			executionOrder = append(executionOrder, "third")
 			c.Next()
@@ -51,11 +51,11 @@ func TestMiddlewareOrdering(t *testing.T) {
 		router.ServeHTTP(w, req)
 
 		assert.Equal(t, http.StatusOK, w.Code)
-		
+
 		// Verify execution order: middleware runs in order, then handler, then middleware cleanup in reverse
 		expected := []string{"first", "second", "third", "handler", "third-after", "second-after", "first-after"}
 		assert.Equal(t, expected, executionOrder)
-		
+
 		_ = logger // Use logger to avoid unused variable error
 	})
 }
@@ -67,12 +67,12 @@ func TestMiddlewareChaining(t *testing.T) {
 	t.Run("should chain logging, metrics, and rate limiting middleware", func(t *testing.T) {
 		logger := zaptest.NewLogger(t)
 		router := gin.New()
-		
+
 		// Chain multiple middleware
 		router.Use(LoggingMiddleware(logger))
 		router.Use(PrometheusMiddleware())
 		router.Use(RateLimitMiddleware(10, 5))
-		
+
 		router.GET("/test", func(c *gin.Context) {
 			c.JSON(http.StatusOK, gin.H{"message": "success"})
 		})
@@ -87,10 +87,10 @@ func TestMiddlewareChaining(t *testing.T) {
 	t.Run("should chain auth and role middleware", func(t *testing.T) {
 		secret := "test-secret"
 		router := gin.New()
-		
+
 		router.Use(JWTAuthMiddleware(secret))
 		router.Use(RequireRole("admin"))
-		
+
 		router.GET("/admin", func(c *gin.Context) {
 			c.JSON(http.StatusOK, gin.H{"message": "admin area"})
 		})
@@ -115,10 +115,10 @@ func TestMiddlewareChaining(t *testing.T) {
 	t.Run("should reject when chained auth and role middleware fail", func(t *testing.T) {
 		secret := "test-secret"
 		router := gin.New()
-		
+
 		router.Use(JWTAuthMiddleware(secret))
 		router.Use(RequireRole("admin"))
-		
+
 		router.GET("/admin", func(c *gin.Context) {
 			c.JSON(http.StatusOK, gin.H{"message": "admin area"})
 		})
@@ -219,11 +219,11 @@ func TestMiddlewareInteraction(t *testing.T) {
 	t.Run("rate limit should apply before auth", func(t *testing.T) {
 		secret := "test-secret"
 		router := gin.New()
-		
+
 		// Rate limit comes first
 		router.Use(RateLimitMiddleware(1, 1))
 		router.Use(JWTAuthMiddleware(secret))
-		
+
 		router.GET("/test", func(c *gin.Context) {
 			c.JSON(http.StatusOK, gin.H{"message": "success"})
 		})
@@ -255,11 +255,11 @@ func TestMiddlewareInteraction(t *testing.T) {
 	t.Run("auth should apply before rate limit", func(t *testing.T) {
 		secret := "test-secret"
 		router := gin.New()
-		
+
 		// Auth comes first
 		router.Use(JWTAuthMiddleware(secret))
 		router.Use(RateLimitMiddleware(1, 1))
-		
+
 		router.GET("/test", func(c *gin.Context) {
 			c.JSON(http.StatusOK, gin.H{"message": "success"})
 		})
@@ -274,11 +274,11 @@ func TestMiddlewareInteraction(t *testing.T) {
 	t.Run("logging should record all requests including rate limited ones", func(t *testing.T) {
 		logger := zaptest.NewLogger(t)
 		router := gin.New()
-		
+
 		// Logging first, then rate limiting
 		router.Use(LoggingMiddleware(logger))
 		router.Use(RateLimitMiddleware(1, 1))
-		
+
 		router.GET("/test", func(c *gin.Context) {
 			c.JSON(http.StatusOK, gin.H{"message": "success"})
 		})
@@ -369,7 +369,7 @@ func TestMiddlewareWithDifferentHTTPMethods(t *testing.T) {
 		t.Run("should handle "+tc.method+" requests", func(t *testing.T) {
 			logger := zaptest.NewLogger(t)
 			router := gin.New()
-			
+
 			router.Use(LoggingMiddleware(logger))
 			router.Use(PrometheusMiddleware())
 
@@ -401,7 +401,7 @@ func TestFullMiddlewareStack(t *testing.T) {
 		secret := "test-secret"
 
 		router := gin.New()
-		
+
 		// Full stack: logging -> metrics -> rate limit -> auth -> role check
 		router.Use(LoggingMiddleware(logger))
 		router.Use(PrometheusMiddleware())
@@ -435,7 +435,7 @@ func TestFullMiddlewareStack(t *testing.T) {
 		secret := "test-secret"
 
 		router := gin.New()
-		
+
 		// Full stack
 		router.Use(LoggingMiddleware(logger))
 		router.Use(PrometheusMiddleware())

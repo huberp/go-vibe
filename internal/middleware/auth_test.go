@@ -125,7 +125,7 @@ func TestJWTAuthMiddleware(t *testing.T) {
 		}
 		token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 		tokenString, _ := token.SignedString([]byte(secret))
-		
+
 		// Manually craft a token that looks like it uses a different signing method
 		// For this test, we'll just use an invalid token which will also fail
 		w := httptest.NewRecorder()
@@ -261,7 +261,7 @@ func TestJWTAuthMiddleware(t *testing.T) {
 		// Create a token with wrong claim types
 		claims := jwt.MapClaims{
 			"user_id": "not-a-number", // Should be float64
-			"role":    123,             // Should be string
+			"role":    123,            // Should be string
 			"exp":     time.Now().Add(time.Hour).Unix(),
 		}
 		token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
