@@ -1,0 +1,53 @@
+name: Create Code Review Issues
+
+on:
+  workflow_dispatch:  # Manual trigger
+    inputs:
+      dry_run:
+        description: 'Dry run mode - only show what would be created without actually creating issues'
+        required: false
+        default: 'true'
+        type: choice
+        options:
+          - 'true'
+          - 'false'
+      start_issue:
+        description: 'Start from issue number (1-20)'
+        required: false
+        default: '1'
+      end_issue:
+        description: 'End at issue number (1-20)'
+        required: false
+        default: '20'
+
+jobs:
+  create-issues:
+    name: Create GitHub Issues from Code Review
+    runs-on: ubuntu-latest
+    
+    permissions:
+      issues: write
+      contents: read
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v5
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install PyGithub
+
+    - name: Parse and create issues
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        DRY_RUN: ${{ github.event.inputs.dry_run }}
+        START_ISSUE: ${{ github.event.inputs.start_issue }}
+        END_ISSUE: ${{ github.event.inputs.end_issue }}
+      run: |
+        python .github/scripts/create-issues.py

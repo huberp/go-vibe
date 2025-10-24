@@ -171,17 +171,27 @@ Done
 
 ## Automation Opportunity
 
-Consider creating a GitHub Action that:
+✅ **IMPLEMENTED** - A GitHub Action workflow has been created to automate issue creation!
+
+The workflow:
 1. Reads `CODE_REVIEW_ISSUES.md`
 2. Parses issues in a structured format
 3. Creates GitHub issues automatically via GitHub API
 
-Example workflow trigger:
-```yaml
-name: Create Code Review Issues
-on:
-  workflow_dispatch:  # Manual trigger
-```
+### Using the Workflow
+
+The workflow is located at `.github/workflows/create-code-review-issues.yml` and can be triggered manually from the GitHub Actions UI.
+
+**Quick Start:**
+1. Go to Actions tab on GitHub
+2. Select "Create Code Review Issues" workflow
+3. Click "Run workflow"
+4. Choose parameters:
+   - `dry_run: true` - Preview mode (recommended first)
+   - `start_issue: 1` and `end_issue: 20` - Create all issues
+5. Run and review the output
+
+**See detailed documentation**: [WORKFLOW_USAGE.md](./WORKFLOW_USAGE.md)
 
 ## Questions & Support
 
