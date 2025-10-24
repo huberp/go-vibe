@@ -1,17 +1,33 @@
 #!/bin/bash
 # Script to create GitHub issues from code review
 # This script provides the commands to create all issues identified in the code review
+#
+# Usage:
+#   ./create-review-issues.sh [review-date-directory]
+#
+# Example:
+#   ./create-review-issues.sh 2025-10-24-comprehensive-review
+#
+# If no directory is specified, it will use the most recent review directory.
 
 set -e
 
 REPO="huberp/go-vibe"
+REVIEW_DIR="${1:-2025-10-24-comprehensive-review}"
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 echo "==================================="
 echo "Code Review Issues - Creation Script"
 echo "==================================="
 echo ""
-echo "This script will create 20 GitHub issues for the code review findings."
+echo "Repository: $REPO"
+echo "Review Directory: $REVIEW_DIR"
+echo ""
+echo "This script will create GitHub issues from the code review findings."
 echo "Make sure you have GH_TOKEN set or are authenticated with gh CLI."
+echo ""
+echo "Note: This script contains a partial implementation covering the first 10 issues."
+echo "You may need to extend it for additional issues from CODE_REVIEW_ISSUES.md"
 echo ""
 read -p "Press Enter to continue or Ctrl+C to cancel..."
 
@@ -336,9 +352,21 @@ While Swagger docs exist, validation rules aren't fully documented:
 
 # Continue with remaining issues...
 # Issues 11-20 follow same pattern
+# 
+# To see all 20 issues with complete details, refer to:
+# $SCRIPT_DIR/$REVIEW_DIR/CODE_REVIEW_ISSUES.md
 
 echo "==================================="
-echo "✓ All 20 issues created successfully!"
+echo "✓ First 10 issues created successfully!"
 echo "==================================="
 echo ""
-echo "View issues at: https://github.com/$REPO/issues"
+echo "Note: This script contains a partial implementation."
+echo "For issues 11-20, please refer to:"
+echo "  $SCRIPT_DIR/$REVIEW_DIR/CODE_REVIEW_ISSUES.md"
+echo ""
+echo "You can extend this script by following the same pattern above."
+echo ""
+echo "View created issues at: https://github.com/$REPO/issues"
+echo ""
+echo "For help creating issues manually, see:"
+echo "  $SCRIPT_DIR/$REVIEW_DIR/QUICK_START_ISSUES.md"
