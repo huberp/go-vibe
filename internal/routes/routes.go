@@ -40,8 +40,8 @@ func SetupRoutes(router *gin.Engine, db *gorm.DB, logger *zap.Logger, jwtSecret 
 
 	// Create handlers
 	userHandler := handlers.NewUserHandler(userRepo)
-	authHandler := handlers.NewAuthHandler(db, jwtSecret)
-	
+	authHandler := handlers.NewAuthHandler(db, jwtSecret, logger)
+
 	// Setup health check providers
 	healthRegistry := health.NewRegistry()
 	healthRegistry.Register(health.NewDatabaseHealthCheckProvider(db, health.ScopeStartup, health.ScopeReady))

@@ -50,7 +50,7 @@ func NewHealthHandler(registry *health.Registry) *HealthHandler {
 func (h *HealthHandler) HealthCheck(c *gin.Context) {
 	// Check all providers (scope = nil means check all, but each provider only once)
 	checkResults := h.registry.Check(nil)
-	
+
 	components := make(map[string]ComponentHealth)
 	for name, result := range checkResults {
 		components[name] = ComponentHealth{
@@ -89,7 +89,7 @@ func (h *HealthHandler) StartupProbe(c *gin.Context) {
 	// Check only startup scope providers
 	scope := health.ScopeStartup
 	checkResults := h.registry.Check(&scope)
-	
+
 	components := make(map[string]ComponentHealth)
 	for name, result := range checkResults {
 		components[name] = ComponentHealth{
@@ -127,7 +127,7 @@ func (h *HealthHandler) LivenessProbe(c *gin.Context) {
 	// Check only liveness scope providers
 	scope := health.ScopeLive
 	checkResults := h.registry.Check(&scope)
-	
+
 	components := make(map[string]ComponentHealth)
 	for name, result := range checkResults {
 		components[name] = ComponentHealth{
@@ -161,7 +161,7 @@ func (h *HealthHandler) ReadinessProbe(c *gin.Context) {
 	// Check only readiness scope providers
 	scope := health.ScopeReady
 	checkResults := h.registry.Check(&scope)
-	
+
 	components := make(map[string]ComponentHealth)
 	for name, result := range checkResults {
 		components[name] = ComponentHealth{
@@ -187,4 +187,3 @@ func (h *HealthHandler) ReadinessProbe(c *gin.Context) {
 
 	c.JSON(statusCode, response)
 }
-

@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"go.uber.org/zap"
 	"gorm.io/gorm"
 )
 
@@ -12,11 +13,16 @@ import (
 type AuthHandler struct {
 	db     *gorm.DB
 	secret string
+	logger *zap.Logger
 }
 
 // NewAuthHandler creates a new auth handler
-func NewAuthHandler(db *gorm.DB, secret string) *AuthHandler {
-	return &AuthHandler{db: db, secret: secret}
+func NewAuthHandler(db *gorm.DB, secret string, logger *zap.Logger) *AuthHandler {
+	return &AuthHandler{
+		db:     db,
+		secret: secret,
+		logger: logger,
+	}
 }
 
 // LoginRequest represents the request body for login
@@ -50,9 +56,17 @@ type LoginResponse struct {
 func (h *AuthHandler) Login(c *gin.Context) {
 	var req LoginRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
+		h.logger.Warn("invalid login request",
+			zap.String("error", err.Error()),
+			zap.String("client_ip", c.ClientIP()),
+		)
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
+
+	// Get request context for logging
+	requestID, _ := c.Get("request_id")
+	clientIP := c.ClientIP()
 
 	// Find user by email
 	var user struct {
@@ -63,13 +77,33 @@ func (h *AuthHandler) Login(c *gin.Context) {
 		Role         string
 	}
 
-	if err := h.db.Table("users").Where("email = ?", req.Email).First(&user).Error; err != nil {
+	if err := h.db.WithContext(c.Request.Context()).Table("users").Where("email = ?", req.Email).First(&user).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			h.logger.Warn("login attempt with unknown email",
+				zap.String("email", req.Email),
+				zap.String("client_ip", clientIP),
+				zap.Any("request_id", requestID),
+			)
+		} else {
+			h.logger.Error("database error during login",
+				zap.Error(err),
+				zap.String("email", req.Email),
+				zap.String("client_ip", clientIP),
+				zap.Any("request_id", requestID),
+			)
+		}
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid credentials"})
 		return
 	}
 
 	// Check password
 	if !utils.CheckPasswordHash(req.Password, user.PasswordHash) {
+		h.logger.Warn("login attempt with invalid password",
+			zap.String("email", req.Email),
+			zap.String("client_ip", clientIP),
+			zap.Any("request_id", requestID),
+			zap.Uint("user_id", user.ID),
+		)
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid credentials"})
 		return
 	}
@@ -77,9 +111,25 @@ func (h *AuthHandler) Login(c *gin.Context) {
 	// Generate JWT
 	token, err := utils.GenerateJWT(user.ID, user.Role, h.secret)
 	if err != nil {
+		h.logger.Error("failed to generate JWT token",
+			zap.Error(err),
+			zap.Uint("user_id", user.ID),
+			zap.String("email", req.Email),
+			zap.String("client_ip", clientIP),
+			zap.Any("request_id", requestID),
+		)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to generate token"})
 		return
 	}
+
+	// Log successful authentication
+	h.logger.Info("successful login",
+		zap.Uint("user_id", user.ID),
+		zap.String("email", req.Email),
+		zap.String("role", user.Role),
+		zap.String("client_ip", clientIP),
+		zap.Any("request_id", requestID),
+	)
 
 	response := LoginResponse{
 		Token: token,
