@@ -308,4 +308,162 @@ func TestLogin(t *testing.T) {
 
 		assert.Equal(t, http.StatusOK, w.Code)
 	})
+
+	t.Run("should return different roles for different users", func(t *testing.T) {
+		db := setupTestDB(t)
+		logger := setupTestLogger()
+
+		// Create admin user
+		adminHashedPassword, _ := utils.HashPassword("adminpass")
+		adminUser := &models.User{
+			Name:         "Admin User",
+			Email:        "admin@example.com",
+			PasswordHash: adminHashedPassword,
+			Role:         "admin",
+		}
+		db.Create(adminUser)
+
+		handler := NewAuthHandler(db, "test-secret", logger)
+		router := gin.New()
+		router.POST("/login", handler.Login)
+
+		loginReq := LoginRequest{
+			Email:    "admin@example.com",
+			Password: "adminpass",
+		}
+		body, _ := json.Marshal(loginReq)
+
+		w := httptest.NewRecorder()
+		req, _ := http.NewRequest("POST", "/login", bytes.NewReader(body))
+		req.Header.Set("Content-Type", "application/json")
+		router.ServeHTTP(w, req)
+
+		assert.Equal(t, http.StatusOK, w.Code)
+
+		var response LoginResponse
+		json.Unmarshal(w.Body.Bytes(), &response)
+		assert.Equal(t, "admin", response.User.Role)
+	})
+
+	t.Run("should handle empty password", func(t *testing.T) {
+		db := setupTestDB(t)
+		logger := setupTestLogger()
+
+		handler := NewAuthHandler(db, "test-secret", logger)
+		router := gin.New()
+		router.POST("/login", handler.Login)
+
+		loginReq := LoginRequest{
+			Email:    "test@example.com",
+			Password: "",
+		}
+		body, _ := json.Marshal(loginReq)
+
+		w := httptest.NewRecorder()
+		req, _ := http.NewRequest("POST", "/login", bytes.NewReader(body))
+		req.Header.Set("Content-Type", "application/json")
+		router.ServeHTTP(w, req)
+
+		assert.Equal(t, http.StatusBadRequest, w.Code)
+	})
+
+	t.Run("should handle case-sensitive email", func(t *testing.T) {
+		db := setupTestDB(t)
+		logger := setupTestLogger()
+
+		// Create user with lowercase email
+		hashedPassword, _ := utils.HashPassword("password123")
+		user := &models.User{
+			Name:         "Test User",
+			Email:        "test@example.com",
+			PasswordHash: hashedPassword,
+			Role:         "user",
+		}
+		db.Create(user)
+
+		handler := NewAuthHandler(db, "test-secret", logger)
+		router := gin.New()
+		router.POST("/login", handler.Login)
+
+		// Try to login with uppercase email
+		loginReq := LoginRequest{
+			Email:    "TEST@EXAMPLE.COM",
+			Password: "password123",
+		}
+		body, _ := json.Marshal(loginReq)
+
+		w := httptest.NewRecorder()
+		req, _ := http.NewRequest("POST", "/login", bytes.NewReader(body))
+		req.Header.Set("Content-Type", "application/json")
+		router.ServeHTTP(w, req)
+
+		// Should fail because email is case-sensitive in database
+		assert.Equal(t, http.StatusUnauthorized, w.Code)
+	})
+
+	t.Run("should handle special characters in password", func(t *testing.T) {
+		db := setupTestDB(t)
+		logger := setupTestLogger()
+
+		// Create user with special characters in password
+		specialPassword := "p@$$w0rd!#$%"
+		hashedPassword, _ := utils.HashPassword(specialPassword)
+		user := &models.User{
+			Name:         "Test User",
+			Email:        "special@example.com",
+			PasswordHash: hashedPassword,
+			Role:         "user",
+		}
+		db.Create(user)
+
+		handler := NewAuthHandler(db, "test-secret", logger)
+		router := gin.New()
+		router.POST("/login", handler.Login)
+
+		loginReq := LoginRequest{
+			Email:    "special@example.com",
+			Password: specialPassword,
+		}
+		body, _ := json.Marshal(loginReq)
+
+		w := httptest.NewRecorder()
+		req, _ := http.NewRequest("POST", "/login", bytes.NewReader(body))
+		req.Header.Set("Content-Type", "application/json")
+		router.ServeHTTP(w, req)
+
+		assert.Equal(t, http.StatusOK, w.Code)
+	})
+
+	t.Run("should handle unicode characters in email and password", func(t *testing.T) {
+		db := setupTestDB(t)
+		logger := setupTestLogger()
+
+		// Create user with unicode in email
+		password := "пароль123"
+		hashedPassword, _ := utils.HashPassword(password)
+		user := &models.User{
+			Name:         "Unicode User",
+			Email:        "тест@example.com",
+			PasswordHash: hashedPassword,
+			Role:         "user",
+		}
+		db.Create(user)
+
+		handler := NewAuthHandler(db, "test-secret", logger)
+		router := gin.New()
+		router.POST("/login", handler.Login)
+
+		loginReq := LoginRequest{
+			Email:    "тест@example.com",
+			Password: password,
+		}
+		body, _ := json.Marshal(loginReq)
+
+		w := httptest.NewRecorder()
+		req, _ := http.NewRequest("POST", "/login", bytes.NewReader(body))
+		req.Header.Set("Content-Type", "application/json")
+		router.ServeHTTP(w, req)
+
+		assert.Equal(t, http.StatusOK, w.Code)
+	})
 }
