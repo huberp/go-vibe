@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"errors"
+	"myapp/internal/middleware"
 	"myapp/internal/models"
 	"myapp/internal/repository"
 	"myapp/pkg/utils"
@@ -111,6 +112,7 @@ func (h *UserHandler) CreateUser(c *gin.Context) {
 // @Success 200 {object} models.User
 // @Failure 400 {object} map[string]string "Invalid ID"
 // @Failure 401 {object} map[string]string "Unauthorized"
+// @Failure 403 {object} map[string]string "Forbidden"
 // @Failure 404 {object} map[string]string "User not found"
 // @Router /v1/users/{id} [get]
 func (h *UserHandler) GetUserByID(c *gin.Context) {
@@ -118,6 +120,12 @@ func (h *UserHandler) GetUserByID(c *gin.Context) {
 	id, err := strconv.ParseUint(idStr, 10, 32)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid user ID"})
+		return
+	}
+
+	// Check if user is owner or admin
+	if !middleware.IsOwnerOrAdmin(c, uint(id)) {
+		c.JSON(http.StatusForbidden, gin.H{"error": "insufficient permissions"})
 		return
 	}
 
@@ -146,6 +154,7 @@ func (h *UserHandler) GetUserByID(c *gin.Context) {
 // @Success 200 {object} models.User
 // @Failure 400 {object} map[string]string "Invalid request"
 // @Failure 401 {object} map[string]string "Unauthorized"
+// @Failure 403 {object} map[string]string "Forbidden"
 // @Failure 404 {object} map[string]string "User not found"
 // @Router /v1/users/{id} [put]
 func (h *UserHandler) UpdateUser(c *gin.Context) {
@@ -153,6 +162,12 @@ func (h *UserHandler) UpdateUser(c *gin.Context) {
 	id, err := strconv.ParseUint(idStr, 10, 32)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid user ID"})
+		return
+	}
+
+	// Check if user is owner or admin
+	if !middleware.IsOwnerOrAdmin(c, uint(id)) {
+		c.JSON(http.StatusForbidden, gin.H{"error": "insufficient permissions"})
 		return
 	}
 

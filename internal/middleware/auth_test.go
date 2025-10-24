@@ -79,3 +79,50 @@ func TestRequireRole(t *testing.T) {
 		assert.Equal(t, http.StatusForbidden, w.Code)
 	})
 }
+
+func TestIsOwnerOrAdmin(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+
+	t.Run("should allow admin to access any resource", func(t *testing.T) {
+		c, _ := gin.CreateTestContext(httptest.NewRecorder())
+		c.Set("user_role", "admin")
+		c.Set("user_id", uint(1))
+
+		result := IsOwnerOrAdmin(c, uint(999))
+		assert.True(t, result)
+	})
+
+	t.Run("should allow user to access their own resource", func(t *testing.T) {
+		c, _ := gin.CreateTestContext(httptest.NewRecorder())
+		c.Set("user_role", "user")
+		c.Set("user_id", uint(5))
+
+		result := IsOwnerOrAdmin(c, uint(5))
+		assert.True(t, result)
+	})
+
+	t.Run("should deny user from accessing another user's resource", func(t *testing.T) {
+		c, _ := gin.CreateTestContext(httptest.NewRecorder())
+		c.Set("user_role", "user")
+		c.Set("user_id", uint(5))
+
+		result := IsOwnerOrAdmin(c, uint(10))
+		assert.False(t, result)
+	})
+
+	t.Run("should deny access when user_role is missing", func(t *testing.T) {
+		c, _ := gin.CreateTestContext(httptest.NewRecorder())
+		c.Set("user_id", uint(5))
+
+		result := IsOwnerOrAdmin(c, uint(5))
+		assert.False(t, result)
+	})
+
+	t.Run("should deny access when user_id is missing", func(t *testing.T) {
+		c, _ := gin.CreateTestContext(httptest.NewRecorder())
+		c.Set("user_role", "user")
+
+		result := IsOwnerOrAdmin(c, uint(5))
+		assert.False(t, result)
+	})
+}
