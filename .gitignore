@@ -32,6 +32,7 @@ server.exe
 myapp
 dist/
 build/
+kubectl
 
 # Server process files
 server.pid
