@@ -254,8 +254,8 @@ Write-Host ""
 # Check Prometheus metrics (fetch once and filter multiple times)
 Write-Host "15. Checking Prometheus metrics (http_requests_total)..."
 try {
-    $metrics = Invoke-WebRequest -Uri "$BaseUrl/metrics" -UseBasicParsing
-    $metricsLines = $metrics.Content -split "`n" | Select-String -Pattern "http_requests_total" | Select-Object -First 5
+    $script:metrics = Invoke-WebRequest -Uri "$BaseUrl/metrics" -UseBasicParsing
+    $metricsLines = $script:metrics.Content -split "`n" | Select-String -Pattern "http_requests_total" | Select-Object -First 5
     $metricsLines | ForEach-Object { Write-Host $_ }
 } catch {
     Write-Host "Error: $($_.Exception.Message)" -ForegroundColor Red
@@ -265,8 +265,13 @@ Write-Host ""
 
 Write-Host "16. Checking Prometheus metrics (http_request_duration_seconds)..."
 try {
-    $metricsLines = $metrics.Content -split "`n" | Select-String -Pattern "http_request_duration_seconds" | Select-Object -First 5
-    $metricsLines | ForEach-Object { Write-Host $_ }
+    if ($script:metrics) {
+        $metricsLines = $script:metrics.Content -split "`n" | Select-String -Pattern "http_request_duration_seconds" | Select-Object -First 5
+        $metricsLines | ForEach-Object { Write-Host $_ }
+    } else {
+        Write-Host "Error: Metrics not available" -ForegroundColor Red
+        $script:ErrorCount++
+    }
 } catch {
     Write-Host "Error: $($_.Exception.Message)" -ForegroundColor Red
     $script:ErrorCount++
@@ -275,8 +280,13 @@ Write-Host ""
 
 Write-Host "17. Checking Prometheus metrics (users_total)..."
 try {
-    $metricsLines = $metrics.Content -split "`n" | Select-String -Pattern "users_total"
-    $metricsLines | ForEach-Object { Write-Host $_ }
+    if ($script:metrics) {
+        $metricsLines = $script:metrics.Content -split "`n" | Select-String -Pattern "users_total"
+        $metricsLines | ForEach-Object { Write-Host $_ }
+    } else {
+        Write-Host "Error: Metrics not available" -ForegroundColor Red
+        $script:ErrorCount++
+    }
 } catch {
     Write-Host "Error: $($_.Exception.Message)" -ForegroundColor Red
     $script:ErrorCount++
