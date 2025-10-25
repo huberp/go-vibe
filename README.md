@@ -1,32 +1,32 @@
 # Production-Ready User Management Microservice
 
-A production-ready microservice built with Go 1.25.2, Gin v1.11.0, following TDD principles and designed for Kubernetes deployment.
+A **production-ready microservice built with Go 1.25.2, Gin v1.11.0, following TDD principles** and designed for Kubernetes deployment.
 
-## Features
+## Key Features
 
 - ✅ RESTful API for user management (CRUD operations)
 - ✅ JWT-based authentication and authorization
 - ✅ Role-based access control (admin/user)
 - ✅ PostgreSQL database with GORM
-- ✅ **Database migrations with golang-migrate** (version-controlled schema changes)
-- ✅ **Auto-generated OpenAPI/Swagger documentation** (accessible at /swagger)
-- ✅ **Registrable health check system with scopes** (startup, liveness, readiness, base)
+- ✅ Database migrations with golang-migrate (version-controlled schema changes)
+- ✅ Auto-generated OpenAPI/Swagger documentation (accessible at /swagger)
+- ✅ Registrable health check system with scopes (startup, liveness, readiness, base)
 - ✅ YAML-based configuration with stage support (development, staging, production)
 - ✅ Flexible configuration: YAML files + environment variable overrides
-- ✅ **Configurable rate limiting** (via YAML/environment variables)
+- ✅ Configurable rate limiting (via YAML/environment variables)
 - ✅ Structured logging with Zap
 - ✅ W3C trace context support for distributed tracing
-- ✅ **Configurable OpenTelemetry (OTEL) tracing** (with path filtering for health/metrics endpoints)
+- ✅ Configurable OpenTelemetry (OTEL) tracing (with path filtering for health/metrics endpoints)
 - ✅ Prometheus metrics (including user count)
 - ✅ CORS middleware for cross-origin requests
 - ✅ API versioning (/v1/...) for backward compatibility
 - ✅ Enhanced bcrypt security (cost factor: 12)
 - ✅ 100% test coverage for handlers and middleware
-- ✅ **Dependency management with go mod tidy in CI**
+- ✅ Dependency management with go mod tidy in CI
 - ✅ Multi-stage Docker build (Alpine-based)
 - ✅ Helm chart for Kubernetes deployment
 - ✅ GitHub Actions CI/CD pipelines
-- ✅ **Shell scripts for common development tasks** (Linux/macOS and Windows PowerShell)
+- ✅ Shell scripts for common development tasks (Linux/macOS and Windows PowerShell)
 
 ## Architecture
 
