@@ -189,17 +189,18 @@ DELETE_RESPONSE=$(curl -s -X DELETE "$BASE_URL/v1/users/$USER_ID" \
 echo "$DELETE_RESPONSE"
 echo ""
 
-# Check Prometheus metrics
+# Check Prometheus metrics (fetch once and filter multiple times)
 echo "15. Checking Prometheus metrics (http_requests_total)..."
-curl -s "$BASE_URL/metrics" | grep "http_requests_total" | head -5
+METRICS_RESPONSE=$(curl -s "$BASE_URL/metrics")
+echo "$METRICS_RESPONSE" | grep "http_requests_total" | head -5
 echo ""
 
 echo "16. Checking Prometheus metrics (http_request_duration_seconds)..."
-curl -s "$BASE_URL/metrics" | grep "http_request_duration_seconds" | head -5
+echo "$METRICS_RESPONSE" | grep "http_request_duration_seconds" | head -5
 echo ""
 
 echo "17. Checking Prometheus metrics (users_total)..."
-curl -s "$BASE_URL/metrics" | grep "users_total"
+echo "$METRICS_RESPONSE" | grep "users_total"
 echo ""
 
 echo "================================"

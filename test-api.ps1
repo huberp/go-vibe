@@ -58,7 +58,7 @@ try {
     }
 } catch {
     Write-Host "Error: $($_.Exception.Message)" -ForegroundColor Red
-    $ErrorCount++
+    $script:ErrorCount++
 }
 Write-Host ""
 
@@ -70,7 +70,7 @@ try {
     }
 } catch {
     Write-Host "Error: $($_.Exception.Message)" -ForegroundColor Red
-    $ErrorCount++
+    $script:ErrorCount++
 }
 Write-Host ""
 
@@ -82,7 +82,7 @@ try {
     }
 } catch {
     Write-Host "Error: $($_.Exception.Message)" -ForegroundColor Red
-    $ErrorCount++
+    $script:ErrorCount++
 }
 Write-Host ""
 
@@ -95,7 +95,7 @@ try {
     }
 } catch {
     Write-Host "Error: $($_.Exception.Message)" -ForegroundColor Red
-    $ErrorCount++
+    $script:ErrorCount++
 }
 Write-Host ""
 
@@ -116,7 +116,7 @@ try {
     }
 } catch {
     Write-Host "Error: $($_.Exception.Message)" -ForegroundColor Red
-    $ErrorCount++
+    $script:ErrorCount++
 }
 Write-Host ""
 
@@ -137,7 +137,7 @@ try {
     }
 } catch {
     Write-Host "Error: $($_.Exception.Message)" -ForegroundColor Red
-    $ErrorCount++
+    $script:ErrorCount++
 }
 Write-Host ""
 
@@ -156,7 +156,7 @@ try {
     }
 } catch {
     Write-Host "Error: $($_.Exception.Message)" -ForegroundColor Red
-    $ErrorCount++
+    $script:ErrorCount++
 }
 Write-Host ""
 
@@ -175,7 +175,7 @@ try {
     }
 } catch {
     Write-Host "Error: $($_.Exception.Message)" -ForegroundColor Red
-    $ErrorCount++
+    $script:ErrorCount++
 }
 Write-Host ""
 
@@ -191,7 +191,7 @@ try {
     }
 } catch {
     Write-Host "Error: $($_.Exception.Message)" -ForegroundColor Red
-    $ErrorCount++
+    $script:ErrorCount++
 }
 Write-Host ""
 
@@ -218,7 +218,7 @@ try {
     }
 } catch {
     Write-Host "Error: $($_.Exception.Message)" -ForegroundColor Red
-    $ErrorCount++
+    $script:ErrorCount++
 }
 Write-Host ""
 
@@ -236,7 +236,7 @@ try {
     }
 } catch {
     Write-Host "Error: $($_.Exception.Message)" -ForegroundColor Red
-    $ErrorCount++
+    $script:ErrorCount++
 }
 Write-Host ""
 
@@ -247,11 +247,11 @@ try {
     Write-Host "User deleted successfully" -ForegroundColor Green
 } catch {
     Write-Host "Error: $($_.Exception.Message)" -ForegroundColor Red
-    $ErrorCount++
+    $script:ErrorCount++
 }
 Write-Host ""
 
-# Check Prometheus metrics
+# Check Prometheus metrics (fetch once and filter multiple times)
 Write-Host "15. Checking Prometheus metrics (http_requests_total)..."
 try {
     $metrics = Invoke-WebRequest -Uri "$BaseUrl/metrics" -UseBasicParsing
@@ -259,29 +259,27 @@ try {
     $metricsLines | ForEach-Object { Write-Host $_ }
 } catch {
     Write-Host "Error: $($_.Exception.Message)" -ForegroundColor Red
-    $ErrorCount++
+    $script:ErrorCount++
 }
 Write-Host ""
 
 Write-Host "16. Checking Prometheus metrics (http_request_duration_seconds)..."
 try {
-    $metrics = Invoke-WebRequest -Uri "$BaseUrl/metrics" -UseBasicParsing
     $metricsLines = $metrics.Content -split "`n" | Select-String -Pattern "http_request_duration_seconds" | Select-Object -First 5
     $metricsLines | ForEach-Object { Write-Host $_ }
 } catch {
     Write-Host "Error: $($_.Exception.Message)" -ForegroundColor Red
-    $ErrorCount++
+    $script:ErrorCount++
 }
 Write-Host ""
 
 Write-Host "17. Checking Prometheus metrics (users_total)..."
 try {
-    $metrics = Invoke-WebRequest -Uri "$BaseUrl/metrics" -UseBasicParsing
     $metricsLines = $metrics.Content -split "`n" | Select-String -Pattern "users_total"
     $metricsLines | ForEach-Object { Write-Host $_ }
 } catch {
     Write-Host "Error: $($_.Exception.Message)" -ForegroundColor Red
-    $ErrorCount++
+    $script:ErrorCount++
 }
 Write-Host ""
 
