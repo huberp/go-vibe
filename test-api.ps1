@@ -265,7 +265,7 @@ Write-Host ""
 
 Write-Host "16. Checking Prometheus metrics (http_request_duration_seconds)..."
 try {
-    if ($script:metrics) {
+    if ($script:metrics -and $script:metrics.Content) {
         $metricsLines = $script:metrics.Content -split "`n" | Select-String -Pattern "http_request_duration_seconds" | Select-Object -First 5
         $metricsLines | ForEach-Object { Write-Host $_ }
     } else {
@@ -280,7 +280,7 @@ Write-Host ""
 
 Write-Host "17. Checking Prometheus metrics (users_total)..."
 try {
-    if ($script:metrics) {
+    if ($script:metrics -and $script:metrics.Content) {
         $metricsLines = $script:metrics.Content -split "`n" | Select-String -Pattern "users_total"
         $metricsLines | ForEach-Object { Write-Host $_ }
     } else {
