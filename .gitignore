@@ -33,6 +33,8 @@ myapp
 dist/
 build/
 kubectl
+generate-users
+cleanup-users
 
 # Server process files
 server.pid
@@ -51,7 +53,7 @@ temp/
 # Database
 *.db
 *.sqlite
-data/
+/data/
 logfile
 
 # Python
