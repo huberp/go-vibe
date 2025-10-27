@@ -30,6 +30,7 @@ Thumbs.db
 server
 server.exe
 myapp
+main
 dist/
 build/
 kubectl
