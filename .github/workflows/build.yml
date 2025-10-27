@@ -44,7 +44,7 @@ jobs:
       run: go build -tags=go_json -v ./cmd/server
 
     - name: Upload artifact
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: myapp-binary
         path: server
