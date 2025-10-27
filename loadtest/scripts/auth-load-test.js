@@ -30,7 +30,9 @@ export const options = {
 const BASE_URL = __ENV.BASE_URL || 'http://localhost:8080';
 
 export default function () {
-  // Select a random user
+  // Select a random user for load testing
+  // Note: Math.random() is acceptable here as this is for test data selection,
+  // not for any security-sensitive operations
   const user = users[Math.floor(Math.random() * users.length)];
 
   // Test login

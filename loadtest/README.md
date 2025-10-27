@@ -364,6 +364,10 @@ sudo apt install k6  # Ubuntu/Debian
 - [k6 Best Practices](https://k6.io/docs/testing-guides/test-types/)
 - [Load Testing Best Practices](https://k6.io/docs/testing-guides/load-testing-best-practices/)
 
+## Security Note
+
+The load testing scripts use `Math.random()` for selecting test users and generating test data. This is acceptable for load testing purposes as these values are not used for any security-sensitive operations. The random selection is purely for distributing load across different test users during load testing scenarios.
+
 ## See Also
 
 - `/testdata/fixtures/` - Test fixtures for database testing
