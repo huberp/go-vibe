@@ -1,0 +1,46 @@
+# Test fixture for users table
+# Password hashes are for 'password123' with bcrypt cost 12
+- id: 1
+  name: John Doe
+  email: john@example.com
+  password_hash: $2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewY5GyYL1P6L7BqG
+  role: user
+  created_at: 2024-01-01T00:00:00Z
+  updated_at: 2024-01-01T00:00:00Z
+  deleted_at: null
+
+- id: 2
+  name: Jane Smith
+  email: jane@example.com
+  password_hash: $2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewY5GyYL1P6L7BqG
+  role: admin
+  created_at: 2024-01-02T00:00:00Z
+  updated_at: 2024-01-02T00:00:00Z
+  deleted_at: null
+
+- id: 3
+  name: Bob Johnson
+  email: bob@example.com
+  password_hash: $2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewY5GyYL1P6L7BqG
+  role: user
+  created_at: 2024-01-03T00:00:00Z
+  updated_at: 2024-01-03T00:00:00Z
+  deleted_at: null
+
+- id: 4
+  name: Alice Williams
+  email: alice@example.com
+  password_hash: $2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewY5GyYL1P6L7BqG
+  role: admin
+  created_at: 2024-01-04T00:00:00Z
+  updated_at: 2024-01-04T00:00:00Z
+  deleted_at: null
+
+- id: 5
+  name: Charlie Brown
+  email: charlie@example.com
+  password_hash: $2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewY5GyYL1P6L7BqG
+  role: user
+  created_at: 2024-01-05T00:00:00Z
+  updated_at: 2024-01-05T00:00:00Z
+  deleted_at: null
