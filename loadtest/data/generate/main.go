@@ -43,7 +43,10 @@ func main() {
 
 	// Generate admin user if requested
 	if adminUser {
-		hashedPassword, _ := utils.HashPassword("password123")
+		hashedPassword, err := utils.HashPassword("password123")
+		if err != nil {
+			log.Fatalf("Failed to hash password: %v", err)
+		}
 		admin := &models.User{
 			Name:         "Load Test Admin",
 			Email:        "loadtest-admin@example.com",
@@ -66,7 +69,10 @@ func main() {
 	}
 
 	// Generate regular users
-	hashedPassword, _ := utils.HashPassword("password123")
+	hashedPassword, err := utils.HashPassword("password123")
+	if err != nil {
+		log.Fatalf("Failed to hash password: %v", err)
+	}
 	batchSize := 100
 	for i := 0; i < numUsers; i += batchSize {
 		end := i + batchSize

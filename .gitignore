@@ -53,7 +53,7 @@ temp/
 # Database
 *.db
 *.sqlite
-/data/
+/data/  # Database data directory (not loadtest/data which is source code)
 logfile
 
 # Python
