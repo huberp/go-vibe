@@ -122,6 +122,9 @@ jobs:
       shell: pwsh
       run: |
         choco install mingw -y --no-progress
+        # Add to PATH for current step
+        $env:Path = "C:\ProgramData\chocolatey\lib\mingw\tools\install\mingw64\bin;$env:Path"
+        # Add to PATH for future steps
         echo "C:\ProgramData\chocolatey\lib\mingw\tools\install\mingw64\bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
         gcc --version
 
