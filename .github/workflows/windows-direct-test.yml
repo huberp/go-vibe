@@ -11,6 +11,8 @@ jobs:
   test-windows-direct:
     name: Run Go Tests Directly on Windows
     runs-on: windows-latest
+    permissions:
+      contents: read
     
     steps:
     - name: Checkout code
