@@ -1,0 +1,44 @@
+name: Windows Direct Test
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  test-windows-direct:
+    name: Run Go Tests Directly on Windows
+    runs-on: windows-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v5
+
+    - name: Set up PostgreSQL
+      uses: ikalnytskyi/action-setup-postgres@v8
+      with:
+        username: testuser
+        password: testpassword
+        database: testdb
+        port: 5432
+      id: postgres
+
+    - name: Set up Go
+      uses: actions/setup-go@v6
+      with:
+        go-version: '1.25.2'
+
+    - name: Download dependencies
+      run: go mod download
+
+    - name: Run tests with verbose logging
+      shell: pwsh
+      run: |
+        Write-Host "Running go test with verbose logging..." -ForegroundColor Cyan
+        go test ./... -v -x -race
+      env:
+        DATABASE_URL: "host=localhost user=testuser password=testpassword dbname=testdb port=5432 sslmode=disable"
+        JWT_SECRET: "test-secret-key"
+        SERVER_PORT: "8081"
