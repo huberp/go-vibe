@@ -132,7 +132,11 @@ jobs:
 
     - name: Test test script
       shell: pwsh
-      run: .\scripts\test.ps1
+      run: |
+        # Unset PostgreSQL environment variables that interfere with CGO builds
+        $env:PQ_LIB_DIR = ""
+        $env:PGSERVICEFILE = ""
+        .\scripts\test.ps1
 
     - name: Test run-background and stop scripts
       shell: pwsh
