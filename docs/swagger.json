@@ -1,10 +1,792 @@
 {
-    "components": {"schemas":{"gorm.DeletedAt":{"properties":{"time":{"type":"string"},"valid":{"description":"Valid is true if Time is not NULL","type":"boolean"}},"type":"object"},"internal_handlers.ComponentHealth":{"properties":{"details":{"additionalProperties":{},"type":"object"},"status":{"type":"string","x-enum-varnames":["StatusUP","StatusDown"]}},"type":"object"},"internal_handlers.CreateUserRequest":{"properties":{"email":{"type":"string"},"name":{"type":"string"},"password":{"minLength":6,"type":"string"},"role":{"enum":["user","admin"],"type":"string"}},"required":["email","name","password"],"type":"object"},"internal_handlers.HealthResponse":{"properties":{"components":{"additionalProperties":{"$ref":"#/components/schemas/internal_handlers.ComponentHealth"},"type":"object"},"status":{"$ref":"#/components/schemas/internal_handlers.HealthStatus"}},"type":"object"},"internal_handlers.HealthStatus":{"type":"string","x-enum-varnames":["StatusUP","StatusDown"]},"internal_handlers.LoginRequest":{"properties":{"email":{"type":"string"},"password":{"type":"string"}},"required":["email","password"],"type":"object"},"internal_handlers.LoginResponse":{"properties":{"token":{"type":"string"},"user":{"properties":{"email":{"type":"string"},"id":{"type":"integer"},"name":{"type":"string"},"role":{"type":"string"}},"type":"object"}},"type":"object"},"internal_handlers.UpdateUserRequest":{"properties":{"email":{"type":"string"},"name":{"type":"string"}},"type":"object"},"myapp_internal_models.User":{"description":"User account information","properties":{"createdAt":{"type":"string"},"created_at":{"example":"2024-01-01T00:00:00Z","type":"string"},"deletedAt":{"$ref":"#/components/schemas/gorm.DeletedAt"},"email":{"example":"john@example.com","type":"string"},"id":{"example":1,"type":"integer"},"name":{"example":"John Doe","type":"string"},"role":{"example":"user","type":"string"},"updatedAt":{"type":"string"},"updated_at":{"example":"2024-01-01T00:00:00Z","type":"string"}},"type":"object"}},"securitySchemes":{"bearerauth":{"bearerFormat":"JWT","scheme":"bearer","type":"http"}}},
-    "info": {"contact":{"email":"support@swagger.io","name":"API Support","url":"http://www.swagger.io/support"},"description":"Production-ready user management microservice with JWT authentication","license":{"name":"Apache 2.0","url":"http://www.apache.org/licenses/LICENSE-2.0.html"},"termsOfService":"http://swagger.io/terms/","title":"User Management API","version":"1.0"},
-    "externalDocs": {"description":"","url":""},
-    "paths": {"/health":{"get":{"description":"Returns overall health status with all component checks","responses":{"200":{"content":{"application/json":{"schema":{"$ref":"#/components/schemas/internal_handlers.HealthResponse"}}},"description":"All components healthy"},"503":{"content":{"application/json":{"schema":{"$ref":"#/components/schemas/internal_handlers.HealthResponse"}}},"description":"One or more components unhealthy"}},"summary":"Health check endpoint","tags":["health"]}},"/health/liveness":{"get":{"description":"Indicates if the application is running and should not be restarted","responses":{"200":{"content":{"application/json":{"schema":{"$ref":"#/components/schemas/internal_handlers.HealthResponse"}}},"description":"Application is alive"}},"summary":"Kubernetes liveness probe","tags":["health"]}},"/health/readiness":{"get":{"description":"Indicates if the application is ready to accept traffic","responses":{"200":{"content":{"application/json":{"schema":{"$ref":"#/components/schemas/internal_handlers.HealthResponse"}}},"description":"Application ready to accept traffic"},"503":{"content":{"application/json":{"schema":{"$ref":"#/components/schemas/internal_handlers.HealthResponse"}}},"description":"Application not ready"}},"summary":"Kubernetes readiness probe","tags":["health"]}},"/health/startup":{"get":{"description":"Indicates if the application has started successfully","responses":{"200":{"content":{"application/json":{"schema":{"$ref":"#/components/schemas/internal_handlers.HealthResponse"}}},"description":"Application started"},"503":{"content":{"application/json":{"schema":{"$ref":"#/components/schemas/internal_handlers.HealthResponse"}}},"description":"Application not started"}},"summary":"Kubernetes startup probe","tags":["health"]}},"/info":{"get":{"description":"Get aggregated information from all registered info providers","responses":{"200":{"content":{"application/json":{"schema":{"additionalProperties":{},"type":"object"}}},"description":"Aggregated information"},"429":{"content":{"application/json":{"schema":{"additionalProperties":{"type":"string"},"type":"object"}}},"description":"Rate limit exceeded"}},"summary":"Get application information","tags":["info"]}},"/v1/login":{"post":{"description":"Authenticate user and return JWT token","requestBody":{"content":{"application/json":{"schema":{"$ref":"#/components/schemas/internal_handlers.LoginRequest"}}},"description":"Login credentials","required":true},"responses":{"200":{"content":{"application/json":{"schema":{"$ref":"#/components/schemas/internal_handlers.LoginResponse"}}},"description":"OK"},"400":{"content":{"application/json":{"schema":{"additionalProperties":{"type":"string"},"type":"object"}}},"description":"Invalid request"},"401":{"content":{"application/json":{"schema":{"additionalProperties":{"type":"string"},"type":"object"}}},"description":"Invalid credentials"}},"summary":"Login user","tags":["auth"]}},"/v1/users":{"get":{"description":"Get list of all users (Admin only)","responses":{"200":{"content":{"application/json":{"schema":{"items":{"$ref":"#/components/schemas/myapp_internal_models.User"},"type":"array"}}},"description":"OK"},"401":{"content":{"application/json":{"schema":{"additionalProperties":{"type":"string"},"type":"object"}}},"description":"Unauthorized"},"403":{"content":{"application/json":{"schema":{"additionalProperties":{"type":"string"},"type":"object"}}},"description":"Forbidden"}},"security":[{"bearerauth":[]}],"summary":"Get all users","tags":["users"]},"post":{"description":"Register a new user account","requestBody":{"content":{"application/json":{"schema":{"$ref":"#/components/schemas/internal_handlers.CreateUserRequest"}}},"description":"User information","required":true},"responses":{"201":{"content":{"application/json":{"schema":{"$ref":"#/components/schemas/myapp_internal_models.User"}}},"description":"Created"},"400":{"content":{"application/json":{"schema":{"additionalProperties":{"type":"string"},"type":"object"}}},"description":"Invalid request"},"500":{"content":{"application/json":{"schema":{"additionalProperties":{"type":"string"},"type":"object"}}},"description":"Server error"}},"summary":"Create a new user","tags":["users"]}},"/v1/users/{id}":{"delete":{"description":"Delete user by ID (Admin only)","parameters":[{"description":"User ID","in":"path","name":"id","required":true,"schema":{"type":"integer"}}],"responses":{"204":{"description":"No Content"},"400":{"content":{"application/json":{"schema":{"additionalProperties":{"type":"string"},"type":"object"}}},"description":"Invalid ID"},"401":{"content":{"application/json":{"schema":{"additionalProperties":{"type":"string"},"type":"object"}}},"description":"Unauthorized"},"403":{"content":{"application/json":{"schema":{"additionalProperties":{"type":"string"},"type":"object"}}},"description":"Forbidden"},"404":{"content":{"application/json":{"schema":{"additionalProperties":{"type":"string"},"type":"object"}}},"description":"User not found"}},"security":[{"bearerauth":[]}],"summary":"Delete user","tags":["users"]},"get":{"description":"Get user details by ID (Owner or Admin)","parameters":[{"description":"User ID","in":"path","name":"id","required":true,"schema":{"type":"integer"}}],"responses":{"200":{"content":{"application/json":{"schema":{"$ref":"#/components/schemas/myapp_internal_models.User"}}},"description":"OK"},"400":{"content":{"application/json":{"schema":{"additionalProperties":{"type":"string"},"type":"object"}}},"description":"Invalid ID"},"401":{"content":{"application/json":{"schema":{"additionalProperties":{"type":"string"},"type":"object"}}},"description":"Unauthorized"},"403":{"content":{"application/json":{"schema":{"additionalProperties":{"type":"string"},"type":"object"}}},"description":"Forbidden"},"404":{"content":{"application/json":{"schema":{"additionalProperties":{"type":"string"},"type":"object"}}},"description":"User not found"}},"security":[{"bearerauth":[]}],"summary":"Get user by ID","tags":["users"]},"put":{"description":"Update user details (Owner or Admin)","parameters":[{"description":"User ID","in":"path","name":"id","required":true,"schema":{"type":"integer"}}],"requestBody":{"content":{"application/json":{"schema":{"$ref":"#/components/schemas/internal_handlers.UpdateUserRequest"}}},"description":"User update information","required":true},"responses":{"200":{"content":{"application/json":{"schema":{"$ref":"#/components/schemas/myapp_internal_models.User"}}},"description":"OK"},"400":{"content":{"application/json":{"schema":{"additionalProperties":{"type":"string"},"type":"object"}}},"description":"Invalid request"},"401":{"content":{"application/json":{"schema":{"additionalProperties":{"type":"string"},"type":"object"}}},"description":"Unauthorized"},"403":{"content":{"application/json":{"schema":{"additionalProperties":{"type":"string"},"type":"object"}}},"description":"Forbidden"},"404":{"content":{"application/json":{"schema":{"additionalProperties":{"type":"string"},"type":"object"}}},"description":"User not found"}},"security":[{"bearerauth":[]}],"summary":"Update user","tags":["users"]}}},
     "openapi": "3.1.0",
+    "info": {
+        "contact": {
+            "email": "support@swagger.io",
+            "name": "API Support",
+            "url": "http://www.swagger.io/support"
+        },
+        "description": "Production-ready user management microservice with JWT authentication",
+        "license": {
+            "name": "Apache 2.0",
+            "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+        },
+        "termsOfService": "http://swagger.io/terms/",
+        "title": "User Management API",
+        "version": "1.0"
+    },
+    "externalDocs": {
+        "description": "",
+        "url": ""
+    },
     "servers": [
-        {"description":"Development server","url":"http://localhost:8080"}
-    ]
+        {
+            "description": "Development server",
+            "url": "http://localhost:8080"
+        }
+    ],
+    "paths": {
+        "/health": {
+            "get": {
+                "description": "Returns overall health status with all component checks",
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/internal_handlers.HealthResponse"
+                                }
+                            }
+                        },
+                        "description": "All components healthy"
+                    },
+                    "503": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/internal_handlers.HealthResponse"
+                                }
+                            }
+                        },
+                        "description": "One or more components unhealthy"
+                    }
+                },
+                "summary": "Health check endpoint",
+                "tags": [
+                    "health"
+                ]
+            }
+        },
+        "/health/liveness": {
+            "get": {
+                "description": "Indicates if the application is running and should not be restarted",
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/internal_handlers.HealthResponse"
+                                }
+                            }
+                        },
+                        "description": "Application is alive"
+                    }
+                },
+                "summary": "Kubernetes liveness probe",
+                "tags": [
+                    "health"
+                ]
+            }
+        },
+        "/health/readiness": {
+            "get": {
+                "description": "Indicates if the application is ready to accept traffic",
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/internal_handlers.HealthResponse"
+                                }
+                            }
+                        },
+                        "description": "Application ready to accept traffic"
+                    },
+                    "503": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/internal_handlers.HealthResponse"
+                                }
+                            }
+                        },
+                        "description": "Application not ready"
+                    }
+                },
+                "summary": "Kubernetes readiness probe",
+                "tags": [
+                    "health"
+                ]
+            }
+        },
+        "/health/startup": {
+            "get": {
+                "description": "Indicates if the application has started successfully",
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/internal_handlers.HealthResponse"
+                                }
+                            }
+                        },
+                        "description": "Application started"
+                    },
+                    "503": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/internal_handlers.HealthResponse"
+                                }
+                            }
+                        },
+                        "description": "Application not started"
+                    }
+                },
+                "summary": "Kubernetes startup probe",
+                "tags": [
+                    "health"
+                ]
+            }
+        },
+        "/info": {
+            "get": {
+                "description": "Get aggregated information from all registered info providers",
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "additionalProperties": {},
+                                    "type": "object"
+                                }
+                            }
+                        },
+                        "description": "Aggregated information"
+                    },
+                    "429": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "additionalProperties": {
+                                        "type": "string"
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        },
+                        "description": "Rate limit exceeded"
+                    }
+                },
+                "summary": "Get application information",
+                "tags": [
+                    "info"
+                ]
+            }
+        },
+        "/v1/login": {
+            "post": {
+                "description": "Authenticate user and return JWT token",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/internal_handlers.LoginRequest"
+                            }
+                        }
+                    },
+                    "description": "Login credentials",
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/internal_handlers.LoginResponse"
+                                }
+                            }
+                        },
+                        "description": "OK"
+                    },
+                    "400": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "additionalProperties": {
+                                        "type": "string"
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        },
+                        "description": "Invalid request"
+                    },
+                    "401": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "additionalProperties": {
+                                        "type": "string"
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        },
+                        "description": "Invalid credentials"
+                    }
+                },
+                "summary": "Login user",
+                "tags": [
+                    "auth"
+                ]
+            }
+        },
+        "/v1/users": {
+            "get": {
+                "description": "Get list of all users (Admin only)",
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "items": {
+                                        "$ref": "#/components/schemas/myapp_internal_models.User"
+                                    },
+                                    "type": "array"
+                                }
+                            }
+                        },
+                        "description": "OK"
+                    },
+                    "401": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "additionalProperties": {
+                                        "type": "string"
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        },
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "additionalProperties": {
+                                        "type": "string"
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        },
+                        "description": "Forbidden"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerauth": []
+                    }
+                ],
+                "summary": "Get all users",
+                "tags": [
+                    "users"
+                ]
+            },
+            "post": {
+                "description": "Register a new user account",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/internal_handlers.CreateUserRequest"
+                            }
+                        }
+                    },
+                    "description": "User information",
+                    "required": true
+                },
+                "responses": {
+                    "201": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/myapp_internal_models.User"
+                                }
+                            }
+                        },
+                        "description": "Created"
+                    },
+                    "400": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "additionalProperties": {
+                                        "type": "string"
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        },
+                        "description": "Invalid request"
+                    },
+                    "500": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "additionalProperties": {
+                                        "type": "string"
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        },
+                        "description": "Server error"
+                    }
+                },
+                "summary": "Create a new user",
+                "tags": [
+                    "users"
+                ]
+            }
+        },
+        "/v1/users/{id}": {
+            "delete": {
+                "description": "Delete user by ID (Admin only)",
+                "parameters": [
+                    {
+                        "description": "User ID",
+                        "in": "path",
+                        "name": "id",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "additionalProperties": {
+                                        "type": "string"
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        },
+                        "description": "Invalid ID"
+                    },
+                    "401": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "additionalProperties": {
+                                        "type": "string"
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        },
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "additionalProperties": {
+                                        "type": "string"
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        },
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "additionalProperties": {
+                                        "type": "string"
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        },
+                        "description": "User not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerauth": []
+                    }
+                ],
+                "summary": "Delete user",
+                "tags": [
+                    "users"
+                ]
+            },
+            "get": {
+                "description": "Get user details by ID (Owner or Admin)",
+                "parameters": [
+                    {
+                        "description": "User ID",
+                        "in": "path",
+                        "name": "id",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/myapp_internal_models.User"
+                                }
+                            }
+                        },
+                        "description": "OK"
+                    },
+                    "400": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "additionalProperties": {
+                                        "type": "string"
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        },
+                        "description": "Invalid ID"
+                    },
+                    "401": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "additionalProperties": {
+                                        "type": "string"
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        },
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "additionalProperties": {
+                                        "type": "string"
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        },
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "additionalProperties": {
+                                        "type": "string"
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        },
+                        "description": "User not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerauth": []
+                    }
+                ],
+                "summary": "Get user by ID",
+                "tags": [
+                    "users"
+                ]
+            },
+            "put": {
+                "description": "Update user details (Owner or Admin)",
+                "parameters": [
+                    {
+                        "description": "User ID",
+                        "in": "path",
+                        "name": "id",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/internal_handlers.UpdateUserRequest"
+                            }
+                        }
+                    },
+                    "description": "User update information",
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/myapp_internal_models.User"
+                                }
+                            }
+                        },
+                        "description": "OK"
+                    },
+                    "400": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "additionalProperties": {
+                                        "type": "string"
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        },
+                        "description": "Invalid request"
+                    },
+                    "401": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "additionalProperties": {
+                                        "type": "string"
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        },
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "additionalProperties": {
+                                        "type": "string"
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        },
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "additionalProperties": {
+                                        "type": "string"
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        },
+                        "description": "User not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerauth": []
+                    }
+                ],
+                "summary": "Update user",
+                "tags": [
+                    "users"
+                ]
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "gorm.DeletedAt": {
+                "properties": {
+                    "time": {
+                        "type": "string"
+                    },
+                    "valid": {
+                        "description": "Valid is true if Time is not NULL",
+                        "type": "boolean"
+                    }
+                },
+                "type": "object"
+            },
+            "internal_handlers.ComponentHealth": {
+                "properties": {
+                    "details": {
+                        "additionalProperties": {},
+                        "type": "object"
+                    },
+                    "status": {
+                        "type": "string",
+                        "x-enum-varnames": [
+                            "StatusUP",
+                            "StatusDown"
+                        ]
+                    }
+                },
+                "type": "object"
+            },
+            "internal_handlers.CreateUserRequest": {
+                "properties": {
+                    "email": {
+                        "type": "string"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "password": {
+                        "minLength": 6,
+                        "type": "string"
+                    },
+                    "role": {
+                        "enum": [
+                            "user",
+                            "admin"
+                        ],
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "email",
+                    "name",
+                    "password"
+                ],
+                "type": "object"
+            },
+            "internal_handlers.HealthResponse": {
+                "properties": {
+                    "components": {
+                        "additionalProperties": {
+                            "$ref": "#/components/schemas/internal_handlers.ComponentHealth"
+                        },
+                        "type": "object"
+                    },
+                    "status": {
+                        "$ref": "#/components/schemas/internal_handlers.HealthStatus"
+                    }
+                },
+                "type": "object"
+            },
+            "internal_handlers.HealthStatus": {
+                "type": "string",
+                "x-enum-varnames": [
+                    "StatusUP",
+                    "StatusDown"
+                ]
+            },
+            "internal_handlers.LoginRequest": {
+                "properties": {
+                    "email": {
+                        "type": "string"
+                    },
+                    "password": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "email",
+                    "password"
+                ],
+                "type": "object"
+            },
+            "internal_handlers.LoginResponse": {
+                "properties": {
+                    "token": {
+                        "type": "string"
+                    },
+                    "user": {
+                        "properties": {
+                            "email": {
+                                "type": "string"
+                            },
+                            "id": {
+                                "type": "integer"
+                            },
+                            "name": {
+                                "type": "string"
+                            },
+                            "role": {
+                                "type": "string"
+                            }
+                        },
+                        "type": "object"
+                    }
+                },
+                "type": "object"
+            },
+            "internal_handlers.UpdateUserRequest": {
+                "properties": {
+                    "email": {
+                        "type": "string"
+                    },
+                    "name": {
+                        "type": "string"
+                    }
+                },
+                "type": "object"
+            },
+            "myapp_internal_models.User": {
+                "description": "User account information",
+                "properties": {
+                    "createdAt": {
+                        "type": "string"
+                    },
+                    "created_at": {
+                        "example": "2024-01-01T00:00:00Z",
+                        "type": "string"
+                    },
+                    "deletedAt": {
+                        "$ref": "#/components/schemas/gorm.DeletedAt"
+                    },
+                    "email": {
+                        "example": "john@example.com",
+                        "type": "string"
+                    },
+                    "id": {
+                        "example": 1,
+                        "type": "integer"
+                    },
+                    "name": {
+                        "example": "John Doe",
+                        "type": "string"
+                    },
+                    "role": {
+                        "example": "user",
+                        "type": "string"
+                    },
+                    "updatedAt": {
+                        "type": "string"
+                    },
+                    "updated_at": {
+                        "example": "2024-01-01T00:00:00Z",
+                        "type": "string"
+                    }
+                },
+                "type": "object"
+            }
+        },
+        "securitySchemes": {
+            "bearerauth": {
+                "bearerFormat": "JWT",
+                "scheme": "bearer",
+                "type": "http"
+            }
+        }
+    }
 }
