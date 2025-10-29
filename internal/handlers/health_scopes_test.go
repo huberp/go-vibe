@@ -54,7 +54,7 @@ func TestHealthCheckScopes(t *testing.T) {
 		req, _ := http.NewRequest("GET", "/health", nil)
 		router.ServeHTTP(w, req)
 		assert.Equal(t, http.StatusOK, w.Code)
-		var healthResponse HealthResponse
+		var healthResponse health.Response
 		json.Unmarshal(w.Body.Bytes(), &healthResponse)
 		assert.Contains(t, healthResponse.Components, "base-check")
 
@@ -63,7 +63,7 @@ func TestHealthCheckScopes(t *testing.T) {
 		req, _ = http.NewRequest("GET", "/health/startup", nil)
 		router.ServeHTTP(w, req)
 		assert.Equal(t, http.StatusOK, w.Code)
-		var startupResponse HealthResponse
+		var startupResponse health.Response
 		json.Unmarshal(w.Body.Bytes(), &startupResponse)
 		assert.NotContains(t, startupResponse.Components, "base-check")
 
@@ -72,7 +72,7 @@ func TestHealthCheckScopes(t *testing.T) {
 		req, _ = http.NewRequest("GET", "/health/readiness", nil)
 		router.ServeHTTP(w, req)
 		assert.Equal(t, http.StatusOK, w.Code)
-		var readinessResponse HealthResponse
+		var readinessResponse health.Response
 		json.Unmarshal(w.Body.Bytes(), &readinessResponse)
 		assert.NotContains(t, readinessResponse.Components, "base-check")
 
@@ -81,7 +81,7 @@ func TestHealthCheckScopes(t *testing.T) {
 		req, _ = http.NewRequest("GET", "/health/liveness", nil)
 		router.ServeHTTP(w, req)
 		assert.Equal(t, http.StatusOK, w.Code)
-		var livenessResponse HealthResponse
+		var livenessResponse health.Response
 		json.Unmarshal(w.Body.Bytes(), &livenessResponse)
 		assert.NotContains(t, livenessResponse.Components, "base-check")
 	})
@@ -92,7 +92,7 @@ func TestHealthCheckScopes(t *testing.T) {
 		req, _ := http.NewRequest("GET", "/health/startup", nil)
 		router.ServeHTTP(w, req)
 		assert.Equal(t, http.StatusOK, w.Code)
-		var startupResponse HealthResponse
+		var startupResponse health.Response
 		json.Unmarshal(w.Body.Bytes(), &startupResponse)
 		assert.Contains(t, startupResponse.Components, "startup-check")
 
@@ -101,7 +101,7 @@ func TestHealthCheckScopes(t *testing.T) {
 		req, _ = http.NewRequest("GET", "/health", nil)
 		router.ServeHTTP(w, req)
 		assert.Equal(t, http.StatusOK, w.Code)
-		var healthResponse HealthResponse
+		var healthResponse health.Response
 		json.Unmarshal(w.Body.Bytes(), &healthResponse)
 		assert.Contains(t, healthResponse.Components, "startup-check")
 	})
@@ -112,7 +112,7 @@ func TestHealthCheckScopes(t *testing.T) {
 		req, _ := http.NewRequest("GET", "/health/readiness", nil)
 		router.ServeHTTP(w, req)
 		assert.Equal(t, http.StatusOK, w.Code)
-		var readinessResponse HealthResponse
+		var readinessResponse health.Response
 		json.Unmarshal(w.Body.Bytes(), &readinessResponse)
 		assert.Contains(t, readinessResponse.Components, "ready-check")
 
@@ -121,7 +121,7 @@ func TestHealthCheckScopes(t *testing.T) {
 		req, _ = http.NewRequest("GET", "/health", nil)
 		router.ServeHTTP(w, req)
 		assert.Equal(t, http.StatusOK, w.Code)
-		var healthResponse HealthResponse
+		var healthResponse health.Response
 		json.Unmarshal(w.Body.Bytes(), &healthResponse)
 		assert.Contains(t, healthResponse.Components, "ready-check")
 	})
@@ -132,7 +132,7 @@ func TestHealthCheckScopes(t *testing.T) {
 		req, _ := http.NewRequest("GET", "/health/liveness", nil)
 		router.ServeHTTP(w, req)
 		assert.Equal(t, http.StatusOK, w.Code)
-		var livenessResponse HealthResponse
+		var livenessResponse health.Response
 		json.Unmarshal(w.Body.Bytes(), &livenessResponse)
 		assert.Contains(t, livenessResponse.Components, "live-check")
 
@@ -141,7 +141,7 @@ func TestHealthCheckScopes(t *testing.T) {
 		req, _ = http.NewRequest("GET", "/health", nil)
 		router.ServeHTTP(w, req)
 		assert.Equal(t, http.StatusOK, w.Code)
-		var healthResponse HealthResponse
+		var healthResponse health.Response
 		json.Unmarshal(w.Body.Bytes(), &healthResponse)
 		assert.Contains(t, healthResponse.Components, "live-check")
 	})
@@ -152,7 +152,7 @@ func TestHealthCheckScopes(t *testing.T) {
 		req, _ := http.NewRequest("GET", "/health/startup", nil)
 		router.ServeHTTP(w, req)
 		assert.Equal(t, http.StatusOK, w.Code)
-		var startupResponse HealthResponse
+		var startupResponse health.Response
 		json.Unmarshal(w.Body.Bytes(), &startupResponse)
 		assert.Contains(t, startupResponse.Components, "multi-scope-check")
 
@@ -161,7 +161,7 @@ func TestHealthCheckScopes(t *testing.T) {
 		req, _ = http.NewRequest("GET", "/health/readiness", nil)
 		router.ServeHTTP(w, req)
 		assert.Equal(t, http.StatusOK, w.Code)
-		var readinessResponse HealthResponse
+		var readinessResponse health.Response
 		json.Unmarshal(w.Body.Bytes(), &readinessResponse)
 		assert.Contains(t, readinessResponse.Components, "multi-scope-check")
 
@@ -170,7 +170,7 @@ func TestHealthCheckScopes(t *testing.T) {
 		req, _ = http.NewRequest("GET", "/health/liveness", nil)
 		router.ServeHTTP(w, req)
 		assert.Equal(t, http.StatusOK, w.Code)
-		var livenessResponse HealthResponse
+		var livenessResponse health.Response
 		json.Unmarshal(w.Body.Bytes(), &livenessResponse)
 		assert.Contains(t, livenessResponse.Components, "multi-scope-check")
 
@@ -179,7 +179,7 @@ func TestHealthCheckScopes(t *testing.T) {
 		req, _ = http.NewRequest("GET", "/health", nil)
 		router.ServeHTTP(w, req)
 		assert.Equal(t, http.StatusOK, w.Code)
-		var healthResponse HealthResponse
+		var healthResponse health.Response
 		json.Unmarshal(w.Body.Bytes(), &healthResponse)
 		assert.Contains(t, healthResponse.Components, "multi-scope-check")
 		// Verify it appears only once by checking we can access it
@@ -192,7 +192,7 @@ func TestHealthCheckScopes(t *testing.T) {
 		req, _ := http.NewRequest("GET", "/health", nil)
 		router.ServeHTTP(w, req)
 		assert.Equal(t, http.StatusOK, w.Code)
-		var response HealthResponse
+		var response health.Response
 		json.Unmarshal(w.Body.Bytes(), &response)
 
 		// Should contain all 5 providers
@@ -205,7 +205,7 @@ func TestHealthCheckScopes(t *testing.T) {
 
 		// All should be UP
 		for name, component := range response.Components {
-			assert.Equal(t, StatusUP, component.Status, "Component %s should be UP", name)
+			assert.Equal(t, health.StatusUp, component.Status, "Component %s should be UP", name)
 		}
 	})
 }
