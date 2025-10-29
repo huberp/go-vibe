@@ -19,17 +19,11 @@ func NewHealthHandler(registry *health.Registry) *HealthHandler {
 	}
 }
 
-// HealthCheck godoc
-// @Summary Health check endpoint
-// @Description Returns overall health status with all component checks
-// @Tags health
-// @Produce json
-// @Success 200 {object} health.Response "All components healthy"
-// @Failure 503 {object} health.Response "One or more components unhealthy"
-// @Router /health [get]
-func (h *HealthHandler) HealthCheck(c *gin.Context) {
-	// Check all providers (scope = nil means check all, but each provider only once)
-	checkResults := h.registry.Check(nil)
+// buildHealthResponse performs health checks for the given scope and builds a health response.
+// The scope parameter can be nil to check all providers.
+// Returns the HTTP status code and the health response.
+func (h *HealthHandler) buildHealthResponse(scope *health.Scope) (int, health.Response) {
+	checkResults := h.registry.Check(scope)
 
 	components := make(map[string]health.ComponentHealth)
 	for name, result := range checkResults {
@@ -51,6 +45,20 @@ func (h *HealthHandler) HealthCheck(c *gin.Context) {
 		statusCode = http.StatusServiceUnavailable
 	}
 
+	return statusCode, response
+}
+
+// HealthCheck godoc
+// @Summary Health check endpoint
+// @Description Returns overall health status with all component checks
+// @Tags health
+// @Produce json
+// @Success 200 {object} health.Response "All components healthy"
+// @Failure 503 {object} health.Response "One or more components unhealthy"
+// @Router /health [get]
+func (h *HealthHandler) HealthCheck(c *gin.Context) {
+	// Check all providers (scope = nil means check all, but each provider only once)
+	statusCode, response := h.buildHealthResponse(nil)
 	c.JSON(statusCode, response)
 }
 
@@ -65,28 +73,7 @@ func (h *HealthHandler) HealthCheck(c *gin.Context) {
 func (h *HealthHandler) StartupProbe(c *gin.Context) {
 	// Check only startup scope providers
 	scope := health.ScopeStartup
-	checkResults := h.registry.Check(&scope)
-
-	components := make(map[string]health.ComponentHealth)
-	for name, result := range checkResults {
-		components[name] = health.ComponentHealth{
-			Status:  result.Status,
-			Details: result.Details,
-		}
-	}
-
-	overallStatus := health.OverallStatus(checkResults)
-
-	response := health.Response{
-		Status:     overallStatus,
-		Components: components,
-	}
-
-	statusCode := http.StatusOK
-	if overallStatus == health.StatusDown {
-		statusCode = http.StatusServiceUnavailable
-	}
-
+	statusCode, response := h.buildHealthResponse(&scope)
 	c.JSON(statusCode, response)
 }
 
@@ -100,23 +87,7 @@ func (h *HealthHandler) StartupProbe(c *gin.Context) {
 func (h *HealthHandler) LivenessProbe(c *gin.Context) {
 	// Check only liveness scope providers
 	scope := health.ScopeLive
-	checkResults := h.registry.Check(&scope)
-
-	components := make(map[string]health.ComponentHealth)
-	for name, result := range checkResults {
-		components[name] = health.ComponentHealth{
-			Status:  result.Status,
-			Details: result.Details,
-		}
-	}
-
-	overallStatus := health.OverallStatus(checkResults)
-
-	response := health.Response{
-		Status:     overallStatus,
-		Components: components,
-	}
-
+	_, response := h.buildHealthResponse(&scope)
 	c.JSON(http.StatusOK, response)
 }
 
@@ -131,27 +102,6 @@ func (h *HealthHandler) LivenessProbe(c *gin.Context) {
 func (h *HealthHandler) ReadinessProbe(c *gin.Context) {
 	// Check only readiness scope providers
 	scope := health.ScopeReady
-	checkResults := h.registry.Check(&scope)
-
-	components := make(map[string]health.ComponentHealth)
-	for name, result := range checkResults {
-		components[name] = health.ComponentHealth{
-			Status:  result.Status,
-			Details: result.Details,
-		}
-	}
-
-	overallStatus := health.OverallStatus(checkResults)
-
-	response := health.Response{
-		Status:     overallStatus,
-		Components: components,
-	}
-
-	statusCode := http.StatusOK
-	if overallStatus == health.StatusDown {
-		statusCode = http.StatusServiceUnavailable
-	}
-
+	statusCode, response := h.buildHealthResponse(&scope)
 	c.JSON(statusCode, response)
 }
