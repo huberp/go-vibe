@@ -28,6 +28,18 @@ type CheckResult struct {
 	Details map[string]interface{} `json:"details,omitempty"`
 }
 
+// ComponentHealth represents the health of a single component
+type ComponentHealth struct {
+	Status  Status                 `json:"status"`
+	Details map[string]interface{} `json:"details,omitempty"`
+}
+
+// Response represents the overall health response
+type Response struct {
+	Status     Status                     `json:"status"`
+	Components map[string]ComponentHealth `json:"components,omitempty"`
+}
+
 // HealthCheckProvider defines the interface for providing health check information.
 // Implementations can check various aspects of application health such as
 // database connectivity, external service availability, or custom metrics.
