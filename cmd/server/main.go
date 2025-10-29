@@ -35,7 +35,6 @@ import (
 // @servers.description Development server
 
 // @securitydefinitions.bearerauth BearerAuth
-// @description Type "Bearer" followed by a space and JWT token.
 
 func main() {
 	// Parse command line flags

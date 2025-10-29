@@ -20,7 +20,7 @@ const docTemplate = `{
 var SwaggerInfo = &swag.Spec{
 	Version:          "1.0",
 	Title:            "User Management API",
-	Description:      "Type \"Bearer\" followed by a space and JWT token.",
+	Description:      "Production-ready user management microservice with JWT authentication",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 	LeftDelim:        "{{",

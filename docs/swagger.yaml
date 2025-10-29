@@ -126,7 +126,7 @@ info:
     email: support@swagger.io
     name: API Support
     url: http://www.swagger.io/support
-  description: Type "Bearer" followed by a space and JWT token.
+  description: Production-ready user management microservice with JWT authentication
   license:
     name: Apache 2.0
     url: http://www.apache.org/licenses/LICENSE-2.0.html
