@@ -1,6 +1,6 @@
 # Database Migrations Guide
 
-This project uses [golang-migrate](https://github.com/golang-migrate/migrate) for database schema management.
+For db schema migration ``golang-migrate`` is used.
 
 ## Overview
 
