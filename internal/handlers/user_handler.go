@@ -41,7 +41,7 @@ type UpdateUserRequest struct {
 // @Description Get list of all users (Admin only)
 // @Tags users
 // @Produce json
-// @Security BearerAuth
+// @Security bearerauth
 // @Success 200 {array} models.User
 // @Failure 401 {object} map[string]string "Unauthorized"
 // @Failure 403 {object} map[string]string "Forbidden"
@@ -107,7 +107,7 @@ func (h *UserHandler) CreateUser(c *gin.Context) {
 // @Description Get user details by ID (Owner or Admin)
 // @Tags users
 // @Produce json
-// @Security BearerAuth
+// @Security bearerauth
 // @Param id path int true "User ID"
 // @Success 200 {object} models.User
 // @Failure 400 {object} map[string]string "Invalid ID"
@@ -148,7 +148,7 @@ func (h *UserHandler) GetUserByID(c *gin.Context) {
 // @Tags users
 // @Accept json
 // @Produce json
-// @Security BearerAuth
+// @Security bearerauth
 // @Param id path int true "User ID"
 // @Param request body UpdateUserRequest true "User update information"
 // @Success 200 {object} models.User
@@ -208,7 +208,7 @@ func (h *UserHandler) UpdateUser(c *gin.Context) {
 // @Summary Delete user
 // @Description Delete user by ID (Admin only)
 // @Tags users
-// @Security BearerAuth
+// @Security bearerauth
 // @Param id path int true "User ID"
 // @Success 204 "No Content"
 // @Failure 400 {object} map[string]string "Invalid ID"
