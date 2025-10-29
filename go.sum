@@ -62,7 +62,7 @@ github.com/go-openapi/jsonreference v0.21.2 h1:Wxjda4M/BBQllegefXrY/9aq1fxBA8sI5
 github.com/go-openapi/jsonreference v0.21.2/go.mod h1:pp3PEjIsJ9CZDGCNOyXIQxsNuroxm8FAJ/+quA0yKzQ=
 github.com/go-openapi/spec v0.22.0 h1:xT/EsX4frL3U09QviRIZXvkh80yibxQmtoEvyqug0Tw=
 github.com/go-openapi/spec v0.22.0/go.mod h1:K0FhKxkez8YNS94XzF8YKEMULbFrRw4m15i2YUht4L0=
-github.com/go-openapi/swag v0.19.15 h1:D2NRCBzS9/pEY3gP9Nl8aDqGUcPFrwG2p+CNFrLyrCM=
+github.com/go-openapi/swag v0.22.3 h1:yMBqmnQ0gyZvEb/+KzuWZOXgllrXT4SADYbvDaXHv/g=
 github.com/go-openapi/swag/conv v0.25.1 h1:+9o8YUg6QuqqBM5X6rYL/p1dpWeZRhoIt9x7CCP+he0=
 github.com/go-openapi/swag/conv v0.25.1/go.mod h1:Z1mFEGPfyIKPu0806khI3zF+/EUXde+fdeksUl2NiDs=
 github.com/go-openapi/swag/jsonname v0.25.1 h1:Sgx+qbwa4ej6AomWC6pEfXrA6uP2RkaNjA9BR8a1RJU=
