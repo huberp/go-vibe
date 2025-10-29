@@ -12,7 +12,7 @@ The `health` package provides a flexible system for monitoring application healt
 - ✅ **Kubernetes Ready**: Built-in support for K8s startup, liveness, and readiness probes
 - ✅ **Extensible**: Easy to add custom health check providers
 - ✅ **Thread-Safe**: Registry supports concurrent access
-- ✅ **Zero Dependencies**: Only depends on standard library and GORM for database checks
+- ✅ **Minimal Dependencies**: Core types have no external dependencies; optional providers use GORM
 - ✅ **JSON Response Types**: Ready-to-use HTTP response structures
 
 ## Quick Start
@@ -20,7 +20,7 @@ The `health` package provides a flexible system for monitoring application healt
 ### 1. Create a Registry
 
 ```go
-import "myapp/pkg/health"
+import "yourapp/pkg/health"
 
 registry := health.NewRegistry()
 ```
@@ -300,7 +300,7 @@ func HealthCheckHandler(c *gin.Context) {
 package main
 
 import (
-    "myapp/pkg/health"
+    "yourapp/pkg/health"
     "github.com/gin-gonic/gin"
     "gorm.io/gorm"
 )
