@@ -1,5 +1,7 @@
 # Copilot Instructions for go-vibe
 
+> **🚨 CRITICAL**: DO NOT CHANGE LICENSE or README.md to turn them into copies of a db migration project. This project IS NOT a copy of the db migration project.
+
 > **📘 Note**: This file provides comprehensive development guidelines for GitHub Copilot and other AI coding assistants, as well as human contributors. It ensures consistent code quality and adherence to project standards.
 
 This document provides overarching guidelines and best practices for contributing to the go-vibe project. These instructions apply across the entire codebase.

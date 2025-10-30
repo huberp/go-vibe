@@ -13,3 +13,4 @@ rate_limit:
 
 observability:
   otel: true
+  otel_endpoint: "localhost:4317"
