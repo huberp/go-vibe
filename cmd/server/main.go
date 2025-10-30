@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"fmt"
 	"log"
@@ -9,6 +10,7 @@ import (
 	"myapp/pkg/config"
 	"myapp/pkg/logger"
 	"myapp/pkg/migration"
+	"myapp/pkg/otel"
 	"os"
 
 	_ "myapp/docs" // Import generated docs
@@ -64,6 +66,22 @@ func main() {
 	logger.Log.Info("Starting server",
 		zap.String("stage", activeStage),
 		zap.String("port", cfg.Server.Port))
+
+	// Initialize OpenTelemetry if enabled
+	if cfg.Observability.Otel {
+		ctx := context.Background()
+		_, cleanup, err := otel.InitProvider(ctx, "myapp", cfg.Observability.OtelEndpoint, logger.Log)
+		if err != nil {
+			logger.Log.Warn("Failed to initialize OpenTelemetry provider, continuing without tracing",
+				zap.Error(err))
+		} else {
+			defer func() {
+				if err := cleanup(context.Background()); err != nil {
+					logger.Log.Error("Failed to shutdown OpenTelemetry provider", zap.Error(err))
+				}
+			}()
+		}
+	}
 
 	// Connect to database
 	db, err := gorm.Open(postgres.Open(cfg.Database.URL), &gorm.Config{})
