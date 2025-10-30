@@ -113,7 +113,8 @@ A **production-ready microservice** has been successfully implemented following 
 - ✅ Metrics endpoint at `/metrics` (Prometheus format)
 - ✅ Structured logging with Zap
 - ✅ W3C trace context support (traceparent header)
-- ✅ OpenTelemetry tracing integration
+- ✅ OpenTelemetry tracing integration with OTLP exporter
+- ✅ OTEL Collector configuration for trace aggregation
 - ✅ Request ID tracking (UUID or trace ID)
 
 #### Security ✅
@@ -470,7 +471,14 @@ helm lint ./helm/myapp
 # 5. Test API
 docker-compose up
 ./test-api.sh
+
+# 6. Test OpenTelemetry tracing
+./test-otel.sh
 ```
+
+## 📚 Documentation
+
+- **[OTEL_SETUP.md](docs/OTEL_SETUP.md)** - Complete OpenTelemetry setup and configuration guide
 
 ## 🏆 Summary
 
