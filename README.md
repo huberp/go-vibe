@@ -1,376 +1,196 @@
-# go-vibe
+[![GitHub Workflow Status (branch)](https://img.shields.io/github/actions/workflow/status/golang-migrate/migrate/ci.yaml?branch=master)](https://github.com/golang-migrate/migrate/actions/workflows/ci.yaml?query=branch%3Amaster)
+[![GoDoc](https://pkg.go.dev/badge/github.com/golang-migrate/migrate)](https://pkg.go.dev/github.com/golang-migrate/migrate/v4)
+[![Coverage Status](https://img.shields.io/coveralls/github/golang-migrate/migrate/master.svg)](https://coveralls.io/github/golang-migrate/migrate?branch=master)
+[![packagecloud.io](https://img.shields.io/badge/deb-packagecloud.io-844fec.svg)](https://packagecloud.io/golang-migrate/migrate?filter=debs)
+[![Docker Pulls](https://img.shields.io/docker/pulls/migrate/migrate.svg)](https://hub.docker.com/r/migrate/migrate/)
+![Supported Go Versions](https://img.shields.io/badge/Go-1.24%2C%201.25-lightgrey.svg)
+[![GitHub Release](https://img.shields.io/github/release/golang-migrate/migrate.svg)](https://github.com/golang-migrate/migrate/releases)
+[![Go Report Card](https://goreportcard.com/badge/github.com/golang-migrate/migrate/v4)](https://goreportcard.com/report/github.com/golang-migrate/migrate/v4)
 
-[![Build](https://github.com/huberp/go-vibe/workflows/Build/badge.svg)](https://github.com/huberp/go-vibe/actions/workflows/build.yml)
-[![Test](https://github.com/huberp/go-vibe/workflows/Test/badge.svg)](https://github.com/huberp/go-vibe/actions/workflows/test.yml)
-[![Deploy](https://github.com/huberp/go-vibe/workflows/Deploy/badge.svg)](https://github.com/huberp/go-vibe/actions/workflows/deploy.yml)
-[![codecov](https://codecov.io/gh/huberp/go-vibe/branch/main/graph/badge.svg)](https://codecov.io/gh/huberp/go-vibe)
-[![Go Version](https://img.shields.io/badge/Go-1.25.2-blue.svg)](https://go.dev/)
-[![Go Report Card](https://goreportcard.com/badge/github.com/huberp/go-vibe)](https://goreportcard.com/report/github.com/huberp/go-vibe)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+# migrate
 
-**A production-ready user management microservice built with Go, following Test-Driven Development (TDD) principles and designed for cloud-native Kubernetes deployment.**
+__Database migrations written in Go. Use as [CLI](#cli-usage) or import as [library](#use-in-your-go-project).__
 
-## Features
+* Migrate reads migrations from [sources](#migration-sources)
+   and applies them in correct order to a [database](#databases).
+* Drivers are "dumb", migrate glues everything together and makes sure the logic is bulletproof.
+   (Keeps the drivers lightweight, too.)
+* Database drivers don't assume things or try to correct user input. When in doubt, fail.
 
-- ✅ **RESTful API** with JWT authentication
-- ✅ **Role-based Access Control** (RBAC) - admin and user roles
-- ✅ **PostgreSQL** database with GORM ORM
-- ✅ **Database migrations** with golang-migrate
-- ✅ **OpenAPI/Swagger** documentation (auto-generated)
-- ✅ **Prometheus metrics** for monitoring
-- ✅ **Structured logging** with Zap
-- ✅ **OpenTelemetry** tracing support
-- ✅ **Rate limiting** (configurable per environment)
-- ✅ **CORS** middleware
-- ✅ **Docker** containerization
-- ✅ **Kubernetes/Helm** deployment
-- ✅ **CI/CD** with GitHub Actions
-- ✅ **100% test coverage** for critical paths
+Forked from [mattes/migrate](https://github.com/mattes/migrate)
 
-## Quick Start
+## Databases
 
-### Prerequisites
+Database drivers run migrations. [Add a new database?](database/driver.go)
 
-- Go 1.25.2 or higher
-- PostgreSQL 13+
-- Docker (optional, for containerized deployment)
-- Kubernetes cluster (optional, for production deployment)
+* [PostgreSQL](database/postgres)
+* [PGX v4](database/pgx)
+* [PGX v5](database/pgx/v5)
+* [Redshift](database/redshift)
+* [Ql](database/ql)
+* [Cassandra / ScyllaDB](database/cassandra)
+* [SQLite](database/sqlite)
+* [SQLite3](database/sqlite3) ([todo #165](https://github.com/mattes/migrate/issues/165))
+* [SQLCipher](database/sqlcipher)
+* [MySQL / MariaDB](database/mysql)
+* [Neo4j](database/neo4j)
+* [MongoDB](database/mongodb)
+* [CrateDB](database/crate) ([todo #170](https://github.com/mattes/migrate/issues/170))
+* [Shell](database/shell) ([todo #171](https://github.com/mattes/migrate/issues/171))
+* [Google Cloud Spanner](database/spanner)
+* [CockroachDB](database/cockroachdb)
+* [YugabyteDB](database/yugabytedb)
+* [ClickHouse](database/clickhouse)
+* [Firebird](database/firebird)
+* [MS SQL Server](database/sqlserver)
+* [rqlite](database/rqlite)
 
-### Local Development
+### Database URLs
 
-1. **Clone the repository:**
-   ```bash
-   git clone https://github.com/huberp/go-vibe.git
-   cd go-vibe
-   ```
+Database connection strings are specified via URLs. The URL format is driver dependent but generally has the form: `dbdriver://username:password@host:port/dbname?param1=true&param2=false`
 
-2. **Set up environment variables:**
-   ```bash
-   export DATABASE_URL="postgres://user:password@localhost:5432/myapp?sslmode=disable"
-   export JWT_SECRET="your-secret-key-here"
-   export SERVER_PORT="8080"
-   ```
+Any [reserved URL characters](https://en.wikipedia.org/wiki/Percent-encoding#Percent-encoding_reserved_characters) need to be escaped. Note, the `%` character also [needs to be escaped](https://en.wikipedia.org/wiki/Percent-encoding#Percent-encoding_the_percent_character)
 
-3. **Install dependencies:**
-   ```bash
-   go mod download
-   ```
+Explicitly, the following characters need to be escaped:
+`!`, `#`, `$`, `%`, `&`, `'`, `(`, `)`, `*`, `+`, `,`, `/`, `:`, `;`, `=`, `?`, `@`, `[`, `]`
 
-4. **Generate Swagger documentation:**
-   ```bash
-   # Linux/macOS
-   ./scripts/swagger.sh
-   
-   # Windows PowerShell
-   .\scripts\swagger.ps1
-   ```
-
-5. **Run the application:**
-   ```bash
-   go run ./cmd/server
-   ```
-
-6. **Access the API:**
-   - Health check: http://localhost:8080/health
-   - Swagger UI: http://localhost:8080/swagger/index.html
-   - Metrics: http://localhost:8080/metrics
-
-### Using Docker Compose
+It's easiest to always run the URL parts of your DB connection URL (e.g. username, password, etc) through an URL encoder. See the example Python snippets below:
 
 ```bash
-docker-compose up -d
+$ python3 -c 'import urllib.parse; print(urllib.parse.quote(input("String to encode: "), ""))'
+String to encode: FAKEpassword!#$%&'()*+,/:;=?@[]
+FAKEpassword%21%23%24%25%26%27%28%29%2A%2B%2C%2F%3A%3B%3D%3F%40%5B%5D
+$ python2 -c 'import urllib; print urllib.quote(raw_input("String to encode: "), "")'
+String to encode: FAKEpassword!#$%&'()*+,/:;=?@[]
+FAKEpassword%21%23%24%25%26%27%28%29%2A%2B%2C%2F%3A%3B%3D%3F%40%5B%5D
+$
 ```
 
-This will start both the application and PostgreSQL database.
+## Migration Sources
 
-## API Endpoints
+Source drivers read migrations from local or remote sources. [Add a new source?](source/driver.go)
 
-### v1 API (Recommended)
+* [Filesystem](source/file) - read from filesystem
+* [io/fs](source/iofs) - read from a Go [io/fs](https://pkg.go.dev/io/fs#FS)
+* [Go-Bindata](source/go_bindata) - read from embedded binary data ([jteeuwen/go-bindata](https://github.com/jteeuwen/go-bindata))
+* [pkger](source/pkger) - read from embedded binary data ([markbates/pkger](https://github.com/markbates/pkger))
+* [GitHub](source/github) - read from remote GitHub repositories
+* [GitHub Enterprise](source/github_ee) - read from remote GitHub Enterprise repositories
+* [Bitbucket](source/bitbucket) - read from remote Bitbucket repositories
+* [Gitlab](source/gitlab) - read from remote Gitlab repositories
+* [AWS S3](source/aws_s3) - read from Amazon Web Services S3
+* [Google Cloud Storage](source/google_cloud_storage) - read from Google Cloud Platform Storage
 
-| Method | Endpoint         | Auth            | Description          |
-|--------|------------------|-----------------|----------------------|
-| POST   | `/v1/users`      | None (signup)   | Create a user        |
-| POST   | `/v1/login`      | None            | Authenticate user    |
-| GET    | `/v1/users`      | JWT (admin)     | List all users       |
-| GET    | `/v1/users/{id}` | JWT (owner/admin) | Get user by ID     |
-| PUT    | `/v1/users/{id}` | JWT (owner/admin) | Update user by ID  |
-| DELETE | `/v1/users/{id}` | JWT (admin)     | Delete user by ID    |
+## CLI usage
 
-### Monitoring & Documentation
+* Simple wrapper around this library.
+* Handles ctrl+c (SIGINT) gracefully.
+* No config search paths, no config files, no magic ENV var injections.
 
-| Method | Endpoint       | Auth | Description                    |
-|--------|----------------|------|--------------------------------|
-| GET    | `/health`      | None | Health check                   |
-| GET    | `/metrics`     | None | Prometheus metrics             |
-| GET    | `/swagger/*`   | None | OpenAPI/Swagger documentation  |
+[CLI Documentation](cmd/migrate) (includes CLI install instructions)
 
-For detailed API documentation, see the [Swagger UI](http://localhost:8080/swagger/index.html) when running locally.
-
-## Configuration
-
-The application supports multiple configuration methods:
-
-1. **Environment Variables** (highest priority)
-2. **YAML Configuration Files** (stage-specific)
-3. **Default Values** (fallback)
-
-### Environment Variables
+### Basic usage
 
 ```bash
-DATABASE_URL=postgres://user:password@localhost:5432/myapp?sslmode=disable
-JWT_SECRET=your-secret-key
-SERVER_PORT=8080
-APP_STAGE=production  # Options: development, staging, production
+$ migrate -source file://path/to/migrations -database postgres://localhost:5432/database up 2
 ```
 
-### YAML Configuration
-
-Configuration files are located in `config/`:
-- `base.yaml` - Shared defaults
-- `development.yaml` - Development overrides
-- `staging.yaml` - Staging overrides
-- `production.yaml` - Production overrides
-
-See [docs/configuration/yaml-config-migration.md](docs/configuration/yaml-config-migration.md) for details.
-
-## Testing
-
-### Run all tests:
+### Docker usage
 
 ```bash
-# Linux/macOS
-./scripts/test.sh
-
-# Windows PowerShell
-.\scripts\test.ps1
-
-# Manual
-go test ./... -v
+$ docker run -v {{ migration dir }}:/migrations --network host migrate/migrate
+    -path=/migrations/ -database postgres://localhost:5432/database up 2
 ```
 
-### Run tests with coverage:
+## Use in your Go project
+
+* API is stable and frozen for this release (v3 & v4).
+* Uses [Go modules](https://golang.org/cmd/go/#hdr-Modules__module_versions__and_more) to manage dependencies.
+* To help prevent database corruptions, it supports graceful stops via `GracefulStop chan bool`.
+* Bring your own logger.
+* Uses `io.Reader` streams internally for low memory overhead.
+* Thread-safe and no goroutine leaks.
+
+__[Go Documentation](https://pkg.go.dev/github.com/golang-migrate/migrate/v4)__
+
+```go
+import (
+    "github.com/golang-migrate/migrate/v4"
+    _ "github.com/golang-migrate/migrate/v4/database/postgres"
+    _ "github.com/golang-migrate/migrate/v4/source/github"
+)
+
+func main() {
+    m, err := migrate.New(
+        "github://mattes:personal-access-token@mattes/migrate_test",
+        "postgres://localhost:5432/database?sslmode=enable")
+    m.Steps(2)
+}
+```
+
+Want to use an existing database client?
+
+```go
+import (
+    "database/sql"
+    _ "github.com/lib/pq"
+    "github.com/golang-migrate/migrate/v4"
+    "github.com/golang-migrate/migrate/v4/database/postgres"
+    _ "github.com/golang-migrate/migrate/v4/source/file"
+)
+
+func main() {
+    db, err := sql.Open("postgres", "postgres://localhost:5432/database?sslmode=enable")
+    driver, err := postgres.WithInstance(db, &postgres.Config{})
+    m, err := migrate.NewWithDatabaseInstance(
+        "file:///migrations",
+        "postgres", driver)
+    m.Up() // or m.Steps(2) if you want to explicitly set the number of migrations to run
+}
+```
+
+## Getting started
+
+Go to [getting started](GETTING_STARTED.md)
+
+## Tutorials
+
+* [CockroachDB](database/cockroachdb/TUTORIAL.md)
+* [PostgreSQL](database/postgres/TUTORIAL.md)
+
+(more tutorials to come)
+
+## Migration files
+
+Each migration has an up and down migration. [Why?](FAQ.md#why-two-separate-files-up-and-down-for-a-migration)
 
 ```bash
-# Linux/macOS
-./scripts/test-coverage.sh
-
-# Windows PowerShell
-.\scripts\test-coverage.ps1
-
-# Manual
-go test ./... -coverprofile=coverage.out
-go tool cover -html=coverage.out
+1481574547_create_users_table.up.sql
+1481574547_create_users_table.down.sql
 ```
 
-### Test API endpoints:
+[Best practices: How to write migrations.](MIGRATIONS.md)
 
-```bash
-# Linux/macOS
-./test-api.sh
+## Coming from another db migration tool?
 
-# Windows PowerShell
-.\test-api.ps1
-```
+Check out [migradaptor](https://github.com/musinit/migradaptor/).
+*Note: migradaptor is not affiliated or supported by this project*
 
-## Database Migrations
+## Versions
 
-### Create a new migration:
+Version | Supported? | Import | Notes
+--------|------------|--------|------
+**master** | :white_check_mark: | `import "github.com/golang-migrate/migrate/v4"` | New features and bug fixes arrive here first |
+**v4** | :white_check_mark: | `import "github.com/golang-migrate/migrate/v4"` | Used for stable releases |
+**v3** | :x: | `import "github.com/golang-migrate/migrate"` (with package manager) or `import "gopkg.in/golang-migrate/migrate.v3"` (not recommended) | **DO NOT USE** - No longer supported |
 
-```bash
-# Linux/macOS
-./scripts/migrate.sh create <migration_name>
+## Development and Contributing
 
-# Windows PowerShell
-.\scripts\migrate.ps1 create <migration_name>
-```
+Yes, please! [`Makefile`](Makefile) is your friend,
+read the [development guide](CONTRIBUTING.md).
 
-### Apply migrations:
-
-```bash
-# Linux/macOS
-./scripts/migrate.sh up
-
-# Windows PowerShell
-.\scripts\migrate.ps1 up
-```
-
-See [docs/database/migrations.md](docs/database/migrations.md) for detailed migration guide.
-
-## Deployment
-
-### Build Docker Image
-
-```bash
-docker build -t go-vibe:latest .
-```
-
-### Deploy to Kubernetes with Helm
-
-```bash
-helm install myapp ./helm/myapp \
-  --set database.url="$DATABASE_URL" \
-  --set jwt.secret="$JWT_SECRET" \
-  --namespace production \
-  --create-namespace
-```
-
-For local Kubernetes setup, see [docs/deployment/LOCAL_K8S_SETUP_SUMMARY.md](docs/deployment/LOCAL_K8S_SETUP_SUMMARY.md).
-
-## Observability
-
-### Prometheus Metrics
-
-The application exposes the following metrics at `/metrics`:
-
-- `http_requests_total` - Total HTTP requests by method, path, and status
-- `http_request_duration_seconds` - HTTP request duration
-- `users_total` - Total number of users (gauge)
-- Go runtime metrics (memory, GC, goroutines, etc.)
-
-### Structured Logging
-
-All logs are structured using Zap with the following fields:
-- `method` - HTTP method
-- `path` - Request path
-- `status` - Response status code
-- `duration` - Request duration
-- `client_ip` - Client IP address
-- `trace_id` - W3C trace ID (if available)
-- `span_id` - OpenTelemetry span ID (if available)
-
-### Tracing
-
-The application supports W3C Trace Context and OpenTelemetry tracing:
-- Automatic trace ID extraction from `traceparent` header
-- Span context propagation
-- Integration with OpenTelemetry backends
-
-## Project Structure
-
-```
-.
-├── .github/workflows/       # CI/CD pipelines
-├── cmd/server/             # Application entry point
-├── config/                 # YAML configuration files
-├── docs/                   # Documentation and Swagger specs
-├── helm/myapp/            # Kubernetes Helm chart
-├── internal/              # Private application code
-│   ├── handlers/          # HTTP request handlers
-│   ├── middleware/        # HTTP middleware (auth, logging, metrics)
-│   ├── models/            # Data models
-│   ├── repository/        # Data access layer
-│   └── routes/            # Route configuration
-├── migrations/            # Database migrations
-├── pkg/                   # Public libraries
-│   ├── config/            # Configuration loader
-│   ├── logger/            # Logging setup
-│   ├── migration/         # Migration runner
-│   └── utils/             # Utilities (JWT, password hashing)
-├── scripts/               # Build and deployment scripts
-├── Dockerfile             # Multi-stage Docker build
-├── docker-compose.yml     # Local development setup
-└── go.mod                 # Go module dependencies
-```
-
-## Development Scripts
-
-All common development tasks have helper scripts:
-
-```bash
-# Linux/macOS
-./scripts/build.sh              # Build the application
-./scripts/test.sh               # Run tests
-./scripts/test-coverage.sh      # Run tests with coverage
-./scripts/swagger.sh            # Generate Swagger docs
-./scripts/migrate.sh            # Database migrations
-./scripts/run-background.sh     # Start server in background
-./scripts/stop.sh               # Stop background server
-
-# Windows PowerShell
-.\scripts\build.ps1
-.\scripts\test.ps1
-.\scripts\test-coverage.ps1
-.\scripts\swagger.ps1
-.\scripts\migrate.ps1
-.\scripts\run-background.ps1
-.\scripts\stop.ps1
-```
-
-See [scripts/README.md](scripts/README.md) for detailed script documentation.
-
-## Security
-
-- ✅ JWT (HS256) token-based authentication
-- ✅ Password hashing with bcrypt (cost factor: 12)
-- ✅ Input validation on all endpoints
-- ✅ SQL injection prevention (GORM parameterized queries)
-- ✅ Role-based access control (RBAC)
-- ✅ Configurable rate limiting
-- ✅ CORS middleware
-
-**Security Best Practices:**
-- Never commit secrets to version control
-- Store JWT_SECRET and DATABASE_URL in environment variables or Kubernetes secrets
-- Use HTTPS in production (configure in Kubernetes ingress)
-- Regularly update dependencies
-
-## Contributing
-
-Contributions are welcome! Please follow these guidelines:
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Write tests for your changes (TDD approach)
-4. Ensure all tests pass (`./scripts/test.sh`)
-5. Commit your changes with conventional commits format
-6. Push to the branch (`git push origin feature/amazing-feature`)
-7. Open a Pull Request
-
-See [.github/copilot-instructions.md](.github/copilot-instructions.md) for detailed contribution guidelines.
-
-## License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## Documentation
-
-For comprehensive documentation, see the [docs/](docs/) directory:
-
-- **API Documentation**: [docs/api/](docs/api/) - OpenAPI/Swagger specifications
-- **Configuration Guide**: [docs/configuration/](docs/configuration/) - YAML config and migration
-- **Database Guide**: [docs/database/](docs/database/) - Migrations and PostgreSQL setup
-- **Deployment Guide**: [docs/deployment/](docs/deployment/) - Kubernetes and local setup
-- **Development Guide**: [docs/development/](docs/development/) - Code review and workflows
-- **Observability**: [docs/observability/](docs/observability/) - Metrics and monitoring
-
-## Architecture
-
-This microservice follows Clean Architecture principles:
-
-- **Repository Pattern** for data access abstraction
-- **Dependency Injection** for testability
-- **Interface-based design** for flexibility
-- **Separation of concerns** across layers
-- **Test-Driven Development** (TDD) for all features
-
-## Tech Stack
-
-- **Language**: Go 1.25.2
-- **Web Framework**: Gin v1.11.0
-- **ORM**: GORM v1.31.0
-- **Database**: PostgreSQL 13+
-- **Authentication**: JWT (github.com/golang-jwt/jwt/v5)
-- **Logging**: Zap v1.27.0
-- **Testing**: Testify v1.11.1 + gomock
-- **Metrics**: Prometheus v1.23.2
-- **Migrations**: golang-migrate v4.19.0
-- **Documentation**: Swagger/OpenAPI (swaggo)
-- **Deployment**: Docker, Kubernetes, Helm
-
-## Acknowledgments
-
-Built with Test-Driven Development (TDD) principles and following Go best practices.
+Also have a look at the [FAQ](FAQ.md).
 
 ---
 
-For more information, see the [Implementation Summary](IMPLEMENTATION_SUMMARY.md).
+Looking for alternatives? [https://awesome-go.com/#database](https://awesome-go.com/#database).
