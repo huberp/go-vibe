@@ -39,57 +39,20 @@ jobs:
       # Pre-download Go dependencies
       # This speeds up build, test, and development operations
       - name: Download Go dependencies
-        run: go mod download
-
-      # Install Swagger CLI tool (swag)
-      # Used by build workflow to generate API documentation
-      - name: Install Swagger CLI
-        run: go install github.com/swaggo/swag/cmd/swag@latest
-
-      # Install golang-migrate CLI
-      # Used for database migration operations
-      - name: Install golang-migrate
-        run: |
-          curl -L https://github.com/golang-migrate/migrate/releases/latest/download/migrate.linux-amd64.tar.gz | tar xvz
-          sudo mv migrate /usr/local/bin/migrate
-          migrate -version
-
-      # Install mockgen for generating mocks
-      # Used in testing workflows
-      - name: Install mockgen
-        run: go install go.uber.org/mock/mockgen@latest
+        run: go mod download 
 
       # Install golangci-lint for code quality checks
       # Common tool for Go projects
       - name: Install golangci-lint
         run: |
           curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin
-          golangci-lint --version
-
-      # Set up Docker Buildx
-      # Used in deployment workflows
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      # Install Helm
-      # Used for Kubernetes deployments
-      - name: Set up Helm
-        uses: azure/setup-helm@v4
-        with:
-          version: 'latest'
+          golangci-lint --version 
 
       # Pre-build common Go tools to cache them
       - name: Pre-build Go tools
         run: |
           go build -v ./cmd/server
-          go test -v -run=^$ ./... # Compile tests without running them
-
-      # Install kubectl for Kubernetes operations
-      - name: Install kubectl
-        run: |
-          curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
-          sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
-          kubectl version --client
+          go test -v -run=^$ ./... # Compile tests without running them   
 
       # Verify all tools are installed correctly
       - name: Verify installations
@@ -97,23 +60,8 @@ jobs:
           echo "=== Go version ==="
           go version
           
-          echo "=== Swag version ==="
-          swag --version
-          
-          echo "=== Migrate version ==="
-          migrate -version
-          
-          echo "=== Mockgen version ==="
-          mockgen --version
-          
           echo "=== Golangci-lint version ==="
           golangci-lint --version
-          
-          echo "=== Helm version ==="
-          helm version
-          
-          echo "=== Kubectl version ==="
-          kubectl version --client
           
           echo "=== Docker version ==="
           docker --version
@@ -128,13 +76,7 @@ jobs:
           echo "The following tools and dependencies have been pre-installed:"
           echo "  ✓ Go 1.25.2 with cached modules"
           echo "  ✓ Project dependencies (go mod download)"
-          echo "  ✓ Swagger CLI (swag)"
-          echo "  ✓ golang-migrate"
-          echo "  ✓ mockgen"
           echo "  ✓ golangci-lint"
-          echo "  ✓ Docker Buildx"
-          echo "  ✓ Helm"
-          echo "  ✓ kubectl"
           echo ""
           echo "This setup is based on the most frequently used tools in:"
           echo "  - build.yml (Go, swag, modules)"
