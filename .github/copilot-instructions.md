@@ -32,16 +32,20 @@ This document provides overarching guidelines and best practices for contributin
 
 ## Project Overview
 
-go-vibe is a production-ready user management microservice built with Go 1.25.2, following Test-Driven Development (TDD) principles and designed for cloud-native Kubernetes deployment.
+go-vibe is a production-ready Go microservice template built with Go 1.25.2, following Test-Driven Development (TDD) principles and designed for cloud-native Kubernetes deployment.
 
-**Target Audience**: Backend developers working on Go microservices with PostgreSQL databases, deployed on Kubernetes.
+**Target Audience**: Backend developers building Go microservices with PostgreSQL databases, deployed on Kubernetes.
 
 **Key Design Decisions**:
 - TDD-first approach for all new features
 - Repository pattern for data abstraction
-- JWT-based stateless authentication
+- Clean architecture with clear separation of concerns
+- JWT-based stateless authentication (middleware provided)
 - Horizontal scalability via Kubernetes HPA
 - Observability-first design with structured logging and metrics
+- Domain-agnostic core with example implementations
+
+**Note**: This template provides infrastructure and patterns. For complete domain-specific implementations, see `examples/user-management/` which demonstrates a full user management API with authentication, authorization, and CRUD operations.
 
 ## Copilot Communication Style
 
