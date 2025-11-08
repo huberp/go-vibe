@@ -11,7 +11,7 @@ package repository
 
 import (
 	context "context"
-	models "myapp/internal/models"
+	models "myapp/examples/user-management/internal/models"
 	reflect "reflect"
 
 	gomock "go.uber.org/mock/gomock"

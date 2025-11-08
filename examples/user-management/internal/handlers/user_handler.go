@@ -2,9 +2,9 @@ package handlers
 
 import (
 	"errors"
+	"myapp/examples/user-management/internal/models"
+	"myapp/examples/user-management/internal/repository"
 	"myapp/internal/middleware"
-	"myapp/internal/models"
-	"myapp/internal/repository"
 	"myapp/pkg/utils"
 	"net/http"
 	"strconv"

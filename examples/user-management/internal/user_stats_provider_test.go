@@ -1,7 +1,7 @@
 package info
 
 import (
-	"myapp/internal/models"
+	"myapp/examples/user-management/internal/models"
 	"testing"
 
 	"github.com/stretchr/testify/assert"

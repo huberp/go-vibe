@@ -2,7 +2,7 @@ package repository
 
 import (
 	"context"
-	"myapp/internal/models"
+	"myapp/examples/user-management/internal/models"
 )
 
 //go:generate mockgen -source=user_repository.go -destination=user_repository_mock.go -package=repository

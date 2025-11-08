@@ -3,7 +3,7 @@ package handlers
 import (
 	"bytes"
 	"encoding/json"
-	"myapp/internal/models"
+	"myapp/examples/user-management/internal/models"
 	"myapp/pkg/utils"
 	"net/http"
 	"net/http/httptest"

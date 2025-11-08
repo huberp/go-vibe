@@ -3,7 +3,7 @@ package repository
 import (
 	"context"
 	"errors"
-	"myapp/internal/models"
+	"myapp/examples/user-management/internal/models"
 
 	"gorm.io/gorm"
 )

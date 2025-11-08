@@ -2,7 +2,7 @@ package info
 
 import (
 	"context"
-	"myapp/internal/models"
+	"myapp/examples/user-management/internal/models"
 
 	"gorm.io/gorm"
 )
