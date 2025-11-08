@@ -11,7 +11,7 @@ if (-not $swagPath) {
 }
 
 # Generate swagger docs
-swag init -g cmd/server/main.go --output docs --parseDependency --parseInternal
+swag init -g cmd/server/main.go --output docs --parseDependency --parseInternal --exclude examples
 
 if ($LASTEXITCODE -eq 0) {
     Write-Host "Success: Swagger documentation generated in ./docs" -ForegroundColor Green

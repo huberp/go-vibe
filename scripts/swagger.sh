@@ -16,7 +16,7 @@ if ! command -v swag &> /dev/null && [ -x "$HOME/go/bin/swag" ]; then
 fi
 
 # Generate swagger docs
-$SWAG_CMD init -g cmd/server/main.go --output docs --parseDependency --parseInternal
+$SWAG_CMD init -g cmd/server/main.go --output docs --parseDependency --parseInternal --exclude examples
 
 echo "✅ Swagger documentation generated in ./docs"
 echo "   View at: http://localhost:8080/swagger/index.html (when server is running)"

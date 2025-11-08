@@ -38,7 +38,7 @@ jobs:
       run: go install github.com/swaggo/swag/cmd/swag@latest
 
     - name: Generate Swagger documentation
-      run: swag init -g cmd/server/main.go --output docs --parseDependency --parseInternal
+      run: swag init -g cmd/server/main.go --output docs --parseDependency --parseInternal --exclude examples
 
     - name: Build
       run: go build -tags=go_json -v ./cmd/server
