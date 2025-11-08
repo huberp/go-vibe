@@ -4,7 +4,6 @@ import (
 	"flag"
 	"fmt"
 	"log"
-	"myapp/internal/models"
 	"myapp/internal/routes"
 	"myapp/pkg/config"
 	"myapp/pkg/logger"
@@ -19,9 +18,9 @@ import (
 	"gorm.io/gorm"
 )
 
-// @title           User Management API
+// @title           Microservice API
 // @version         1.0
-// @description     Production-ready user management microservice with JWT authentication
+// @description     Production-ready Go microservice template with observability and best practices
 // @termsOfService  http://swagger.io/terms/
 
 // @contact.name   API Support
@@ -75,9 +74,10 @@ func main() {
 	if err := migration.RunMigrations(cfg.Database.URL, logger.Log); err != nil {
 		logger.Log.Warn("Failed to run migrations, falling back to AutoMigrate", zap.Error(err))
 		// Fallback to GORM AutoMigrate for backward compatibility
-		if err := db.AutoMigrate(&models.User{}); err != nil {
-			logger.Log.Fatal("Failed to run AutoMigrate", zap.Error(err))
-		}
+		// Add your models here:
+		// if err := db.AutoMigrate(&models.YourModel{}); err != nil {
+		//     logger.Log.Fatal("Failed to run AutoMigrate", zap.Error(err))
+		// }
 	}
 
 	// Setup Gin

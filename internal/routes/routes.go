@@ -3,7 +3,6 @@ package routes
 import (
 	"myapp/internal/handlers"
 	"myapp/internal/middleware"
-	"myapp/internal/repository"
 	"myapp/pkg/config"
 	"myapp/pkg/health"
 	"myapp/pkg/info"
@@ -35,12 +34,10 @@ func SetupRoutes(router *gin.Engine, db *gorm.DB, logger *zap.Logger, jwtSecret 
 	sqlDB.SetMaxIdleConns(cfg.Database.MaxIdleConns)
 	sqlDB.SetConnMaxLifetime(time.Duration(cfg.Database.ConnMaxLifetime) * time.Minute)
 
-	// Create repository
-	userRepo := repository.NewPostgresUserRepository(db)
-
-	// Create handlers
-	userHandler := handlers.NewUserHandler(userRepo)
-	authHandler := handlers.NewAuthHandler(db, jwtSecret, logger)
+	// Add your domain-specific repositories and handlers here
+	// Example:
+	// myRepo := repository.NewMyRepository(db)
+	// myHandler := handlers.NewMyHandler(myRepo)
 
 	// Setup health check providers
 	healthRegistry := health.NewRegistry()
@@ -50,11 +47,12 @@ func SetupRoutes(router *gin.Engine, db *gorm.DB, logger *zap.Logger, jwtSecret 
 	// Setup info providers
 	infoRegistry := info.NewRegistry()
 	infoRegistry.Register(info.NewBuildInfoProvider("dev", "unknown", "", runtime.Version()))
-	infoRegistry.Register(info.NewUserStatsProvider(db))
+	// Add your custom info providers here
+	// Example: infoRegistry.Register(info.NewMyStatsProvider(db))
 	infoHandler := handlers.NewInfoHandler(infoRegistry)
 
-	// Register user count metric collector
-	middleware.RegisterUserCountCollector(db)
+	// Register custom metric collectors here
+	// Example: middleware.RegisterMyCountCollector(db)
 
 	// CORS middleware - allow all origins in development, configure for production
 	router.Use(cors.New(cors.Config{
@@ -95,46 +93,24 @@ func SetupRoutes(router *gin.Engine, db *gorm.DB, logger *zap.Logger, jwtSecret 
 	// Info endpoint
 	router.GET("/info", infoHandler.GetInfo)
 
-	// API v1 routes
-	v1 := router.Group("/v1")
-	{
-		// Public routes
-		v1.POST("/login", authHandler.Login)
-		v1.POST("/users", userHandler.CreateUser) // Public signup
-
-		// Protected routes
-		protected := v1.Group("/")
-		protected.Use(middleware.JWTAuthMiddleware(jwtSecret))
-		{
-			// Admin-only routes
-			admin := protected.Group("/")
-			admin.Use(middleware.RequireRole("admin"))
-			{
-				admin.GET("/users", userHandler.GetUsers)
-				admin.DELETE("/users/:id", userHandler.DeleteUser)
-			}
-
-			// Owner or admin routes
-			protected.GET("/users/:id", userHandler.GetUserByID)
-			protected.PUT("/users/:id", userHandler.UpdateUser)
-		}
-	}
-
-	// Legacy routes (backward compatibility) - redirect to v1
-	router.POST("/login", authHandler.Login)
-	router.POST("/users", userHandler.CreateUser)
-
-	protected := router.Group("/")
-	protected.Use(middleware.JWTAuthMiddleware(jwtSecret))
-	{
-		admin := protected.Group("/")
-		admin.Use(middleware.RequireRole("admin"))
-		{
-			admin.GET("/users", userHandler.GetUsers)
-			admin.DELETE("/users/:id", userHandler.DeleteUser)
-		}
-
-		protected.GET("/users/:id", userHandler.GetUserByID)
-		protected.PUT("/users/:id", userHandler.UpdateUser)
-	}
+	// Add your API routes here
+	// Example:
+	// v1 := router.Group("/v1")
+	// {
+	//     // Public routes
+	//     v1.POST("/login", authHandler.Login)
+	//     v1.POST("/items", myHandler.CreateItem)
+	//
+	//     // Protected routes
+	//     protected := v1.Group("/")
+	//     protected.Use(middleware.JWTAuthMiddleware(jwtSecret))
+	//     {
+	//         protected.GET("/items", myHandler.GetItems)
+	//         protected.GET("/items/:id", myHandler.GetItemByID)
+	//         protected.PUT("/items/:id", myHandler.UpdateItem)
+	//         protected.DELETE("/items/:id", myHandler.DeleteItem)
+	//     }
+	// }
+	//
+	// See examples/user-management for a complete working example
 }

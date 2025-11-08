@@ -5,13 +5,10 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/gin-gonic/gin"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/testutil"
 	"github.com/stretchr/testify/assert"
-	"gorm.io/driver/postgres"
-	"gorm.io/gorm"
 )
 
 func TestPrometheusMiddleware(t *testing.T) {
@@ -230,68 +227,6 @@ func TestPrometheusMiddleware(t *testing.T) {
 		router.ServeHTTP(w, req)
 
 		assert.Equal(t, http.StatusOK, w.Code)
-	})
-}
-
-func TestRegisterUserCountCollector(t *testing.T) {
-	t.Run("should register user count collector successfully", func(t *testing.T) {
-		// Create a mock database
-		mockDB, _, err := sqlmock.New()
-		assert.NoError(t, err)
-		defer mockDB.Close()
-
-		dialector := postgres.New(postgres.Config{
-			Conn:       mockDB,
-			DriverName: "postgres",
-		})
-		db, err := gorm.Open(dialector, &gorm.Config{})
-		assert.NoError(t, err)
-
-		// Register the collector - should not panic
-		RegisterUserCountCollector(db)
-
-		// Successfully registered (no panic)
-	})
-
-	t.Run("should handle database error gracefully", func(t *testing.T) {
-		// Create a mock database
-		mockDB, _, err := sqlmock.New()
-		assert.NoError(t, err)
-		defer mockDB.Close()
-
-		dialector := postgres.New(postgres.Config{
-			Conn:       mockDB,
-			DriverName: "postgres",
-		})
-		db, err := gorm.Open(dialector, &gorm.Config{})
-		assert.NoError(t, err)
-
-		// Register the collector - should not panic even if DB is closed
-		RegisterUserCountCollector(db)
-
-		// The collector is registered and will silently handle errors when scraped
-	})
-
-	t.Run("should only register collector once", func(t *testing.T) {
-		// Create a mock database
-		mockDB, _, err := sqlmock.New()
-		assert.NoError(t, err)
-		defer mockDB.Close()
-
-		dialector := postgres.New(postgres.Config{
-			Conn:       mockDB,
-			DriverName: "postgres",
-		})
-		db, err := gorm.Open(dialector, &gorm.Config{})
-		assert.NoError(t, err)
-
-		// Call RegisterUserCountCollector multiple times
-		// It should only register once due to sync.Once
-		for i := 0; i < 3; i++ {
-			RegisterUserCountCollector(db)
-		}
-
-		// No panic should occur
 	})
 }
 
