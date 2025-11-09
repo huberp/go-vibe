@@ -66,6 +66,36 @@ func (r *Registry) Check(scope *Scope) map[string]*CheckResult {
 	return result
 }
 
+// BuildResponse performs health checks for the given scope and builds a health response.
+// The scope parameter can be nil to check all providers.
+// Returns the HTTP status code and the health response.
+// This is framework-agnostic and can be used with any HTTP framework.
+func (r *Registry) BuildResponse(scope *Scope) (int, Response) {
+	checkResults := r.Check(scope)
+
+	components := make(map[string]ComponentHealth)
+	for name, result := range checkResults {
+		components[name] = ComponentHealth{
+			Status:  result.Status,
+			Details: result.Details,
+		}
+	}
+
+	overallStatus := OverallStatus(checkResults)
+
+	response := Response{
+		Status:     overallStatus,
+		Components: components,
+	}
+
+	statusCode := 200 // http.StatusOK
+	if overallStatus == StatusDown {
+		statusCode = 503 // http.StatusServiceUnavailable
+	}
+
+	return statusCode, response
+}
+
 // OverallStatus determines the overall health status based on all component statuses.
 // Returns StatusDown if any component is down, otherwise StatusUp.
 func OverallStatus(components map[string]*CheckResult) Status {

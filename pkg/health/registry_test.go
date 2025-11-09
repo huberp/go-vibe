@@ -272,3 +272,121 @@ func TestOverallStatus(t *testing.T) {
 		assert.Equal(t, StatusDown, status)
 	})
 }
+
+func TestBuildResponse(t *testing.T) {
+	t.Run("should build response with all healthy components", func(t *testing.T) {
+		registry := NewRegistry()
+		provider := &mockHealthCheckProvider{
+			name: "database",
+			result: &CheckResult{
+				Status:  StatusUp,
+				Details: map[string]interface{}{"connection": "active"},
+			},
+			scopes: []Scope{ScopeReady},
+		}
+		registry.Register(provider)
+
+		statusCode, response := registry.BuildResponse(nil)
+
+		assert.Equal(t, 200, statusCode)
+		assert.Equal(t, StatusUp, response.Status)
+		assert.Len(t, response.Components, 1)
+		assert.Contains(t, response.Components, "database")
+		assert.Equal(t, StatusUp, response.Components["database"].Status)
+		assert.Equal(t, map[string]interface{}{"connection": "active"}, response.Components["database"].Details)
+	})
+
+	t.Run("should return 503 when any component is down", func(t *testing.T) {
+		registry := NewRegistry()
+		healthyProvider := &mockHealthCheckProvider{
+			name:   "cache",
+			result: &CheckResult{Status: StatusUp},
+			scopes: []Scope{ScopeReady},
+		}
+		unhealthyProvider := &mockHealthCheckProvider{
+			name: "database",
+			result: &CheckResult{
+				Status:  StatusDown,
+				Details: map[string]interface{}{"error": "connection refused"},
+			},
+			scopes: []Scope{ScopeReady},
+		}
+		registry.Register(healthyProvider)
+		registry.Register(unhealthyProvider)
+
+		statusCode, response := registry.BuildResponse(nil)
+
+		assert.Equal(t, 503, statusCode)
+		assert.Equal(t, StatusDown, response.Status)
+		assert.Len(t, response.Components, 2)
+		assert.Equal(t, StatusUp, response.Components["cache"].Status)
+		assert.Equal(t, StatusDown, response.Components["database"].Status)
+	})
+
+	t.Run("should filter by scope", func(t *testing.T) {
+		registry := NewRegistry()
+		startupProvider := &mockHealthCheckProvider{
+			name:   "startup-check",
+			result: &CheckResult{Status: StatusUp},
+			scopes: []Scope{ScopeStartup},
+		}
+		readyProvider := &mockHealthCheckProvider{
+			name:   "ready-check",
+			result: &CheckResult{Status: StatusUp},
+			scopes: []Scope{ScopeReady},
+		}
+		registry.Register(startupProvider)
+		registry.Register(readyProvider)
+
+		scope := ScopeStartup
+		statusCode, response := registry.BuildResponse(&scope)
+
+		assert.Equal(t, 200, statusCode)
+		assert.Equal(t, StatusUp, response.Status)
+		assert.Len(t, response.Components, 1)
+		assert.Contains(t, response.Components, "startup-check")
+		assert.NotContains(t, response.Components, "ready-check")
+	})
+
+	t.Run("should return UP with empty components when no providers registered", func(t *testing.T) {
+		registry := NewRegistry()
+
+		statusCode, response := registry.BuildResponse(nil)
+
+		assert.Equal(t, 200, statusCode)
+		assert.Equal(t, StatusUp, response.Status)
+		assert.Empty(t, response.Components)
+	})
+
+	t.Run("should handle multiple scopes correctly", func(t *testing.T) {
+		registry := NewRegistry()
+		multiScopeProvider := &mockHealthCheckProvider{
+			name:   "db",
+			result: &CheckResult{Status: StatusUp},
+			scopes: []Scope{ScopeStartup, ScopeReady, ScopeLive},
+		}
+		registry.Register(multiScopeProvider)
+
+		// Check each scope individually
+		startupScope := ScopeStartup
+		startupCode, startupResp := registry.BuildResponse(&startupScope)
+		assert.Equal(t, 200, startupCode)
+		assert.Contains(t, startupResp.Components, "db")
+
+		readyScope := ScopeReady
+		readyCode, readyResp := registry.BuildResponse(&readyScope)
+		assert.Equal(t, 200, readyCode)
+		assert.Contains(t, readyResp.Components, "db")
+
+		liveScope := ScopeLive
+		liveCode, liveResp := registry.BuildResponse(&liveScope)
+		assert.Equal(t, 200, liveCode)
+		assert.Contains(t, liveResp.Components, "db")
+
+		// Check all scopes (nil)
+		allCode, allResp := registry.BuildResponse(nil)
+		assert.Equal(t, 200, allCode)
+		assert.Len(t, allResp.Components, 1) // Should appear only once
+		assert.Contains(t, allResp.Components, "db")
+	})
+}
