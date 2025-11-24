@@ -16,7 +16,7 @@ jobs:
     steps:
       # Checkout repository to access go.mod and other project files
       - name: Checkout repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       # Set up Go with version matching project requirements
       - name: Set up Go
