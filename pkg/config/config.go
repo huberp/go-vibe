@@ -34,7 +34,8 @@ type RateLimitConfig struct {
 
 // ObservabilityConfig holds observability-specific configuration
 type ObservabilityConfig struct {
-	Otel bool `mapstructure:"otel"`
+	Otel         bool   `mapstructure:"otel"`
+	OtelEndpoint string `mapstructure:"otel_endpoint"`
 }
 
 // Config holds application configuration
@@ -91,6 +92,7 @@ func LoadWithStage(stage string) *Config {
 	v.BindEnv("rate_limit.requests_per_second", "RATE_LIMIT_REQUESTS_PER_SECOND")
 	v.BindEnv("rate_limit.burst", "RATE_LIMIT_BURST")
 	v.BindEnv("observability.otel", "OBSERVABILITY_OTEL")
+	v.BindEnv("observability.otel_endpoint", "OTEL_EXPORTER_OTLP_ENDPOINT")
 
 	// Unmarshal configuration into struct
 	var config Config
@@ -121,4 +123,5 @@ func setDefaults(v *viper.Viper) {
 	v.SetDefault("rate_limit.requests_per_second", 100)
 	v.SetDefault("rate_limit.burst", 200)
 	v.SetDefault("observability.otel", false)
+	v.SetDefault("observability.otel_endpoint", "localhost:4317")
 }

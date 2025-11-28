@@ -19,6 +19,22 @@ services:
       timeout: 5s
       retries: 5
 
+  # OpenTelemetry Collector
+  otel-collector:
+    image: otel/opentelemetry-collector:latest
+    container_name: myapp-otel-collector
+    command: ["--config=/etc/otelcol/config.yaml"]
+    volumes:
+      - ./otel-collector-config.yaml:/etc/otelcol/config.yaml
+    ports:
+      - "4317:4317"   # OTLP gRPC receiver
+      - "4318:4318"   # OTLP HTTP receiver
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:13133"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   # Application
   app:
     build: .
@@ -29,8 +45,12 @@ services:
       DATABASE_URL: "postgres://user:password@db:5432/myapp?sslmode=disable"
       JWT_SECRET: "your-secret-key-change-in-production"
       SERVER_PORT: "8080"
+      OBSERVABILITY_OTEL: "true"
+      OTEL_EXPORTER_OTLP_ENDPOINT: "otel-collector:4317"
     depends_on:
       db:
+        condition: service_healthy
+      otel-collector:
         condition: service_healthy
     healthcheck:
       test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8080/health"]
