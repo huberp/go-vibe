@@ -18,11 +18,11 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v6
 
-      # Set up Go with version matching project requirements
+      # Set up Go with version from go.mod
       - name: Set up Go
         uses: actions/setup-go@v6
         with:
-          go-version: '1.25.2'
+          go-version-file: 'go.mod'
 
       # Cache Go modules for faster subsequent runs
       # This is the most frequently used optimization across all workflows
@@ -74,7 +74,7 @@ jobs:
           echo "🚀 Copilot environment setup complete!"
           echo ""
           echo "The following tools and dependencies have been pre-installed:"
-          echo "  ✓ Go 1.25.2 with cached modules"
+          echo "  ✓ Go (version from go.mod) with cached modules"
           echo "  ✓ Project dependencies (go mod download)"
           echo "  ✓ golangci-lint"
           echo ""
