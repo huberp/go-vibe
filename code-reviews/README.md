@@ -8,7 +8,6 @@ This directory contains comprehensive code reviews of the go-vibe project. Each 
 code-reviews/
 ├── README.md                          # This file
 ├── code-review-instructions.md        # Common instructions for conducting reviews
-├── create-review-issues.sh            # Helper script for creating GitHub issues
 └── YYYY-MM-DD-review-name/            # Individual review directories
     ├── README.md                      # Review-specific navigation guide
     ├── CODE_REVIEW_SUMMARY.md         # Detailed findings and analysis
@@ -54,15 +53,6 @@ code-reviews/
 2. Start with the `README.md` in that directory
 3. Review findings in `CODE_REVIEW_SUMMARY.md`
 4. Create GitHub issues using the guide
-
-### Using Helper Scripts
-
-The `create-review-issues.sh` script can be used to automate GitHub issue creation:
-
-```bash
-cd code-reviews
-./create-review-issues.sh
-```
 
 ---
 
