@@ -11,7 +11,7 @@ func TestComponentHealth(t *testing.T) {
 	t.Run("should create component health with status and details", func(t *testing.T) {
 		component := ComponentHealth{
 			Status: StatusUp,
-			Details: map[string]interface{}{
+			Details: map[string]any{
 				"version": "1.0.0",
 			},
 		}
@@ -23,7 +23,7 @@ func TestComponentHealth(t *testing.T) {
 	t.Run("should marshal to JSON correctly", func(t *testing.T) {
 		component := ComponentHealth{
 			Status: StatusUp,
-			Details: map[string]interface{}{
+			Details: map[string]any{
 				"message": "healthy",
 			},
 		}
@@ -52,7 +52,7 @@ func TestResponse(t *testing.T) {
 			Components: map[string]ComponentHealth{
 				"database": {
 					Status: StatusUp,
-					Details: map[string]interface{}{
+					Details: map[string]any{
 						"connections": 10,
 					},
 				},
@@ -159,14 +159,14 @@ func TestResponseIntegration(t *testing.T) {
 			Components: map[string]ComponentHealth{
 				"database": {
 					Status: StatusUp,
-					Details: map[string]interface{}{
+					Details: map[string]any{
 						"connections": 5,
 						"max":         100,
 					},
 				},
 				"app": {
 					Status: StatusUp,
-					Details: map[string]interface{}{
+					Details: map[string]any{
 						"timestamp": "2024-01-01T00:00:00Z",
 					},
 				},
@@ -177,12 +177,12 @@ func TestResponseIntegration(t *testing.T) {
 		assert.NoError(t, err)
 
 		// Verify JSON structure
-		var parsed map[string]interface{}
+		var parsed map[string]any
 		err = json.Unmarshal(jsonData, &parsed)
 		assert.NoError(t, err)
 		assert.Equal(t, "UP", parsed["status"])
-		
-		components, ok := parsed["components"].(map[string]interface{})
+
+		components, ok := parsed["components"].(map[string]any)
 		assert.True(t, ok)
 		assert.Len(t, components, 2)
 	})

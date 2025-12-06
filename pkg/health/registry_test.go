@@ -46,7 +46,7 @@ func TestRegister(t *testing.T) {
 			name: "test",
 			result: &CheckResult{
 				Status:  StatusUp,
-				Details: map[string]interface{}{"key": "value"},
+				Details: map[string]any{"key": "value"},
 			},
 			scopes: []Scope{ScopeBase},
 		}
@@ -280,7 +280,7 @@ func TestBuildResponse(t *testing.T) {
 			name: "database",
 			result: &CheckResult{
 				Status:  StatusUp,
-				Details: map[string]interface{}{"connection": "active"},
+				Details: map[string]any{"connection": "active"},
 			},
 			scopes: []Scope{ScopeReady},
 		}
@@ -293,7 +293,7 @@ func TestBuildResponse(t *testing.T) {
 		assert.Len(t, response.Components, 1)
 		assert.Contains(t, response.Components, "database")
 		assert.Equal(t, StatusUp, response.Components["database"].Status)
-		assert.Equal(t, map[string]interface{}{"connection": "active"}, response.Components["database"].Details)
+		assert.Equal(t, map[string]any{"connection": "active"}, response.Components["database"].Details)
 	})
 
 	t.Run("should return 503 when any component is down", func(t *testing.T) {
@@ -307,7 +307,7 @@ func TestBuildResponse(t *testing.T) {
 			name: "database",
 			result: &CheckResult{
 				Status:  StatusDown,
-				Details: map[string]interface{}{"error": "connection refused"},
+				Details: map[string]any{"error": "connection refused"},
 			},
 			scopes: []Scope{ScopeReady},
 		}

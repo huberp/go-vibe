@@ -315,7 +315,7 @@ func TestLoggingMiddleware_TraceIDConsistency(t *testing.T) {
 		traceparent := "00-0af7651916cd43dd8448eb211c80319c-b7ad6b7169203331-01"
 		expectedTraceID := "0af7651916cd43dd8448eb211c80319c"
 
-		for i := 0; i < 3; i++ {
+		for range 3 {
 			router := gin.New()
 			router.Use(LoggingMiddleware(logger))
 			router.GET("/test", func(c *gin.Context) {

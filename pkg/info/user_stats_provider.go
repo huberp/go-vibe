@@ -25,7 +25,7 @@ func (u *UserStatsProvider) Name() string {
 }
 
 // Info returns user statistics.
-func (u *UserStatsProvider) Info() (map[string]interface{}, error) {
+func (u *UserStatsProvider) Info() (map[string]any, error) {
 	ctx := context.Background()
 
 	var totalUsers int64
@@ -43,7 +43,7 @@ func (u *UserStatsProvider) Info() (map[string]interface{}, error) {
 		return nil, err
 	}
 
-	return map[string]interface{}{
+	return map[string]any{
 		"total":   totalUsers,
 		"admins":  adminUsers,
 		"regular": regularUsers,

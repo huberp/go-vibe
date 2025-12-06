@@ -33,7 +33,7 @@ func (s *SimpleHealthCheckProvider) Name() string {
 func (s *SimpleHealthCheckProvider) Check() (*CheckResult, error) {
 	return &CheckResult{
 		Status: StatusUp,
-		Details: map[string]interface{}{
+		Details: map[string]any{
 			"timestamp": time.Now().UTC().Format(time.RFC3339),
 		},
 	}, nil

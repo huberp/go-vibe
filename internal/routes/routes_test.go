@@ -121,10 +121,10 @@ func TestMetricsEndpoint(t *testing.T) {
 		assert.Equal(t, http.StatusOK, w.Code)
 
 		body := w.Body.String()
-		lines := strings.Split(body, "\n")
+		lines := strings.SplitSeq(body, "\n")
 
 		// Verify format rules
-		for _, line := range lines {
+		for line := range lines {
 			if len(line) == 0 {
 				continue
 			}

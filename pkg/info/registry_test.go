@@ -10,7 +10,7 @@ import (
 // mockProvider is a simple mock implementation of InfoProvider for testing
 type mockProvider struct {
 	name string
-	data map[string]interface{}
+	data map[string]any
 	err  error
 }
 
@@ -18,7 +18,7 @@ func (m *mockProvider) Name() string {
 	return m.name
 }
 
-func (m *mockProvider) Info() (map[string]interface{}, error) {
+func (m *mockProvider) Info() (map[string]any, error) {
 	if m.err != nil {
 		return nil, m.err
 	}
@@ -39,7 +39,7 @@ func TestRegister(t *testing.T) {
 		registry := NewRegistry()
 		provider := &mockProvider{
 			name: "test",
-			data: map[string]interface{}{"key": "value"},
+			data: map[string]any{"key": "value"},
 		}
 
 		registry.Register(provider)
@@ -47,18 +47,18 @@ func TestRegister(t *testing.T) {
 
 		assert.Len(t, result, 1)
 		assert.Contains(t, result, "test")
-		assert.Equal(t, map[string]interface{}{"key": "value"}, result["test"])
+		assert.Equal(t, map[string]any{"key": "value"}, result["test"])
 	})
 
 	t.Run("should register multiple providers", func(t *testing.T) {
 		registry := NewRegistry()
 		provider1 := &mockProvider{
 			name: "provider1",
-			data: map[string]interface{}{"key1": "value1"},
+			data: map[string]any{"key1": "value1"},
 		}
 		provider2 := &mockProvider{
 			name: "provider2",
-			data: map[string]interface{}{"key2": "value2"},
+			data: map[string]any{"key2": "value2"},
 		}
 
 		registry.Register(provider1)
@@ -76,20 +76,20 @@ func TestGetAll(t *testing.T) {
 		registry := NewRegistry()
 		provider1 := &mockProvider{
 			name: "build",
-			data: map[string]interface{}{"version": "1.0.0"},
+			data: map[string]any{"version": "1.0.0"},
 		}
 		provider2 := &mockProvider{
 			name: "stats",
-			data: map[string]interface{}{"count": 42},
+			data: map[string]any{"count": 42},
 		}
 
 		registry.Register(provider1)
 		registry.Register(provider2)
 		result := registry.GetAll()
 
-		assert.Equal(t, map[string]interface{}{
-			"build": map[string]interface{}{"version": "1.0.0"},
-			"stats": map[string]interface{}{"count": 42},
+		assert.Equal(t, map[string]any{
+			"build": map[string]any{"version": "1.0.0"},
+			"stats": map[string]any{"count": 42},
 		}, result)
 	})
 
@@ -97,7 +97,7 @@ func TestGetAll(t *testing.T) {
 		registry := NewRegistry()
 		provider1 := &mockProvider{
 			name: "working",
-			data: map[string]interface{}{"key": "value"},
+			data: map[string]any{"key": "value"},
 		}
 		provider2 := &mockProvider{
 			name: "failing",

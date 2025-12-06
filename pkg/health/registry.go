@@ -1,5 +1,7 @@
 package health
 
+import "slices"
+
 import "sync"
 
 // Registry manages a collection of HealthCheckProvider instances.
@@ -44,13 +46,7 @@ func (r *Registry) Check(scope *Scope) map[string]*CheckResult {
 			}
 		} else {
 			// Check if provider has the requested scope
-			hasScope := false
-			for _, s := range provider.Scopes() {
-				if s == *scope {
-					hasScope = true
-					break
-				}
-			}
+			hasScope := slices.Contains(provider.Scopes(), *scope)
 			if !hasScope {
 				continue
 			}

@@ -40,8 +40,8 @@ func (b *BuildInfoProvider) Name() string {
 }
 
 // Info returns build information.
-func (b *BuildInfoProvider) Info() (map[string]interface{}, error) {
-	return map[string]interface{}{
+func (b *BuildInfoProvider) Info() (map[string]any, error) {
+	return map[string]any{
 		"version":    b.Version,
 		"commit":     b.CommitSHA,
 		"build_time": b.BuildTime,

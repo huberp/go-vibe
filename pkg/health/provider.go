@@ -24,14 +24,14 @@ const (
 
 // CheckResult represents the result of a health check
 type CheckResult struct {
-	Status  Status                 `json:"status"`
-	Details map[string]interface{} `json:"details,omitempty"`
+	Status  Status         `json:"status"`
+	Details map[string]any `json:"details,omitempty"`
 }
 
 // ComponentHealth represents the health of a single component
 type ComponentHealth struct {
-	Status  Status                 `json:"status"`
-	Details map[string]interface{} `json:"details,omitempty"`
+	Status  Status         `json:"status"`
+	Details map[string]any `json:"details,omitempty"`
 }
 
 // Response represents the overall health response
