@@ -15,14 +15,14 @@ import (
 // mockInfoProvider is a simple mock implementation for testing
 type mockInfoProvider struct {
 	name string
-	data map[string]interface{}
+	data map[string]any
 }
 
 func (m *mockInfoProvider) Name() string {
 	return m.name
 }
 
-func (m *mockInfoProvider) Info() (map[string]interface{}, error) {
+func (m *mockInfoProvider) Info() (map[string]any, error) {
 	return m.data, nil
 }
 
@@ -53,7 +53,7 @@ func TestGetInfo(t *testing.T) {
 
 		assert.Equal(t, http.StatusOK, w.Code)
 
-		var response map[string]interface{}
+		var response map[string]any
 		json.Unmarshal(w.Body.Bytes(), &response)
 		assert.Empty(t, response)
 	})
@@ -62,7 +62,7 @@ func TestGetInfo(t *testing.T) {
 		registry := info.NewRegistry()
 		provider := &mockInfoProvider{
 			name: "build",
-			data: map[string]interface{}{
+			data: map[string]any{
 				"version": "1.0.0",
 				"commit":  "abc123",
 			},
@@ -79,11 +79,11 @@ func TestGetInfo(t *testing.T) {
 
 		assert.Equal(t, http.StatusOK, w.Code)
 
-		var response map[string]interface{}
+		var response map[string]any
 		json.Unmarshal(w.Body.Bytes(), &response)
 
 		assert.Contains(t, response, "build")
-		buildInfo := response["build"].(map[string]interface{})
+		buildInfo := response["build"].(map[string]any)
 		assert.Equal(t, "1.0.0", buildInfo["version"])
 		assert.Equal(t, "abc123", buildInfo["commit"])
 	})
@@ -93,14 +93,14 @@ func TestGetInfo(t *testing.T) {
 
 		buildProvider := &mockInfoProvider{
 			name: "build",
-			data: map[string]interface{}{
+			data: map[string]any{
 				"version": "1.0.0",
 			},
 		}
 
 		statsProvider := &mockInfoProvider{
 			name: "stats",
-			data: map[string]interface{}{
+			data: map[string]any{
 				"total": 42,
 			},
 		}
@@ -118,7 +118,7 @@ func TestGetInfo(t *testing.T) {
 
 		assert.Equal(t, http.StatusOK, w.Code)
 
-		var response map[string]interface{}
+		var response map[string]any
 		json.Unmarshal(w.Body.Bytes(), &response)
 
 		assert.Len(t, response, 2)
@@ -135,7 +135,7 @@ func TestGetInfo(t *testing.T) {
 
 		// Make requests up to the burst limit (20)
 		successCount := 0
-		for i := 0; i < 25; i++ {
+		for range 25 {
 			w := httptest.NewRecorder()
 			req, _ := http.NewRequest("GET", "/info", nil)
 			router.ServeHTTP(w, req)
@@ -158,7 +158,7 @@ func TestGetInfo(t *testing.T) {
 		router.GET("/info", handler.GetInfo)
 
 		// Exhaust the rate limit
-		for i := 0; i < 25; i++ {
+		for range 25 {
 			w := httptest.NewRecorder()
 			req, _ := http.NewRequest("GET", "/info", nil)
 			router.ServeHTTP(w, req)
@@ -174,7 +174,7 @@ func TestGetInfo(t *testing.T) {
 
 		// Should eventually hit 429
 		if w.Code == http.StatusTooManyRequests {
-			var response map[string]interface{}
+			var response map[string]any
 			json.Unmarshal(w.Body.Bytes(), &response)
 			assert.Contains(t, response["error"], "rate limit exceeded")
 		}

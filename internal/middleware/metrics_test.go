@@ -196,7 +196,7 @@ func TestPrometheusMiddleware(t *testing.T) {
 		})
 
 		// Make multiple requests
-		for i := 0; i < 5; i++ {
+		for range 5 {
 			w := httptest.NewRecorder()
 			req, _ := http.NewRequest("GET", "/test", nil)
 			router.ServeHTTP(w, req)
@@ -287,7 +287,7 @@ func TestRegisterUserCountCollector(t *testing.T) {
 
 		// Call RegisterUserCountCollector multiple times
 		// It should only register once due to sync.Once
-		for i := 0; i < 3; i++ {
+		for range 3 {
 			RegisterUserCountCollector(db)
 		}
 
@@ -328,7 +328,7 @@ func TestPrometheusMiddleware_ConcurrentRequests(t *testing.T) {
 
 		// Make concurrent requests
 		done := make(chan bool)
-		for i := 0; i < 10; i++ {
+		for range 10 {
 			go func() {
 				w := httptest.NewRecorder()
 				req, _ := http.NewRequest("GET", "/test", nil)
@@ -339,7 +339,7 @@ func TestPrometheusMiddleware_ConcurrentRequests(t *testing.T) {
 		}
 
 		// Wait for all goroutines
-		for i := 0; i < 10; i++ {
+		for range 10 {
 			<-done
 		}
 	})

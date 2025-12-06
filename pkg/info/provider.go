@@ -11,5 +11,5 @@ type InfoProvider interface {
 	// Info returns the information provided by this provider.
 	// The map can contain any JSON-serializable data.
 	// Returns an error if the information cannot be retrieved.
-	Info() (map[string]interface{}, error)
+	Info() (map[string]any, error)
 }

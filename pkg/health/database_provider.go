@@ -36,7 +36,7 @@ func (d *DatabaseHealthCheckProvider) Check() (*CheckResult, error) {
 	if d.db == nil {
 		return &CheckResult{
 			Status: StatusDown,
-			Details: map[string]interface{}{
+			Details: map[string]any{
 				"error": "database not initialized",
 			},
 		}, nil
@@ -46,7 +46,7 @@ func (d *DatabaseHealthCheckProvider) Check() (*CheckResult, error) {
 	if err != nil {
 		return &CheckResult{
 			Status: StatusDown,
-			Details: map[string]interface{}{
+			Details: map[string]any{
 				"error": err.Error(),
 			},
 		}, nil
@@ -59,7 +59,7 @@ func (d *DatabaseHealthCheckProvider) Check() (*CheckResult, error) {
 	if err := sqlDB.PingContext(ctx); err != nil {
 		return &CheckResult{
 			Status: StatusDown,
-			Details: map[string]interface{}{
+			Details: map[string]any{
 				"error": err.Error(),
 			},
 		}, nil
@@ -69,7 +69,7 @@ func (d *DatabaseHealthCheckProvider) Check() (*CheckResult, error) {
 	stats := sqlDB.Stats()
 	return &CheckResult{
 		Status: StatusUp,
-		Details: map[string]interface{}{
+		Details: map[string]any{
 			"max_open_connections": stats.MaxOpenConnections,
 			"open_connections":     stats.OpenConnections,
 			"in_use":               stats.InUse,

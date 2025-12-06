@@ -36,7 +36,7 @@ func TestRateLimitMiddleware(t *testing.T) {
 		})
 
 		// First two requests should succeed (burst)
-		for i := 0; i < 2; i++ {
+		for range 2 {
 			w := httptest.NewRecorder()
 			req, _ := http.NewRequest("GET", "/test", nil)
 			router.ServeHTTP(w, req)
@@ -99,7 +99,7 @@ func TestRateLimitMiddleware(t *testing.T) {
 		})
 
 		// All 5 burst requests should succeed
-		for i := 0; i < 5; i++ {
+		for i := range 5 {
 			w := httptest.NewRecorder()
 			req, _ := http.NewRequest("GET", "/test", nil)
 			router.ServeHTTP(w, req)
@@ -136,7 +136,7 @@ func TestRateLimitMiddleware(t *testing.T) {
 		})
 
 		// All 100 burst requests should succeed
-		for i := 0; i < 100; i++ {
+		for i := range 100 {
 			w := httptest.NewRecorder()
 			req, _ := http.NewRequest("GET", "/test", nil)
 			router.ServeHTTP(w, req)
@@ -184,10 +184,8 @@ func TestRateLimitMiddleware(t *testing.T) {
 		var mu sync.Mutex
 
 		// Make 10 concurrent requests
-		for i := 0; i < 10; i++ {
-			wg.Add(1)
-			go func() {
-				defer wg.Done()
+		for range 10 {
+			wg.Go(func() {
 				w := httptest.NewRecorder()
 				req, _ := http.NewRequest("GET", "/test", nil)
 				req.Header.Set("X-Forwarded-For", "192.168.1.100")
@@ -200,7 +198,7 @@ func TestRateLimitMiddleware(t *testing.T) {
 					rateLimitedCount++
 				}
 				mu.Unlock()
-			}()
+			})
 		}
 
 		wg.Wait()
@@ -222,7 +220,7 @@ func TestRateLimitMiddleware(t *testing.T) {
 
 		// Each IP should be able to make 2 requests (burst)
 		for _, ip := range ips {
-			for i := 0; i < 2; i++ {
+			for i := range 2 {
 				w := httptest.NewRecorder()
 				req, _ := http.NewRequest("GET", "/test", nil)
 				req.Header.Set("X-Forwarded-For", ip)
@@ -304,7 +302,7 @@ func TestGetLimiter(t *testing.T) {
 		var wg sync.WaitGroup
 
 		// Create limiters concurrently
-		for i := 0; i < 100; i++ {
+		for i := range 100 {
 			wg.Add(1)
 			go func(id int) {
 				defer wg.Done()
@@ -329,7 +327,7 @@ func TestRateLimitMiddleware_EdgeCases(t *testing.T) {
 		})
 
 		// Make many requests quickly
-		for i := 0; i < 100; i++ {
+		for range 100 {
 			w := httptest.NewRecorder()
 			req, _ := http.NewRequest("GET", "/test", nil)
 			router.ServeHTTP(w, req)

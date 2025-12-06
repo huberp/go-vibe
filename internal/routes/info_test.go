@@ -59,13 +59,13 @@ func TestInfoEndpoint(t *testing.T) {
 		// Assert response
 		assert.Equal(t, http.StatusOK, w.Code)
 
-		var response map[string]interface{}
+		var response map[string]any
 		err := json.Unmarshal(w.Body.Bytes(), &response)
 		assert.NoError(t, err)
 
 		// Check build info
 		assert.Contains(t, response, "build")
-		buildInfo := response["build"].(map[string]interface{})
+		buildInfo := response["build"].(map[string]any)
 		assert.Contains(t, buildInfo, "version")
 		assert.Contains(t, buildInfo, "commit")
 		assert.Contains(t, buildInfo, "build_time")
@@ -73,7 +73,7 @@ func TestInfoEndpoint(t *testing.T) {
 
 		// Check user stats
 		assert.Contains(t, response, "users")
-		userStats := response["users"].(map[string]interface{})
+		userStats := response["users"].(map[string]any)
 		assert.Equal(t, float64(3), userStats["total"])
 		assert.Equal(t, float64(1), userStats["admins"])
 		assert.Equal(t, float64(2), userStats["regular"])
@@ -90,13 +90,13 @@ func TestInfoEndpoint(t *testing.T) {
 		// Assert response
 		assert.Equal(t, http.StatusOK, w.Code)
 
-		var response map[string]interface{}
+		var response map[string]any
 		err := json.Unmarshal(w.Body.Bytes(), &response)
 		assert.NoError(t, err)
 
 		// Check user stats are zero
 		assert.Contains(t, response, "users")
-		userStats := response["users"].(map[string]interface{})
+		userStats := response["users"].(map[string]any)
 		assert.Equal(t, float64(0), userStats["total"])
 		assert.Equal(t, float64(0), userStats["admins"])
 		assert.Equal(t, float64(0), userStats["regular"])

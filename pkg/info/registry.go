@@ -27,11 +27,11 @@ func (r *Registry) Register(provider InfoProvider) {
 // GetAll aggregates information from all registered providers.
 // Returns a map where keys are provider names and values are the information maps.
 // If a provider returns an error, that provider's data is omitted from the result.
-func (r *Registry) GetAll() map[string]interface{} {
+func (r *Registry) GetAll() map[string]any {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
 
-	result := make(map[string]interface{})
+	result := make(map[string]any)
 	for _, provider := range r.providers {
 		info, err := provider.Info()
 		if err == nil {
