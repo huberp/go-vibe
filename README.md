@@ -4,7 +4,7 @@
 [![Test](https://github.com/huberp/go-vibe/workflows/Test/badge.svg)](https://github.com/huberp/go-vibe/actions/workflows/test.yml)
 [![Deploy](https://github.com/huberp/go-vibe/workflows/Deploy/badge.svg)](https://github.com/huberp/go-vibe/actions/workflows/deploy.yml)
 [![codecov](https://codecov.io/gh/huberp/go-vibe/branch/main/graph/badge.svg)](https://codecov.io/gh/huberp/go-vibe)
-[![Go Version](https://img.shields.io/badge/Go-1.25.2-blue.svg)](https://go.dev/)
+[![Go Version](https://img.shields.io/github/go-mod/go-version/huberp/go-vibe)](https://github.com/huberp/go-vibe/blob/main/go.mod)
 [![Go Report Card](https://goreportcard.com/badge/github.com/huberp/go-vibe)](https://goreportcard.com/report/github.com/huberp/go-vibe)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
