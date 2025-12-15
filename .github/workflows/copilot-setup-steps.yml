@@ -27,7 +27,7 @@ jobs:
       # Cache Go modules for faster subsequent runs
       # This is the most frequently used optimization across all workflows
       - name: Cache Go modules
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: |
             ~/go/pkg/mod
