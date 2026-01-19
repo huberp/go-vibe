@@ -1,6 +1,6 @@
 # Multi-stage Dockerfile for production deployment
 # Stage 1: Build
-FROM golang:1.25.5-alpine AS builder
+FROM golang:1.26rc2-alpine AS builder
 
 # Install build dependencies
 RUN apk add --no-cache git ca-certificates
