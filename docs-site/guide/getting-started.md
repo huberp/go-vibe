@@ -22,21 +22,43 @@ go mod download
 go mod verify
 ```
 
-## Environment Variables
+## Configuration
 
-go-vibe is configured entirely through environment variables. There are no config files to edit.
+go-vibe uses a **layered configuration** approach: a `config/base.yaml` file defines shared defaults, a stage-specific file (e.g. `config/development.yaml`) overrides them, and environment variables override everything.
+
+```
+config/base.yaml          ← shared defaults
+config/development.yaml   ← overrides for local dev  (APP_STAGE=development)
+config/staging.yaml       ← overrides for staging    (APP_STAGE=staging)
+config/production.yaml    ← overrides for production (APP_STAGE=production)
+```
+
+Set the active stage with the `APP_STAGE` environment variable (defaults to `development`):
+
+```bash
+export APP_STAGE="production"
+```
+
+### Key Environment Variables
+
+Environment variables always take precedence over YAML values and are the recommended way to inject secrets:
 
 | Variable | Required | Default | Description |
 |----------|----------|---------|-------------|
 | `DATABASE_URL` | ✅ | — | Full PostgreSQL DSN |
 | `JWT_SECRET` | ✅ | — | Secret key for signing JWTs — use a long random string in production |
 | `SERVER_PORT` | ❌ | `8080` | Port the HTTP server listens on |
+| `APP_STAGE` | ❌ | `development` | Active config stage (`development`, `staging`, `production`) |
 
 ```bash
+export APP_STAGE="development"
 export DATABASE_URL="postgres://govibe:govibe@localhost:5432/govibe?sslmode=disable"
 export JWT_SECRET="change-me-to-a-long-random-string-in-production"
-export SERVER_PORT="8080"
 ```
+
+::: tip Configuration Guide
+See the [Configuration](/guide/configuration) page for the full list of YAML keys and environment variable bindings.
+:::
 
 ::: warning Security
 Never commit `JWT_SECRET` or `DATABASE_URL` to source control. Use Kubernetes Secrets or a secrets manager in production.

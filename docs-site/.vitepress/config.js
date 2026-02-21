@@ -24,6 +24,7 @@ export default defineConfig({
           { text: 'Getting Started', link: '/guide/getting-started' },
           { text: 'Architecture', link: '/guide/architecture' },
           { text: 'Features', link: '/guide/features' },
+          { text: 'Configuration', link: '/guide/configuration' },
           { text: 'API Reference', link: '/guide/api' },
           { text: 'Deployment', link: '/guide/deployment' },
           { text: 'Observability', link: '/guide/observability' },
@@ -49,6 +50,7 @@ export default defineConfig({
           collapsed: false,
           items: [
             { text: 'Feature Overview', link: '/guide/features' },
+            { text: 'Configuration', link: '/guide/configuration' },
             { text: 'API Reference', link: '/guide/api' },
           ],
         },

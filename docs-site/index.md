@@ -64,6 +64,12 @@ features:
     details: Token-bucket rate limiting middleware and configurable CORS headers keep your API safe from abuse and ready for browser-based frontends out of the box.
     link: /guide/features
     linkText: Learn more
+
+  - icon: ⚙️
+    title: Stage Configurability
+    details: Base YAML config with per-stage overrides (development, staging, production) merged at startup. Environment variables always win — no more copy-pasting config between environments.
+    link: /guide/configuration
+    linkText: Learn more
 ---
 
 <div class="home-quick-start">
