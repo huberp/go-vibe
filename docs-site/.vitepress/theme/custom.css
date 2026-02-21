@@ -1,0 +1,98 @@
+/* Go-inspired color palette — primary: #00ACD7 (Go blue/teal) */
+:root {
+  --vp-c-brand-1: #00ACD7;
+  --vp-c-brand-2: #00C4F0;
+  --vp-c-brand-3: #0092B8;
+  --vp-c-brand-soft: rgba(0, 172, 215, 0.14);
+
+  --vp-button-brand-border: transparent;
+  --vp-button-brand-text: #ffffff;
+  --vp-button-brand-bg: var(--vp-c-brand-1);
+  --vp-button-brand-hover-border: transparent;
+  --vp-button-brand-hover-text: #ffffff;
+  --vp-button-brand-hover-bg: var(--vp-c-brand-2);
+  --vp-button-brand-active-border: transparent;
+  --vp-button-brand-active-text: #ffffff;
+  --vp-button-brand-active-bg: var(--vp-c-brand-3);
+}
+
+.dark {
+  --vp-c-brand-1: #00C4F0;
+  --vp-c-brand-2: #33D0F5;
+  --vp-c-brand-3: #00ACD7;
+  --vp-c-brand-soft: rgba(0, 196, 240, 0.16);
+}
+
+/* Hero gradient */
+.VPHero .name {
+  background: linear-gradient(135deg, #00ACD7 0%, #00E0C6 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Feature cards */
+.VPFeature {
+  border: 1px solid var(--vp-c-divider);
+  transition: border-color 0.25s, box-shadow 0.25s;
+}
+
+.VPFeature:hover {
+  border-color: var(--vp-c-brand-1);
+  box-shadow: 0 4px 20px rgba(0, 172, 215, 0.15);
+}
+
+/* Code blocks */
+.vp-code-group .tabs label {
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+}
+
+/* Inline code */
+:not(pre) > code {
+  color: var(--vp-c-brand-1);
+  background-color: var(--vp-c-brand-soft);
+  border-radius: 4px;
+  padding: 2px 6px;
+}
+
+/* Home page quick start section */
+.home-quick-start {
+  max-width: 1152px;
+  margin: 0 auto;
+  padding: 48px 24px;
+}
+
+.home-quick-start h2 {
+  font-size: 28px;
+  font-weight: 700;
+  margin-bottom: 24px;
+  color: var(--vp-c-text-1);
+}
+
+/* Nav active link */
+.VPNavBarMenuLink.active,
+.VPNavBarMenuGroup.active > button {
+  color: var(--vp-c-brand-1) !important;
+}
+
+/* Sidebar active */
+.VPSidebarItem.is-active > .item .link {
+  color: var(--vp-c-brand-1);
+}
+
+/* Table styling */
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+table th {
+  background: var(--vp-c-brand-soft);
+  color: var(--vp-c-brand-1);
+}
+
+/* Badge */
+.vp-badge.tip {
+  background-color: var(--vp-c-brand-soft);
+  color: var(--vp-c-brand-1);
+}
