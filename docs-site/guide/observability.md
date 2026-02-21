@@ -182,7 +182,7 @@ When implemented, traces will be exported to:
 
 ## Grafana Dashboard
 
-A sample Grafana dashboard configuration is available in `docs/grafana-dashboard.json` (coming soon). It visualises:
+A Grafana dashboard can be built using the Prometheus metrics exposed at `/metrics`. The following panels are recommended:
 
 - **Request rate** — requests per second by endpoint
 - **Error rate** — 4xx and 5xx percentage

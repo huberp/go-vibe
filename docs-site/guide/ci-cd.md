@@ -131,10 +131,8 @@ steps:
       DATABASE_URL: ${{ steps.postgres.outputs.connection-uri }}
       JWT_SECRET: test-secret
     run: |
-      Start-Process -FilePath "go" -ArgumentList "run","./cmd/server" `
-        -RedirectStandardOutput "server.log" `
-        -RedirectStandardError "server-err.log" `
-        -PassThru | Select-Object -ExpandProperty Id | Out-File server.pid
+      $proc = Start-Process -FilePath "go" -ArgumentList "run","./cmd/server" -RedirectStandardOutput "server.log" -RedirectStandardError "server-err.log" -PassThru
+      $proc.Id | Out-File server.pid
       Start-Sleep -Seconds 5
     shell: pwsh
 ```
