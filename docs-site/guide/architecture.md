@@ -66,11 +66,16 @@ go-vibe/
 │       └── routes.go         # Route registration
 ├── pkg/
 │   ├── config/
-│   │   └── config.go         # Environment variable loading
+│   │   └── config.go         # Layered YAML + env-var config loading (Viper)
 │   ├── logger/
 │   │   └── logger.go         # Zap logger initialisation
 │   └── utils/
 │       └── password.go       # bcrypt helpers
+├── config/
+│   ├── base.yaml             # Shared defaults for all stages
+│   ├── development.yaml      # Overrides for local development
+│   ├── staging.yaml          # Overrides for staging
+│   └── production.yaml       # Overrides for production
 ├── migrations/               # SQL migration files
 ├── helm/myapp/               # Helm chart for Kubernetes
 ├── docs-site/                # This VitePress documentation
@@ -142,7 +147,7 @@ Plain Go structs with GORM and JSON tags. No methods, no business logic — just
 ### `pkg/`
 
 Reusable, domain-agnostic packages that could be extracted into separate modules:
-- `config` — typed environment variable loading
+- `config` — layered YAML config loading with stage-specific overrides and env-var bindings (Viper)
 - `logger` — Zap logger factory
 - `utils` — bcrypt password helpers
 
